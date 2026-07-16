@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PRD — ProjectSale (Website bán mắt kính)</title>
+<style>
+  :root{
+    --bg:#0f1115;--card:#171a21;--card2:#1d212b;--border:#2a2f3a;
+    --txt:#e6e8ec;--muted:#9aa4b2;--accent:#5b9dff;--accent2:#7c5cff;
+    --pk:#ffd43b;--fk:#5b9dff;--uk:#7c5cff;--nn:#ff9f43;--ok:#51cf66;--danger:#ff6b6b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;font-size:15px}
+  .layout{display:flex;max-width:1280px;margin:0 auto}
+  nav{position:sticky;top:0;align-self:flex-start;width:250px;height:100vh;overflow-y:auto;
+    padding:24px 14px;border-right:1px solid var(--border);font-size:13px}
+  nav a{display:block;color:var(--muted);text-decoration:none;padding:4px 8px;border-radius:6px}
+  nav a:hover{background:var(--card2);color:var(--txt)}
+  nav .grp{color:var(--accent2);font-weight:700;text-transform:uppercase;font-size:11px;
+    letter-spacing:.5px;margin:16px 0 4px;padding-left:8px}
+  main{flex:1;min-width:0;padding:36px 30px 120px}
+  @media(max-width:860px){nav{display:none}main{padding:24px 18px 90px}}
+  h1{font-size:28px;margin:0 0 6px}
+  h2{font-size:22px;margin:44px 0 6px;padding-top:10px;border-top:1px solid var(--border)}
+  h3{font-size:17px;margin:22px 0 6px;color:#fff}
+  h4{font-size:15px;margin:16px 0 4px;color:var(--accent)}
+  p{margin:7px 0}
+  .lead{color:var(--muted)}
+  .kicker{color:var(--accent2);font-weight:700;letter-spacing:1px;font-size:12px;text-transform:uppercase}
+  code{background:#0b0d11;padding:1px 6px;border-radius:5px;font-size:13px;
+    font-family:"SF Mono",Consolas,Menlo,monospace;color:#a3e3ff}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13.5px}
+  th,td{border:1px solid var(--border);padding:8px 11px;text-align:left;vertical-align:top}
+  th{background:var(--card2);color:#fff;font-weight:600}
+  tr:nth-child(even) td{background:rgba(255,255,255,.014)}
+  .tbl-card{background:var(--card);border:1px solid var(--border);border-radius:14px;
+    padding:20px 22px;margin:14px 0}
+  .fr{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin:14px 0}
+  .fr h4{margin-top:0}
+  .fr .frid{font-family:"SF Mono",Consolas,monospace;color:var(--pk);font-weight:700}
+  .meta-row{color:var(--muted);font-size:13px;margin:4px 0}
+  .meta-row b{color:#c7cdd6}
+  .badge{display:inline-block;font-size:10px;font-weight:800;padding:1px 7px;border-radius:4px;
+    margin-right:3px;letter-spacing:.3px;vertical-align:middle}
+  .b-must{background:rgba(81,207,102,.16);color:var(--ok);border:1px solid var(--ok)}
+  .b-should{background:rgba(255,159,67,.16);color:var(--nn);border:1px solid var(--nn)}
+  .b-wont{background:rgba(255,107,107,.14);color:var(--danger);border:1px solid var(--danger)}
+  .b-user{background:rgba(91,157,255,.16);color:var(--fk);border:1px solid var(--fk)}
+  .b-admin{background:rgba(124,92,255,.16);color:var(--uk);border:1px solid var(--uk)}
+  .b-guest{background:rgba(154,164,178,.16);color:var(--muted);border:1px solid var(--muted)}
+  .ac{background:#0b0d11;border-left:3px solid var(--accent);border-radius:6px;padding:8px 12px;margin:8px 0;font-size:13px}
+  .ac b{color:var(--ok)}
+  .legend{background:var(--card2);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;margin:16px 0;font-size:13px;display:flex;gap:18px;flex-wrap:wrap}
+  .note{color:var(--muted);font-size:13px}
+  .meta{display:flex;gap:20px;flex-wrap:wrap;color:var(--muted);font-size:13px;margin:6px 0 0}
+  ul{margin:6px 0;padding-left:22px}
+  li{margin:3px 0}
+  .status-flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0}
+  .pill{background:var(--card2);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:13px;font-weight:600}
+  .arrow{color:var(--muted)}
+  hr{border:none;border-top:1px solid var(--border);margin:36px 0}
+</style>
+</head>
+<body>
+<div class="layout">
+<nav>
+  <div class="grp">Tổng quan</div>
+  <a href="#doc-info">Thông tin tài liệu</a>
+  <a href="#goals">Mục tiêu &amp; Phi mục tiêu</a>
+  <a href="#personas">Personas &amp; Journey</a>
+  <a href="#moscow">Phạm vi MVP (MoSCoW)</a>
+  <div class="grp">Yêu cầu chức năng</div>
+  <a href="#fr-catalog">Catalog</a>
+  <a href="#fr-search">Search / Filter</a>
+  <a href="#fr-cart">Cart</a>
+  <a href="#fr-checkout">Checkout</a>
+  <a href="#fr-payment">Payment</a>
+  <a href="#fr-order">Order</a>
+  <a href="#fr-account">Account / Address</a>
+  <a href="#fr-promo">Promotion</a>
+  <a href="#fr-review">Review</a>
+  <a href="#fr-wishlist">Wishlist</a>
+  <a href="#fr-blog">Blog / SEO</a>
+  <a href="#fr-notif">Notification</a>
+  <a href="#fr-admin">Admin CMS</a>
+  <div class="grp">Khác</div>
+  <a href="#nfr">Yêu cầu phi chức năng</a>
+  <a href="#rules">Business Rules</a>
+  <a href="#status-matrix">Ma trận trạng thái</a>
+  <a href="#risks">Rủi ro &amp; Giả định</a>
+</nav>
+
+<main>
+<span class="kicker">Product Requirements Document · ProjectSale</span>
+<h1 id="doc-info">PRD — Website bán mắt kính</h1>
+<p class="lead">Đặc tả yêu cầu sản phẩm cho nền tảng thương mại điện tử bán mắt kính, thị trường Việt Nam, quy mô ~500 user. Nguyên tắc thiết kế: KISS/YAGNI, không over-engineering.</p>
+
+<h2 id="doc-info-h">Thông tin tài liệu</h2>
+<div class="tbl-card">
+<table>
+<tr><th style="width:200px">Thuộc tính</th><th>Giá trị</th></tr>
+<tr><td>Tên sản phẩm</td><td>ProjectSale — Website bán mắt kính</td></tr>
+<tr><td>Phiên bản</td><td>1.0 (bản MVP)</td></tr>
+<tr><td>Ngày phát hành</td><td>09/07/2026</td></tr>
+<tr><td>Tác giả</td><td>Business Analyst</td></tr>
+<tr><td>Phạm vi</td><td>MVP (Must-have) + các Should-have chính được đánh dấu ưu tiên</td></tr>
+<tr><td>Stack kỹ thuật</td><td>Spring Boot + Hibernate (REST API), MySQL 8, React + Vite (SPA/SSR cho SEO), kiến trúc monolith</td></tr>
+<tr><td>Cơ sở dữ liệu</td><td>18 bảng (xem <code>schema.dbml</code> / database-documentation.html)</td></tr>
+<tr><td>Đối tượng đọc</td><td>Đội phát triển, QA, co-founder, thiết kế</td></tr>
+</table>
+</div>
+
+<div class="legend">
+  <span><span class="badge b-must">MUST</span> Bắt buộc cho MVP</span>
+  <span><span class="badge b-should">SHOULD</span> Nên có (ưu tiên sau)</span>
+  <span><span class="badge b-wont">WON'T</span> Không làm giai đoạn này</span>
+  <span><span class="badge b-guest">GUEST</span> Khách vãng lai</span>
+  <span><span class="badge b-user">USER</span> Đã đăng nhập</span>
+  <span><span class="badge b-admin">ADMIN</span> Quản trị</span>
+</div>
+
+<!-- ================= GOALS ================= -->
+<h2 id="goals">Mục tiêu sản phẩm &amp; Phi mục tiêu</h2>
+<h3>Mục tiêu sản phẩm</h3>
+<ul>
+  <li>Cho phép khách duyệt, tìm kiếm, lọc và mua mắt kính (gọng, tròng theo độ) trực tuyến một cách mượt mà, mobile-first.</li>
+  <li>Hỗ trợ mô hình sản phẩm có biến thể (SKU theo màu/size/chất liệu) với tồn kho &amp; giá riêng theo biến thể.</li>
+  <li>Hỗ trợ mua hàng cả với khách vãng lai (guest) lẫn tài khoản, gộp giỏ khi đăng nhập.</li>
+  <li>Đa dạng thanh toán: COD, chuyển khoản QR, VNPAY.</li>
+  <li>Tối ưu SEO (slug tiếng Việt, meta, sitemap, structured data, 301) để thu hút traffic tự nhiên.</li>
+  <li>Cung cấp Admin CMS đủ dùng để vận hành: quản lý sản phẩm, kho, đơn hàng, khuyến mãi, blog, kiểm duyệt review.</li>
+  <li>Đạt hiệu năng tốt (LCP &lt; 2,5s, API &lt; 300ms) với chi phí vận hành thấp.</li>
+</ul>
+<h3>Phi mục tiêu (Out of scope giai đoạn này)</h3>
+<ul>
+  <li><span class="badge b-wont">WON'T</span> Thử kính ảo AR (virtual try-on).</li>
+  <li>Đa ngôn ngữ / đa tiền tệ / đa quốc gia (chỉ VN, VND).</li>
+  <li>Marketplace nhiều người bán (chỉ một nhà bán duy nhất).</li>
+  <li>Kiến trúc microservice, message queue, event-sourcing — dùng monolith module hoá.</li>
+  <li>Ứng dụng mobile native (chỉ web responsive).</li>
+  <li>Quản lý kho đa chi nhánh / nhiều warehouse (một nguồn tồn kho).</li>
+</ul>
+
+<!-- ================= PERSONAS ================= -->
+<h2 id="personas">Personas &amp; User Journey (tóm tắt)</h2>
+<div class="tbl-card">
+<table>
+<tr><th style="width:150px">Persona</th><th>Mô tả</th><th>Nhu cầu chính</th></tr>
+<tr><td><b>Khách vãng lai (Guest)</b></td><td>Người dùng chưa đăng nhập, đang khảo giá / mua nhanh.</td><td>Duyệt, lọc, xem chi tiết, thêm giỏ, checkout không cần tài khoản.</td></tr>
+<tr><td><b>Khách thành viên (User)</b></td><td>Đã có tài khoản, mua lặp lại.</td><td>Lưu địa chỉ, xem lịch sử đơn, đánh giá, wishlist, theo dõi thông báo.</td></tr>
+<tr><td><b>Người mua tròng theo độ</b></td><td>Cần kính cận, nhập thông số độ.</td><td>Chọn SKU + nhập SPH/CYL/AXIS/PD (Should-have).</td></tr>
+<tr><td><b>Quản trị viên (Admin)</b></td><td>Chủ shop / nhân viên vận hành.</td><td>CRUD sản phẩm, quản kho, xử lý đơn, khuyến mãi, duyệt review, viết blog.</td></tr>
+</table>
+</div>
+<h4>Hành trình mua hàng tiêu biểu</h4>
+<p class="note">Trang chủ / Danh mục → Lọc &amp; sắp xếp → Trang chi tiết sản phẩm → Chọn biến thể (màu/size) → Thêm vào giỏ → Xem giỏ &amp; nhập mã giảm giá → Checkout (địa chỉ, phí ship) → Chọn phương thức thanh toán → Đặt hàng thành công (nhận <code>order_code</code> + email) → Theo dõi trạng thái đơn → Nhận hàng → Đánh giá sản phẩm.</p>
+
+<!-- ================= MOSCOW ================= -->
+<h2 id="moscow">Phạm vi MVP — Ma trận MoSCoW</h2>
+<div class="tbl-card">
+<table>
+<tr><th style="width:110px">Mức</th><th>Hạng mục</th></tr>
+<tr>
+  <td><span class="badge b-must">MUST</span></td>
+  <td>Duyệt/tìm sản phẩm (trang chủ, danh mục, tìm kiếm, phân trang, sắp xếp); bộ lọc (danh mục, thương hiệu, khoảng giá, màu, giới tính, có/không độ); chi tiết + biến thể; giỏ hàng guest+user &amp; gộp giỏ; checkout guest+user; thanh toán COD / chuyển khoản QR / VNPAY; quản lý đơn khách + huỷ khi PENDING; tài khoản &amp; sổ địa chỉ (BCrypt, quên mật khẩu, địa chỉ mặc định); mã giảm giá; đánh giá (published + form, kiểm duyệt); blog/SEO; thông báo email + in-app cơ bản; Admin CMS; SEO nền (slug, meta, sitemap, robots, structured data, 301); trang chính sách.</td>
+</tr>
+<tr>
+  <td><span class="badge b-should">SHOULD</span></td>
+  <td>MOMO + đối soát tự động; wishlist; thông số tròng/độ (SPH/CYL/AXIS/PD); lọc theo hình khuôn mặt (tag); review có ảnh + verified; khuyến mãi nâng cao (freeship theo ngưỡng, combo, banner); admin dashboard + cảnh báo hết hàng + xuất CSV; SEO nâng cao; Zalo/SMS + email marketing; đăng nhập Google.</td>
+</tr>
+<tr>
+  <td><span class="badge b-wont">WON'T</span></td>
+  <td>Thử kính ảo AR (virtual try-on).</td>
+</tr>
+</table>
+</div>
+
+<!-- ================= FUNCTIONAL REQUIREMENTS ================= -->
+<h2 id="fr">Yêu cầu chức năng (Functional Requirements)</h2>
+<p class="note">Mỗi FR có mã duy nhất, nhóm theo module. Trường <b>Given/When/Then</b> là tiêu chí chấp nhận. Tên trường/bảng đồng bộ với schema (ví dụ <code>order_code</code>, <code>slug</code>, <code>variant_id</code>, <code>stock_qty</code>, <code>min_value</code>, <code>usage_limit</code>).</p>
+
+<!-- CATALOG -->
+<h3 id="fr-catalog">Module: Catalog (Sản phẩm &amp; Danh mục)</h3>
+
+<div class="fr">
+  <h4><span class="frid">FR-001</span> Trang chủ &amp; danh sách sản phẩm nổi bật <span class="badge b-must">MUST</span></h4>
+  <div class="meta-row"><b>Actor:</b> <span class="badge b-guest">GUEST</span> <span class="badge b-user">USER</span></div>
+  <div class="meta-row"><b>Mô tả:</b> Hiển thị sản phẩm mới / nổi bật, danh mục chính, banner khuyến mãi trên trang chủ.</div>
+  <div class="meta-row"><b>Tiền điều kiện:</b> Có sản phẩm <code>status=ACTIVE</code>.</div>
+  <div class="meta-row"><b>Luồng chính:</b> Người dùng vào <code>/</code> → hệ thống lấy danh sách <code>products</code> ACTIVE mới nhất, danh mục gốc, kèm <code>thumbnail_url</code>, <code>min_price</code>, <code>rating_avg</code>.</div>
+  <div class="meta-row"><b>Quy tắc:</b> Chỉ hiện sản phẩm ACTIVE (chưa <code>deleted_at</code>); giá hiển thị = <code>min_price</code>.</div>
+  <div class="ac"><b>Given</b> có sản phẩm ACTIVE <b>When</b> mở trang chủ <b>Then</b> thấy lưới sản phẩm kèm ảnh, tên, giá từ, sao trung bình.</div>
+</div>
+
+<div class="fr">
+  <h4><span class="frid">FR-002</span> Trang danh mục theo slug <span class="badge b-must">MUST</span></h4>
+  <div class="meta-row"><b>Actor:</b> <span class="badge b-guest">GUEST</span> <span class="badge b-user">USER</span></div>
+  <div class="meta-row"><b>Mô tả:</b> Liệt kê sản phẩm thuộc một danh mục qua URL <code>/{category-slug}</code> (vd <code>/kinh-can</code>).</div>
+  <div class="meta-row"><b>Tiền điều kiện:</b> <code>categories.slug</code> tồn tại &amp; ACTIVE.</div>
+  <div class="meta-row"><b>Luồng chính:</b> Resolve slug → lấy sản phẩm của category (và danh mục con) → phân trang, sắp xếp, kèm bộ lọc.</div>
+  <div class="meta-row"><b>Quy tắc:</b> Slug không tồn tại → kiểm tra <code>url_redirects</code>; nếu có → 301, nếu không → 404. Render meta_title/meta_description của category.</div>
+  <div class="ac"><b>Given</b> slug <code>/kinh-can</code> hợp lệ <b>When</b> truy cập <b>Then</b> thấy danh sách sản phẩm của danh mục, có breadcrumb và bộ lọc.</div>
+</div>
+
+<div class="fr">
+  <h4><span class="frid">FR-003</span> Trang thương hiệu theo slug <span class="badge b-must">MUST</span></h4>
+  <div class="meta-row"><b>Actor:</b> <span class="badge b-guest">GUEST</span> <span class="badge b-user">USER</span></div>
+  <div class="meta-row"><b>Mô tả:</b> Liệt kê sản phẩm theo thương hiệu qua <code>/thuong-hieu/{brand-slug}</code>.</div>
+  <div class="meta-row"><b>Luồng chính:</b> Resolve <code>brands.slug</code> → sản phẩm của brand ACTIVE → phân trang/lọc/sắp xếp.</div>
+  <div class="ac"><b>Given</b> brand-slug hợp lệ <b>When</b> truy cập <b>Then</b> thấy thông tin brand + danh sách sản phẩm.</div>
+</div>
+
+<div class="fr">
+  <h4><span class="frid">FR-004</span> Trang chi tiết sản phẩm + biến thể <span class="badge b-must">MUST</span></h4>
+  <div class="meta-row"><b>Actor:</b> <span class="badge b-guest">GUEST</span> <span class="badge b-user">USER</span></div>
+  <div class="meta-row"><b>Mô tả:</b> Trang <code>/product/{slug}</code>: gallery, mô tả, chọn biến thể (màu/size), giá &amp; tồn kho theo <code>product_variants</code>, breadcrumb, sản phẩm liên quan.</div>
+  <div class="meta-row"><b>Tiền điều kiện:</b> <code>products.slug</code> tồn tại &amp; ACTIVE.</div>
+  <div class="meta-row"><b>Luồng chính:</b> Lấy product + danh sách <code>product_variants</code> (color, size, price, stock_qty) + <code>product_images</code> (sort_order) + reviews PUBLISHED + sản phẩm liên quan (cùng category/brand).</div>
+  <div class="meta-row"><b>Quy tắc:</b> Gallery đổi theo màu; khi chọn SKU → cập nhật <code>price</code> và trạng thái còn/hết hàng theo <code>stock_qty</code>; biến thể <code>stock_qty=0</code> → nút "Hết hàng"; render structured data Product.</div>
+  <div class="ac"><b>Given</b> sản phẩm có nhiều biến thể <b>When</b> chọn màu &amp; size <b>Then</b> giá &amp; tồn kho cập nhật đúng theo variant đã chọn; nếu hết hàng thì không cho thêm vào giỏ.</div>
+</div>
+
+<div class="fr">
+  <h4><span class="frid">FR-005</span> Sản phẩm liên quan <span class="badge b-must">MUST</span></h4>
+  <div class="meta-row"><b>Actor:</b> <span class="badge b-guest">GUEST</span> <span class="badge b-user">USER</span></div>
+  <div class="meta-row"><b>Mô tả:</b> Gợi ý sản phẩm cùng danh mục hoặc cùng thương hiệu tại trang chi tiết.</div>
+  <div class="ac"><b>Given</b> đang xem sản phẩm A <b>When</b> tải trang <b>Then</b> thấy tối đa N sản phẩm liên quan ACTIVE, không trùng A.</div>
+</div>
+
+<!-- SEARCH/FILTER -->
+<h3 id="fr-search">Module: Search / Filter (Tìm kiếm &amp; Lọc)</h3>
+
+<div class="fr">
+  <h4><span class="frid">FR-006</span> Tìm kiếm sản phẩm <span class="badge b-must">MUST</span></h4>
+  <div class="meta-row"><b>Actor:</b> <span class="badge b-guest">GUEST</span> <span class="badge b-user">USER</span></div>
+  <div class="meta-row"><b>Mô tả:</b> Ô tìm kiếm theo từ khoá trên <code>products.name</code>/<code>description</code> (FULLTEXT index).</div>
+  <div class="meta-row"><b>Luồng chính:</b> Nhập từ khoá → truy vấn FULLTEXT → trả kết quả ACTIVE, phân trang &amp; sắp xếp.</div>
+  <div class="meta-row"><b>Quy tắc:</b> Không dấu vẫn khớp (chuẩn hoá); từ khoá rỗng → trả rỗng hoặc gợi ý.</div>
+  <div class="ac"><b>Given</b> nhập "gong titan" <b>When</b> tìm kiếm <b>Then</b> thấy sản phẩm khớp tên/mô tả, có tổng số kết quả.</div>
+</div>
+
+<div class="fr">
+  <h4><span class="frid">FR-007</span> Bộ lọc sản phẩm <span class="badge b-must">MUST</span></h4>
+  <div class="meta-row"><b>Actor:</b> <span class="badge b-guest">GUEST</span> <span class="badge b-user">USER</span></div>
+  <div class="meta-row"><b>Mô tả:</b> Lọc theo danh mục, thương hiệu, khoảng giá, màu, giới tính, có/không độ.</div>
+  <div class="meta-row"><b>Luồng chính:</b> Áp filter dưới dạng query params → truy vấn kết hợp (category_id, brand_id, price min/max theo <code>min_price</code>/variant price, color theo variant, ...).</div>
+  <div class="meta-row"><b>Quy tắc:</b> Các filter kết hợp AND; khoảng giá dựa trên giá biến thể; "có độ" dựa trên thuộc tính/danh mục tròng; giữ filter khi phân trang &amp; sắp xếp.</div>
+  <div class="ac"><b>Given</b> chọn brand + khoảng giá 300k-800k + màu đen <b>When</b> áp lọc <b>Then</b> chỉ hiển thị sản phẩm thoả tất cả điều kiện, tổng số cập nhật đúng.</div>
+</div>
+
+<div class="fr">
+  <h4><span class="frid">FR-008</span> Sắp xếp &amp; phân trang <span class="badge b-must">MUST</span></h4>
+  <div class="meta-row"><b>Actor:</b> <span class="badge b-guest">GUEST</span> <span class="badge b-user">USER</span></div>
+  <div class="meta-row"><b>Mô tả:</b> Sắp xếp theo mới nhất, giá tăng/giảm, bán chạy/đánh giá; phân trang <code>?page&amp;size&amp;sort</code>.</div>
+  <div class="ac"><b>Given</b> danh sách &gt; 1 trang <b>When</b> chọn sort=price,asc &amp; page=2 <b>Then</b> kết quả đúng thứ tự &amp; đúng trang, giữ nguyên filter.</div>
+</div>
+
+<div class="fr">
+  <h4><span class="frid">FR-009</span> Lọc theo hình khuôn mặt (tag) <span class="badge b-should">SHOULD</span></h4>
+  <div class="meta-row"><b>Actor:</b> <span class="badge b-guest">GUEST</span> <span class="badge b-user">USER</span></div>
+  <div class="meta-row"><b>Mô tả:</b> Lọc gọng phù hợp theo tag hình khuôn mặt (tròn, vuông, oval...).</div>
+  <div class="ac"><b>Given</b> chọn tag "mặt tròn" <b>When</b> lọc <b>Then</b> chỉ hiện sản phẩm gắn tag tương ứng.</div>
+</div>
+
+<!-- CART -->
+<h3 id="fr-cart">Module: Cart (Giỏ hàng)</h3>
+
+<div class="fr">
+  <h4><span class="frid">FR-010</span> Thêm sản phẩm (biến thể) vào giỏ <span class="badge b-must">MUST</span></h4>
+  <div class="meta-row"><b>Actor:</b> <span class="badge b-guest">GUEST</span> <span class="badge b-user">USER</span></div>
+  <div class="meta-row"><b>Mô tả:</b> Thêm một <code>variant_id</code> với số lượng vào giỏ. Guest lưu giỏ phía client/session; user lưu <code>carts</code>/<code>cart_items</code>.</div>
+  <div class="meta-row"><b>Quy tắc:</b> Không cho thêm quá <code>stock_qty</code>; nếu variant đã có trong giỏ → cộng dồn quantity (unique <code>(cart_id, variant_id)</code>).</div>
+  <div class="ac"><b>Given</b> variant còn 3 tồn <b>When</b> thêm 2 rồi thêm 2 <b>Then</b> hệ thống chặn vượt tồn (tối đa 3) và báo lỗi rõ ràng.</div>
+</div>
+
+<div class="fr">
+  <h4><span class="frid">FR-011</span> Xem giỏ &amp; tạm tính <span class="badge b-must">MUST</span></h4>
+  <div class="meta-row"><b>Actor:</b> <span class="badge b-guest">GUEST</span> <span class="badge b-user">USER</span></div>
+  <div class="meta-row"><b>Mô tả:</b> Hiển thị các dòng giỏ (ảnh, tên, SKU, đơn giá, số lượng, thành tiền) và tạm tính (subtotal).</div>
+  <div class="ac"><b>Given</b> giỏ có 2 dòng <b>When</b> mở giỏ <b>Then</b> thấy tạm tính = tổng <code>price × quantity</code> các dòng.</div>
+</div>
+
+<div class="fr">
+  <h4><span class="frid">FR-012</span> Sửa số lượng / xoá dòng giỏ <span class="badge b-must">MUST</span></h4>
+  <div class="meta-row"><b>Actor:</b> <span class="badge b-guest">GUEST</span> <span class="badge b-user">USER</span></div>
+  <div class="meta-row"><b>Mô tả:</b> Tăng/giảm quantity hoặc xoá <code>cart_items</code>.</div>
+  <div class="meta-row"><b>Quy tắc:</b> quantity &ge; 1; giảm về 0 = xoá dòng; không vượt <code>stock_qty</code>.</div>
+  <div class="ac"><b>Given</b> dòng giỏ qty=2 <b>When</b> đổi thành 5 nhưng tồn chỉ 4 <b>Then</b> hệ thống báo lỗi và giữ ở mức hợp lệ.</div>
+</div>
+
+<div class="fr">
+  <h4><span class="frid">FR-013</span> Gộp giỏ guest → user khi đăng nhập <span class="badge b-must">MUST</span></h4>
+  <div class="meta-row"><b>Actor:</b> <span class="badge b-user">USER</span></div>
+  <div class="meta-row"><b>Mô tả:</b> Khi guest có giỏ và đăng nhập, gộp các item vào <code>carts</code> của user.</div>
+  <div class="meta-row"><b>Quy tắc:</b> Trùng variant → cộng dồn quantity, giới hạn theo <code>stock_qty</code>; giỏ guest bị xoá sau khi gộp.</div>
+  <div class="ac"><b>Given</b> guest có variant X (1) và user đã có variant X (2) <b>When</b> đăng nhập <b>Then</b> giỏ user có variant X = 3 (nếu tồn cho phép).</div>
+</div>
+
+<!-- CHECKOUT -->
+<h3 id="fr-checkout">Module: Checkout</h3>
+
+<div class="fr">
+  <h4><span class="frid">FR-014</span> Trang checkout &amp; tính tổng <span class="badge b-must">MUST</span></h4>
+  <div class="meta-row"><b>Actor:</b> <span class="badge b-guest">GUEST</span> <span class="badge b-user">USER</span></div>
+  <div class="meta-row"><b>Mô tả:</b> Nhập/chọn địa chỉ nhận, xem phí ship, giảm giá, và tổng cuối (<code>total</code>).</div>
+  <div class="meta-row"><b>Luồng chính:</b> Lấy giỏ → chọn địa chỉ (user chọn từ sổ, guest nhập tay) → tính <code>subtotal</code>, <code>shipping_fee</code>, <code>discount_amount</code> → <code>total = subtotal - discount_amount + shipping_fee</code>.</div>
+  <div class="meta-row"><b>Quy tắc:</b> Guest bắt buộc nhập tên/điện thoại/địa chỉ nhận; kiểm tra lại tồn kho trước khi cho đặt.</div>
+  <div class="ac"><b>Given</b> giỏ hợp lệ <b>When</b> vào checkout <b>Then</b> thấy subtotal, phí ship, giảm giá, tổng đúng công thức.</div>
+</div>
+
+<div class="fr">
+  <h4><span class="frid">FR-015</span> Tạo đơn hàng từ giỏ <span class="badge b-must">MUST</span></h4>
+  <div class="meta-row"><b>Actor:</b> <span class="badge b-guest">GUEST</span> <span class="badge b-user">USER</span></div>
+  <div class="meta-row"><b>Mô tả:</b> Chốt đơn: tạo <code>orders</code> + <code>order_items</code> (snapshot), sinh <code>order_code</code>, trừ tồn kho, ghi nhận phương thức thanh toán.</div>
+  <div class="meta-row"><b>Luồng chính:</b> Validate tồn kho (optimistic lock <code>version</code> trên variant) → tạo order (status=PENDING) → tạo order_items snapshot <code>product_name</code>, <code>sku</code>, <code>unit_price</code>, <code>line_total</code> → trừ <code>stock_qty</code> → snapshot <code>shipping_address</code> → tạo <code>payments</code> tương ứng → xoá giỏ.</div>
+  <div class="meta-row"><b>Quy tắc:</b> Toàn bộ trong 1 transaction; nếu bất kỳ variant hết tồn hoặc lock xung đột → rollback &amp; báo lỗi; <code>order_code</code> unique không lộ id tuần tự; nếu có <code>promotion_id</code> → tăng <code>used_count</code>.</div>
+  <div class="ac"><b>Given</b> hai đơn cùng mua variant còn 1 tồn <b>When</b> đặt đồng thời <b>Then</b> chỉ 1 đơn thành công, đơn kia bị từ chối do hết hàng (không oversell).</div>
+</div>
+
+<!-- PAYMENT -->
+<h3 id="fr-payment">Module: Payment (Thanh toán)</h3>
+
+<div class="fr">
+  <h4><span class="frid">FR-016</span> Thanh toán COD <span class="badge b-must">MUST</span></h4>
+  <div class="meta-row"><b>Actor:</b> <span class="badge b-guest">GUEST</span> <span class="badge b-user">USER</span></div>
+  <div class="meta-row"><b>Mô tả:</b> Chọn COD → tạo <code>payments</code> method=COD, status=PENDING; đơn ở PENDING chờ xác nhận.</div>
+  <div class="ac"><b>Given</b> chọn COD <b>When</b> đặt hàng <b>Then</b> đơn tạo với payment PENDING, khách nhận email xác nhận + <code>order_code</code>.</div>
+</div>
+
+<div class="fr">
+  <h4><span class="frid">FR-017</span> Thanh toán chuyển khoản QR <span class="badge b-must">MUST</span></h4>
+  <div class="meta-row"><b>Actor:</b> <span class="badge b-guest">GUEST</span> <span class="badge b-user">USER</span></div>
+  <div class="meta-row"><b>Mô tả:</b> Hiển thị QR chuyển khoản với nội dung <code>order_code</code>; admin xác nhận đã nhận tiền → payment PAID.</div>
+  <div class="ac"><b>Given</b> chọn chuyển khoản <b>When</b> đặt hàng <b>Then</b> hiện QR + nội dung là order_code; sau khi admin xác nhận → payment=PAID.</div>
+</div>
+
+<div class="fr">
+  <h4><span class="frid">FR-018</span> Thanh toán VNPAY <span class="badge b-must">MUST</span></h4>
+  <div class="meta-row"><b>Actor:</b> <span class="badge b-guest">GUEST</span> <span class="badge b-user">USER</span></div>
+  <div class="meta-row"><b>Mô tả:</b> Khởi tạo phiên VNPAY, redirect cổng, nhận callback/webhook xác nhận, cập nhật payment.</div>
+  <div class="meta-row"><b>Quy tắc:</b> Xác thực chữ ký (secure hash) từ VNPAY; không lưu số thẻ, chỉ lưu <code>payment_ref</code>; callback thành công → payment=PAID + <code>paid_at</code>; thất bại → FAILED.</div>
+  <div class="ac"><b>Given</b> chọn VNPAY <b>When</b> thanh toán thành công tại cổng <b>Then</b> callback hợp lệ → payment=PAID, đơn có thể chuyển CONFIRMED.</div>
+</div>
+
+<div class="fr">
+  <h4><span class="frid">FR-019</span> Thanh toán MOMO + đối soát <span class="badge b-should">SHOULD</span></h4>
+  <div class="meta-row"><b>Actor:</b> <span class="badge b-guest">GUEST</span> <span class="badge b-user">USER</span></div>
+  <div class="meta-row"><b>Mô tả:</b> Tương tự VNPAY với cổng MOMO, có đối soát tự động.</div>
+  <div class="ac"><b>Given</b> chọn MOMO <b>When</b> thanh toán thành công <b>Then</b> payment=PAID và bản ghi đối soát khớp.</div>
+</div>
+
+<!-- ORDER -->
+<h3 id="fr-order">Module: Order (Quản lý đơn khách)</h3>
+
+<div class="fr">
+  <h4><span class="frid">FR-020</span> Lịch sử đơn hàng của tôi <span class="badge b-must">MUST</span></h4>
+  <div class="meta-row"><b>Actor:</b> <span class="badge b-user">USER</span></div>
+  <div class="meta-row"><b>Mô tả:</b> Danh sách đơn của user, sắp xếp mới nhất, kèm trạng thái &amp; tổng tiền.</div>
+  <div class="ac"><b>Given</b> user có 3 đơn <b>When</b> mở "Đơn hàng của tôi" <b>Then</b> thấy đủ 3 đơn với order_code, ngày, trạng thái, total.</div>
+</div>
+
+<div class="fr">
+  <h4><span class="frid">FR-021</span> Chi tiết đơn theo order_code <span class="badge b-must">MUST</span></h4>
+  <div class="meta-row"><b>Actor:</b> <span class="badge b-user">USER</span></div>
+  <div class="meta-row"><b>Mô tả:</b> Xem chi tiết đơn: các <code>order_items</code>, địa chỉ nhận, thanh toán, trạng thái, tracking.</div>
+  <div class="meta-row"><b>Quy tắc:</b> User chỉ xem đơn của chính mình; guest tra cứu bằng order_code + số điện thoại.</div>
+  <div class="ac"><b>Given</b> đơn thuộc user <b>When</b> mở chi tiết <b>Then</b> thấy đầy đủ dòng hàng snapshot, tổng tiền, trạng thái.</div>
+</div>
+
+<div class="fr">
+  <h4><span class="frid">FR-022</span> Huỷ đơn khi PENDING <span class="badge b-must">MUST</span></h4>
+  <div class="meta-row"><b>Actor:</b> <span class="badge b-user">USER</span></div>
+  <div class="meta-row"><b>Mô tả:</b> Khách tự huỷ đơn khi còn ở trạng thái PENDING.</div>
+  <div class="meta-row"><b>Quy tắc:</b> Chỉ đơn PENDING mới huỷ được; huỷ → status=CANCELLED, hoàn <code>stock_qty</code> đã trừ, hoàn <code>used_count</code> mã giảm giá nếu có.</div>
+  <div class="ac"><b>Given</b> đơn PENDING <b>When</b> bấm huỷ <b>Then</b> đơn thành CANCELLED và tồn kho được cộng trả; <b>Given</b> đơn CONFIRMED <b>When</b> bấm huỷ <b>Then</b> hệ thống từ chối.</div>
+</div>
+
+<!-- ACCOUNT -->
+<h3 id="fr-account">Module: Account &amp; Address (Tài khoản &amp; Sổ địa chỉ)</h3>
+
+<div class="fr">
+  <h4><span class="frid">FR-023</span> Đăng ký tài khoản <span class="badge b-must">MUST</span></h4>
+  <div class="meta-row"><b>Actor:</b> <span class="badge b-guest">GUEST</span></div>
+  <div class="meta-row"><b>Mô tả:</b> Tạo tài khoản bằng email + mật khẩu; lưu <code>password_hash</code> bằng BCrypt.</div>
+  <div class="meta-row"><b>Quy tắc:</b> <code>email</code> unique; không lưu plaintext; role mặc định USER, status ACTIVE.</div>
+  <div class="ac"><b>Given</b> email chưa tồn tại <b>When</b> đăng ký <b>Then</b> tạo user với mật khẩu BCrypt; <b>Given</b> email đã tồn tại <b>When</b> đăng ký <b>Then</b> báo lỗi trùng.</div>
+</div>
+
+<div class="fr">
+  <h4><span class="frid">FR-024</span> Đăng nhập / Đăng xuất <span class="badge b-must">MUST</span></h4>
+  <div class="meta-row"><b>Actor:</b> <span class="badge b-guest">GUEST</span> <span class="badge b-user">USER</span></div>
+  <div class="meta-row"><b>Mô tả:</b> Xác thực email + mật khẩu, cấp JWT (access + refresh); đăng xuất huỷ phiên.</div>
+  <div class="meta-row"><b>Quy tắc:</b> So khớp BCrypt; rate-limit login chống brute force; tài khoản INACTIVE/deleted không đăng nhập được.</div>
+  <div class="ac"><b>Given</b> đúng mật khẩu <b>When</b> đăng nhập <b>Then</b> nhận JWT; <b>Given</b> sai nhiều lần <b>When</b> đăng nhập <b>Then</b> bị giới hạn tần suất.</div>
+</div>
+
+<div class="fr">
+  <h4><span class="frid">FR-025</span> Quên / đặt lại mật khẩu <span class="badge b-must">MUST</span></h4>
+  <div class="meta-row"><b>Actor:</b> <span class="badge b-guest">GUEST</span></div>
+  <div class="meta-row"><b>Mô tả:</b> Gửi email link/token đặt lại, người dùng đặt mật khẩu mới.</div>
+  <div class="meta-row"><b>Quy tắc:</b> Token có hạn &amp; dùng một lần; mật khẩu mới lưu BCrypt.</div>
+  <div class="ac"><b>Given</b> email tồn tại <b>When</b> yêu cầu quên mật khẩu <b>Then</b> nhận email token; <b>When</b> đặt lại bằng token hợp lệ <b>Then</b> đăng nhập được bằng mật khẩu mới.</div>
+</div>
+
+<div class="fr">
+  <h4><span class="frid">FR-026</span> Xem &amp; cập nhật hồ sơ / đổi mật khẩu <span class="badge b-must">MUST</span></h4>
+  <div class="meta-row"><b>Actor:</b> <span class="badge b-user">USER</span></div>
+  <div class="meta-row"><b>Mô tả:</b> Cập nhật <code>full_name</code>, <code>phone</code>; đổi mật khẩu (yêu cầu mật khẩu hiện tại).</div>
+  <div class="ac"><b>Given</b> nhập đúng mật khẩu hiện tại <b>When</b> đổi mật khẩu <b>Then</b> cập nhật thành công; sai → từ chối.</div>
+</div>
+
+<div class="fr">
+  <h4><span class="frid">FR-027</span> Sổ địa chỉ (CRUD + mặc định) <span class="badge b-must">MUST</span></h4>
+  <div class="meta-row"><b>Actor:</b> <span class="badge b-user">USER</span></div>
+  <div class="meta-row"><b>Mô tả:</b> Thêm/sửa/xoá nhiều địa chỉ; đặt một địa chỉ <code>is_default=true</code>.</div>
+  <div class="meta-row"><b>Quy tắc:</b> Chỉ một địa chỉ mặc định/user; đặt mặc định mới sẽ bỏ mặc định cũ.</div>
+  <div class="ac"><b>Given</b> có 2 địa chỉ <b>When</b> đặt địa chỉ B làm mặc định <b>Then</b> A không còn mặc định, B là mặc định.</div>
+</div>
+
+<div class="fr">
+  <h4><span class="frid">FR-028</span> Đăng nhập Google <span class="badge b-should">SHOULD</span></h4>
+  <div class="meta-row"><b>Actor:</b> <span class="badge b-guest">GUEST</span></div>
+  <div class="meta-row"><b>Mô tả:</b> OAuth2 Google; tạo/gắn user theo email.</div>
+  <div class="ac"><b>Given</b> tài khoản Google hợp lệ <b>When</b> đăng nhập Google <b>Then</b> nhận JWT, tự tạo user nếu chưa có.</div>
+</div>
+
+<!-- PROMOTION -->
+<h3 id="fr-promo">Module: Promotion (Mã giảm giá)</h3>
+
+<div class="fr">
+  <h4><span class="frid">FR-029</span> Nhập &amp; áp mã giảm giá <span class="badge b-must">MUST</span></h4>
+  <div class="meta-row"><b>Actor:</b> <span class="badge b-guest">GUEST</span> <span class="badge b-user">USER</span></div>
+  <div class="meta-row"><b>Mô tả:</b> Nhập <code>code</code> ở giỏ/checkout để giảm theo % hoặc số tiền.</div>
+  <div class="meta-row"><b>Quy tắc:</b> Kiểm tra <code>status=ACTIVE</code>, trong khoảng <code>start_at</code>–<code>end_at</code>, <code>subtotal &ge; min_value</code>, <code>used_count &lt; usage_limit</code> (nếu có); PERCENT tính theo % của subtotal, AMOUNT trừ trực tiếp (không âm).</div>
+  <div class="ac"><b>Given</b> mã hợp lệ với min_value 500k <b>When</b> subtotal 600k <b>Then</b> giảm được áp; <b>Given</b> subtotal 400k <b>Then</b> từ chối "chưa đạt tối thiểu".</div>
+</div>
+
+<div class="fr">
+  <h4><span class="frid">FR-030</span> Khuyến mãi nâng cao (freeship/combo/banner) <span class="badge b-should">SHOULD</span></h4>
+  <div class="meta-row"><b>Actor:</b> <span class="badge b-admin">ADMIN</span> <span class="badge b-user">USER</span></div>
+  <div class="meta-row"><b>Mô tả:</b> Freeship theo ngưỡng đơn, combo sản phẩm, banner khuyến mãi trang chủ.</div>
+  <div class="ac"><b>Given</b> ngưỡng freeship 500k <b>When</b> đơn 600k <b>Then</b> phí ship = 0.</div>
+</div>
+
+<!-- REVIEW -->
+<h3 id="fr-review">Module: Review (Đánh giá)</h3>
+
+<div class="fr">
+  <h4><span class="frid">FR-031</span> Hiển thị review đã duyệt <span class="badge b-must">MUST</span></h4>
+  <div class="meta-row"><b>Actor:</b> <span class="badge b-guest">GUEST</span> <span class="badge b-user">USER</span></div>
+  <div class="meta-row"><b>Mô tả:</b> Trang sản phẩm hiển thị review có <code>status=PUBLISHED</code> + <code>rating_avg</code>/<code>review_count</code>.</div>
+  <div class="meta-row"><b>Quy tắc:</b> Chỉ hiện PUBLISHED; PENDING/HIDDEN không hiển thị công khai.</div>
+  <div class="ac"><b>Given</b> sản phẩm có review PENDING và PUBLISHED <b>When</b> khách xem <b>Then</b> chỉ thấy review PUBLISHED.</div>
+</div>
+
+<div class="fr">
+  <h4><span class="frid">FR-032</span> Gửi đánh giá <span class="badge b-must">MUST</span></h4>
+  <div class="meta-row"><b>Actor:</b> <span class="badge b-user">USER</span></div>
+  <div class="meta-row"><b>Mô tả:</b> User gửi <code>rating</code> (1–5) + <code>content</code>; mặc định <code>status=PENDING</code> chờ duyệt.</div>
+  <div class="meta-row"><b>Quy tắc:</b> rating 1..5; có thể gắn <code>order_id</code> để verify đã mua; review vào hàng chờ kiểm duyệt.</div>
+  <div class="ac"><b>Given</b> user đã mua sản phẩm <b>When</b> gửi review 5 sao <b>Then</b> review tạo với PENDING, chưa hiển thị công khai đến khi admin duyệt.</div>
+</div>
+
+<div class="fr">
+  <h4><span class="frid">FR-033</span> Review có ảnh + verified <span class="badge b-should">SHOULD</span></h4>
+  <div class="meta-row"><b>Actor:</b> <span class="badge b-user">USER</span></div>
+  <div class="meta-row"><b>Mô tả:</b> Đính kèm ảnh; đánh dấu "đã mua hàng" (verified) khi có <code>order_id</code> hợp lệ.</div>
+  <div class="ac"><b>Given</b> review có order_id đã COMPLETED <b>When</b> hiển thị <b>Then</b> gắn nhãn "Đã mua hàng".</div>
+</div>
+
+<!-- WISHLIST -->
+<h3 id="fr-wishlist">Module: Wishlist (Yêu thích)</h3>
+
+<div class="fr">
+  <h4><span class="frid">FR-034</span> Quản lý wishlist <span class="badge b-should">SHOULD</span></h4>
+  <div class="meta-row"><b>Actor:</b> <span class="badge b-user">USER</span></div>
+  <div class="meta-row"><b>Mô tả:</b> Thêm/xoá/xem sản phẩm yêu thích; unique <code>(user_id, product_id)</code>.</div>
+  <div class="ac"><b>Given</b> chưa có trong wishlist <b>When</b> thêm sản phẩm <b>Then</b> lưu; thêm lại lần nữa không tạo bản ghi trùng.</div>
+</div>
+
+<!-- BLOG/SEO -->
+<h3 id="fr-blog">Module: Blog / SEO</h3>
+
+<div class="fr">
+  <h4><span class="frid">FR-035</span> Danh sách &amp; chi tiết blog <span class="badge b-must">MUST</span></h4>
+  <div class="meta-row"><b>Actor:</b> <span class="badge b-guest">GUEST</span> <span class="badge b-user">USER</span></div>
+  <div class="meta-row"><b>Mô tả:</b> <code>/blog</code> liệt kê bài PUBLISHED; <code>/blog/{slug}</code> hiển thị chi tiết + meta.</div>
+  <div class="meta-row"><b>Quy tắc:</b> Chỉ bài <code>status=PUBLISHED</code> hiển thị; render meta_title/meta_description; đổi slug tạo 301.</div>
+  <div class="ac"><b>Given</b> bài PUBLISHED <b>When</b> mở /blog/{slug} <b>Then</b> thấy nội dung + meta; bài DRAFT không truy cập công khai.</div>
+</div>
+
+<div class="fr">
+  <h4><span class="frid">FR-036</span> SEO nền (sitemap, robots, structured data, canonical) <span class="badge b-must">MUST</span></h4>
+  <div class="meta-row"><b>Actor:</b> Hệ thống / Bot</div>
+  <div class="meta-row"><b>Mô tả:</b> Sinh <code>sitemap.xml</code>, <code>robots.txt</code>, structured data (Product, Article, BreadcrumbList), thẻ canonical, render cho bot (SSR).</div>
+  <div class="meta-row"><b>Quy tắc:</b> Slug tiếng Việt không dấu; mỗi trang có canonical &amp; meta duy nhất.</div>
+  <div class="ac"><b>Given</b> bot truy cập <code>/sitemap.xml</code> <b>Then</b> nhận danh sách URL ACTIVE; <b>Given</b> sản phẩm <b>Then</b> có structured data Product hợp lệ.</div>
+</div>
+
+<div class="fr">
+  <h4><span class="frid">FR-037</span> 301 redirect khi đổi slug <span class="badge b-must">MUST</span></h4>
+  <div class="meta-row"><b>Actor:</b> Hệ thống</div>
+  <div class="meta-row"><b>Mô tả:</b> Khi slug sản phẩm/danh mục/blog thay đổi, tạo bản ghi <code>url_redirects</code> (old_path → new_path, status 301).</div>
+  <div class="ac"><b>Given</b> slug cũ đã đổi <b>When</b> truy cập old_path <b>Then</b> server trả 301 về new_path.</div>
+</div>
+
+<div class="fr">
+  <h4><span class="frid">FR-038</span> Trang chính sách / pháp lý <span class="badge b-must">MUST</span></h4>
+  <div class="meta-row"><b>Actor:</b> <span class="badge b-guest">GUEST</span> <span class="badge b-user">USER</span></div>
+  <div class="meta-row"><b>Mô tả:</b> Các trang tĩnh: chính sách bảo hành, đổi trả, vận chuyển, bảo mật, điều khoản.</div>
+  <div class="ac"><b>Given</b> vào trang chính sách <b>Then</b> hiển thị nội dung đầy đủ, có trong footer.</div>
+</div>
+
+<!-- NOTIFICATION -->
+<h3 id="fr-notif">Module: Notification (Thông báo)</h3>
+
+<div class="fr">
+  <h4><span class="frid">FR-039</span> Email giao dịch <span class="badge b-must">MUST</span></h4>
+  <div class="meta-row"><b>Actor:</b> Hệ thống</div>
+  <div class="meta-row"><b>Mô tả:</b> Gửi email cho các sự kiện: xác nhận đơn, cập nhật trạng thái, quên mật khẩu.</div>
+  <div class="ac"><b>Given</b> đặt đơn thành công <b>When</b> tạo order <b>Then</b> khách nhận email chứa order_code &amp; chi tiết.</div>
+</div>
+
+<div class="fr">
+  <h4><span class="frid">FR-040</span> Thông báo in-app cơ bản <span class="badge b-must">MUST</span></h4>
+  <div class="meta-row"><b>Actor:</b> <span class="badge b-user">USER</span></div>
+  <div class="meta-row"><b>Mô tả:</b> Ghi <code>notifications</code>, hiển thị danh sách, đánh dấu đã đọc (<code>is_read</code>).</div>
+  <div class="ac"><b>Given</b> có thông báo chưa đọc <b>When</b> mở danh sách &amp; đánh dấu đã đọc <b>Then</b> <code>is_read=true</code>, badge số giảm.</div>
+</div>
+
+<div class="fr">
+  <h4><span class="frid">FR-041</span> Zalo / SMS + email marketing <span class="badge b-should">SHOULD</span></h4>
+  <div class="meta-row"><b>Actor:</b> Hệ thống / Admin</div>
+  <div class="meta-row"><b>Mô tả:</b> Kênh Zalo/SMS cho thông báo đơn &amp; email marketing chiến dịch.</div>
+  <div class="ac"><b>Given</b> đơn chuyển SHIPPING <b>When</b> có cấu hình Zalo/SMS <b>Then</b> khách nhận tin nhắn cập nhật.</div>
+</div>
+
+<!-- ADMIN -->
+<h3 id="fr-admin">Module: Admin CMS</h3>
+
+<div class="fr">
+  <h4><span class="frid">FR-042</span> CRUD sản phẩm / biến thể / ảnh / kho <span class="badge b-must">MUST</span></h4>
+  <div class="meta-row"><b>Actor:</b> <span class="badge b-admin">ADMIN</span></div>
+  <div class="meta-row"><b>Mô tả:</b> Quản lý <code>products</code>, <code>product_variants</code> (sku, color, size, price, stock_qty), <code>product_images</code> (upload, sắp xếp, xoá).</div>
+  <div class="meta-row"><b>Quy tắc:</b> sku unique; slug unique &amp; đổi slug → tạo 301; xoá mềm bằng <code>deleted_at</code>; không xoá variant đã bán (RESTRICT).</div>
+  <div class="ac"><b>Given</b> tạo sản phẩm mới với 2 biến thể <b>When</b> lưu <b>Then</b> sản phẩm + variants + ảnh được tạo, slug unique.</div>
+</div>
+
+<div class="fr">
+  <h4><span class="frid">FR-043</span> Quản lý đơn hàng (admin) <span class="badge b-must">MUST</span></h4>
+  <div class="meta-row"><b>Actor:</b> <span class="badge b-admin">ADMIN</span></div>
+  <div class="meta-row"><b>Mô tả:</b> Danh sách/lọc đơn, cập nhật trạng thái theo ma trận, cập nhật <code>tracking_code</code>, xác nhận thanh toán chuyển khoản.</div>
+  <div class="meta-row"><b>Quy tắc:</b> Chuyển trạng thái tuân theo ma trận hợp lệ; CANCELLED/REFUNDED hoàn tồn kho phù hợp.</div>
+  <div class="ac"><b>Given</b> đơn PENDING đã thanh toán <b>When</b> admin xác nhận <b>Then</b> chuyển CONFIRMED; chuyển sai bước bị chặn.</div>
+</div>
+
+<div class="fr">
+  <h4><span class="frid">FR-044</span> Quản lý danh mục / thương hiệu <span class="badge b-must">MUST</span></h4>
+  <div class="meta-row"><b>Actor:</b> <span class="badge b-admin">ADMIN</span></div>
+  <div class="meta-row"><b>Mô tả:</b> CRUD <code>categories</code> (phân cấp) &amp; <code>brands</code>, kèm slug/meta.</div>
+  <div class="ac"><b>Given</b> tạo danh mục con <b>When</b> gán parent_id <b>Then</b> cây danh mục cập nhật đúng.</div>
+</div>
+
+<div class="fr">
+  <h4><span class="frid">FR-045</span> Quản lý khuyến mãi <span class="badge b-must">MUST</span></h4>
+  <div class="meta-row"><b>Actor:</b> <span class="badge b-admin">ADMIN</span></div>
+  <div class="meta-row"><b>Mô tả:</b> CRUD <code>promotions</code>: code, type, value, min_value, usage_limit, start_at/end_at, status.</div>
+  <div class="ac"><b>Given</b> tạo mã PERCENT 10% <b>When</b> lưu với min_value &amp; usage_limit <b>Then</b> mã sẵn sàng để khách áp dụng.</div>
+</div>
+
+<div class="fr">
+  <h4><span class="frid">FR-046</span> Quản lý blog <span class="badge b-must">MUST</span></h4>
+  <div class="meta-row"><b>Actor:</b> <span class="badge b-admin">ADMIN</span></div>
+  <div class="meta-row"><b>Mô tả:</b> CRUD <code>blog_posts</code>, chuyển DRAFT ↔ PUBLISHED, đặt <code>published_at</code>.</div>
+  <div class="ac"><b>Given</b> bài DRAFT <b>When</b> publish <b>Then</b> status=PUBLISHED, published_at được set, bài xuất hiện công khai.</div>
+</div>
+
+<div class="fr">
+  <h4><span class="frid">FR-047</span> Kiểm duyệt review <span class="badge b-must">MUST</span></h4>
+  <div class="meta-row"><b>Actor:</b> <span class="badge b-admin">ADMIN</span></div>
+  <div class="meta-row"><b>Mô tả:</b> Duyệt (PUBLISHED) hoặc ẩn (HIDDEN) review PENDING; cập nhật <code>rating_avg</code>/<code>review_count</code> khi publish.</div>
+  <div class="ac"><b>Given</b> review PENDING <b>When</b> admin duyệt <b>Then</b> status=PUBLISHED &amp; rating_avg sản phẩm được tính lại.</div>
+</div>
+
+<div class="fr">
+  <h4><span class="frid">FR-048</span> Admin dashboard + cảnh báo hết hàng + xuất CSV <span class="badge b-should">SHOULD</span></h4>
+  <div class="meta-row"><b>Actor:</b> <span class="badge b-admin">ADMIN</span></div>
+  <div class="meta-row"><b>Mô tả:</b> Tổng quan doanh số, đơn theo trạng thái, cảnh báo variant <code>stock_qty</code> thấp, xuất CSV đơn/sản phẩm.</div>
+  <div class="ac"><b>Given</b> variant có stock_qty ≤ ngưỡng <b>When</b> mở dashboard <b>Then</b> thấy cảnh báo hết hàng cho variant đó.</div>
+</div>
+
+<div class="fr">
+  <h4><span class="frid">FR-049</span> Thông số tròng/độ cận (SPH/CYL/AXIS/PD) <span class="badge b-should">SHOULD</span></h4>
+  <div class="meta-row"><b>Actor:</b> <span class="badge b-user">USER</span></div>
+  <div class="meta-row"><b>Mô tả:</b> Khi mua tròng theo độ, khách nhập SPH/CYL/AXIS/PD; lưu kèm order_item.</div>
+  <div class="ac"><b>Given</b> sản phẩm tròng theo độ <b>When</b> nhập thông số hợp lệ <b>Then</b> thông số được lưu &amp; hiển thị trong chi tiết đơn.</div>
+</div>
+
+<!-- ================= NFR ================= -->
+<h2 id="nfr">Yêu cầu phi chức năng (NFR)</h2>
+<div class="tbl-card">
+<table>
+<tr><th style="width:110px">Mã</th><th>Nhóm</th><th>Yêu cầu</th></tr>
+<tr><td><b>NFR-001</b></td><td>Hiệu năng</td><td>LCP &lt; 2,5s trên mobile/4G.</td></tr>
+<tr><td><b>NFR-002</b></td><td>Hiệu năng</td><td>Thời gian phản hồi API &lt; 300ms (p95, tác vụ đọc thông thường).</td></tr>
+<tr><td><b>NFR-003</b></td><td>Hiệu năng</td><td>INP &lt; 200ms; CLS &lt; 0,1.</td></tr>
+<tr><td><b>NFR-004</b></td><td>SEO</td><td>Slug + meta + canonical + sitemap.xml + robots.txt + structured data + 301; render cho bot (SSR).</td></tr>
+<tr><td><b>NFR-005</b></td><td>Bảo mật</td><td>Mật khẩu BCrypt; không lưu số thẻ; HTTPS toàn site.</td></tr>
+<tr><td><b>NFR-006</b></td><td>Bảo mật</td><td>Chống SQLi (prepared statement), XSS (escape output), CSRF; validate input.</td></tr>
+<tr><td><b>NFR-007</b></td><td>Bảo mật</td><td>Phân quyền USER/ADMIN (JWT role); rate-limit endpoint login.</td></tr>
+<tr><td><b>NFR-008</b></td><td>Kiến trúc</td><td>Monolith module hoá rõ ràng (Catalog, Order, Payment, ...); KISS/YAGNI.</td></tr>
+<tr><td><b>NFR-009</b></td><td>Độ tin cậy</td><td>Uptime ~99%; backup cơ sở dữ liệu hằng ngày.</td></tr>
+<tr><td><b>NFR-010</b></td><td>Trải nghiệm</td><td>Mobile-first, responsive.</td></tr>
+<tr><td><b>NFR-011</b></td><td>Analytics</td><td>Tích hợp GA4 + Google Search Console.</td></tr>
+<tr><td><b>NFR-012</b></td><td>Dữ liệu</td><td>Tiền tệ dùng DECIMAL(12,2); thời gian DATETIME; đơn vị VND.</td></tr>
+</table>
+</div>
+
+<!-- ================= BUSINESS RULES ================= -->
+<h2 id="rules">Business Rules quan trọng</h2>
+<div class="tbl-card">
+<table>
+<tr><th style="width:120px">Mã</th><th>Quy tắc</th></tr>
+<tr><td><b>BR-01</b></td><td>Tồn kho quản lý theo <code>product_variants.stock_qty</code> (không ở product). Trừ tồn khi tạo đơn; dùng optimistic lock qua cột <code>version</code> để chống oversell khi đặt đồng thời.</td></tr>
+<tr><td><b>BR-02</b></td><td>Snapshot giá &amp; tên tại <code>order_items</code> (<code>product_name</code>, <code>sku</code>, <code>unit_price</code>, <code>line_total</code>) — thay đổi giá/sản phẩm về sau không ảnh hưởng đơn cũ.</td></tr>
+<tr><td><b>BR-03</b></td><td>Snapshot địa chỉ nhận tại <code>orders.shipping_address</code> (+ receiver_name/phone) lúc đặt.</td></tr>
+<tr><td><b>BR-04</b></td><td>Mã giảm giá: kiểm tra <code>status=ACTIVE</code>, thời gian <code>start_at..end_at</code>, <code>subtotal ≥ min_value</code>, <code>used_count &lt; usage_limit</code> (nếu có). Áp dụng thành công tăng <code>used_count</code>; huỷ đơn hoàn <code>used_count</code>.</td></tr>
+<tr><td><b>BR-05</b></td><td>Công thức tổng: <code>total = subtotal - discount_amount + shipping_fee</code>; các giá trị không âm.</td></tr>
+<tr><td><b>BR-06</b></td><td>Review chỉ hiển thị công khai khi <code>status=PUBLISHED</code>. Mặc định PENDING chờ kiểm duyệt. rating trong 1..5.</td></tr>
+<tr><td><b>BR-07</b></td><td>Chỉ đơn ở trạng thái <code>PENDING</code> mới được khách huỷ. Huỷ → hoàn tồn kho &amp; used_count mã.</td></tr>
+<tr><td><b>BR-08</b></td><td>Đổi slug (product/category/blog) tạo bản ghi <code>url_redirects</code> (301) để giữ SEO.</td></tr>
+<tr><td><b>BR-09</b></td><td>Mỗi user có tối đa 1 giỏ (<code>carts.user_id</code> unique); một variant xuất hiện tối đa 1 dòng trong giỏ (unique <code>(cart_id, variant_id)</code>).</td></tr>
+<tr><td><b>BR-10</b></td><td>Một user chỉ có 1 địa chỉ mặc định (<code>is_default</code>).</td></tr>
+<tr><td><b>BR-11</b></td><td><code>order_code</code> unique, không lộ id tuần tự (định danh hiển thị/tra cứu).</td></tr>
+<tr><td><b>BR-12</b></td><td>Xoá mềm bằng <code>deleted_at</code> cho users/categories/brands/products/variants; không xoá cứng variant đã bán (RESTRICT giữ lịch sử).</td></tr>
+</table>
+</div>
+
+<!-- ================= STATUS MATRIX ================= -->
+<h2 id="status-matrix">Ma trận trạng thái đơn hàng &amp; thanh toán</h2>
+<h3>Vòng đời trạng thái đơn (<code>order_status</code>)</h3>
+<div class="status-flow">
+  <span class="pill">PENDING</span><span class="arrow">→</span>
+  <span class="pill">CONFIRMED</span><span class="arrow">→</span>
+  <span class="pill">SHIPPING</span><span class="arrow">→</span>
+  <span class="pill">COMPLETED</span>
+</div>
+<div class="status-flow">
+  <span class="arrow">Nhánh phụ:</span>
+  <span class="pill">PENDING/CONFIRMED</span><span class="arrow">→</span>
+  <span class="pill">CANCELLED</span>
+  <span class="arrow">·</span>
+  <span class="pill">COMPLETED/PAID</span><span class="arrow">→</span>
+  <span class="pill">REFUNDED</span>
+</div>
+<div class="tbl-card">
+<table>
+<tr><th>Từ trạng thái</th><th>Chuyển hợp lệ đến</th><th>Ai thực hiện</th><th>Ghi chú</th></tr>
+<tr><td>PENDING</td><td>CONFIRMED, CANCELLED</td><td>Admin (xác nhận) / User (huỷ)</td><td>User chỉ huỷ được ở đây (BR-07).</td></tr>
+<tr><td>CONFIRMED</td><td>SHIPPING, CANCELLED</td><td>Admin</td><td>Huỷ ở đây do admin (vd hết hàng), hoàn tồn.</td></tr>
+<tr><td>SHIPPING</td><td>COMPLETED</td><td>Admin</td><td>Cập nhật <code>tracking_code</code>.</td></tr>
+<tr><td>COMPLETED</td><td>REFUNDED</td><td>Admin</td><td>Hoàn tiền/đổi trả (nếu có).</td></tr>
+<tr><td>CANCELLED</td><td>— (kết thúc)</td><td>—</td><td>Đã hoàn tồn kho &amp; used_count.</td></tr>
+<tr><td>REFUNDED</td><td>— (kết thúc)</td><td>—</td><td>Trạng thái cuối.</td></tr>
+</table>
+</div>
+<h3>Trạng thái thanh toán (<code>payment_status</code>)</h3>
+<div class="tbl-card">
+<table>
+<tr><th>Trạng thái</th><th>Ý nghĩa</th><th>Kích hoạt</th></tr>
+<tr><td>PENDING</td><td>Chờ thanh toán (COD chưa thu, chuyển khoản chưa xác nhận, VNPAY chưa callback).</td><td>Khi tạo <code>payments</code>.</td></tr>
+<tr><td>PAID</td><td>Đã thanh toán thành công; set <code>paid_at</code>.</td><td>Callback VNPAY/MOMO hợp lệ, admin xác nhận chuyển khoản, hoặc COD đã thu.</td></tr>
+<tr><td>FAILED</td><td>Thanh toán thất bại tại cổng.</td><td>Callback thất bại / huỷ tại cổng.</td></tr>
+<tr><td>REFUNDED</td><td>Đã hoàn tiền.</td><td>Khi đơn REFUNDED.</td></tr>
+</table>
+</div>
+
+<!-- ================= RISKS ================= -->
+<h2 id="risks">Rủi ro &amp; Giả định</h2>
+<h3>Giả định</h3>
+<ul>
+  <li>Quy mô ~500 user, tải thấp — không cần cache phân tán/queue; MySQL đơn instance đủ dùng.</li>
+  <li>Một nguồn tồn kho duy nhất, một nhà bán, thị trường VN/VND.</li>
+  <li>Đội dev nhỏ — ưu tiên giải pháp đơn giản, tránh over-engineering (KISS/YAGNI).</li>
+  <li>SSR/prerender chỉ áp dụng cho các trang cần SEO (danh mục, sản phẩm, blog).</li>
+  <li>Cổng thanh toán (VNPAY/MOMO) cung cấp sandbox &amp; tài liệu tích hợp.</li>
+</ul>
+<h3>Rủi ro</h3>
+<div class="tbl-card">
+<table>
+<tr><th style="width:110px">Mã</th><th>Rủi ro</th><th>Giảm thiểu</th></tr>
+<tr><td><b>RISK-01</b></td><td>Oversell khi đặt đồng thời.</td><td>Optimistic lock (<code>version</code>) + kiểm tra tồn trong transaction (BR-01).</td></tr>
+<tr><td><b>RISK-02</b></td><td>Callback thanh toán giả mạo.</td><td>Xác thực chữ ký/secure hash; đối chiếu số tiền &amp; order_code.</td></tr>
+<tr><td><b>RISK-03</b></td><td>SEO tụt hạng khi đổi URL.</td><td>Bắt buộc 301 qua <code>url_redirects</code> (BR-08).</td></tr>
+<tr><td><b>RISK-04</b></td><td>Lạm dụng mã giảm giá.</td><td>Ràng buộc usage_limit/min_value + kiểm tra atomic khi tăng used_count.</td></tr>
+<tr><td><b>RISK-05</b></td><td>Brute force đăng nhập.</td><td>Rate-limit + BCrypt (NFR-007).</td></tr>
+<tr><td><b>RISK-06</b></td><td>Mất dữ liệu.</td><td>Backup hằng ngày (NFR-009).</td></tr>
+<tr><td><b>RISK-07</b></td><td>Phình phạm vi (scope creep) sang Should/Won't.</td><td>Bám MoSCoW; AR loại khỏi giai đoạn này.</td></tr>
+</table>
+</div>
+
+<hr>
+<p class="note">— Hết PRD v1.0 · 09/07/2026 · ProjectSale. Tổng cộng 49 yêu cầu chức năng (FR-001..FR-049) và 12 NFR. —</p>
+
+</main>
+</div>
+</body>
+</html>

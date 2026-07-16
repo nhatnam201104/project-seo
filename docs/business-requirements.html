@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Business Requirements — ProjectSale (Website bán mắt kính)</title>
+<style>
+  :root{
+    --bg:#0f1115;--card:#171a21;--card2:#1d212b;--border:#2a2f3a;
+    --txt:#e6e8ec;--muted:#9aa4b2;--accent:#5b9dff;--accent2:#7c5cff;
+    --must:#ff6b6b;--should:#ffd43b;--could:#51cf66;--wont:#9aa4b2;
+    --ok:#51cf66;--warn:#ff9f43;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.65;font-size:15px}
+  .layout{display:flex;max-width:1280px;margin:0 auto}
+  nav{position:sticky;top:0;align-self:flex-start;width:250px;height:100vh;overflow-y:auto;
+    padding:24px 14px;border-right:1px solid var(--border);font-size:13px}
+  nav a{display:block;color:var(--muted);text-decoration:none;padding:4px 8px;border-radius:6px}
+  nav a:hover{background:var(--card2);color:var(--txt)}
+  nav .grp{color:var(--accent2);font-weight:700;text-transform:uppercase;font-size:11px;
+    letter-spacing:.5px;margin:16px 0 4px;padding-left:8px}
+  main{flex:1;min-width:0;padding:36px 30px 120px}
+  @media(max-width:860px){nav{display:none}main{padding:24px 18px 90px}}
+  h1{font-size:28px;margin:0 0 6px}
+  h2{font-size:22px;margin:44px 0 6px;padding-top:10px;border-top:1px solid var(--border)}
+  h3{font-size:17px;margin:24px 0 6px;color:#fff}
+  p{margin:7px 0}
+  ul,ol{margin:8px 0 8px 4px;padding-left:22px}
+  li{margin:4px 0}
+  .lead{color:var(--muted)}
+  .kicker{color:var(--accent2);font-weight:700;letter-spacing:1px;font-size:12px;text-transform:uppercase}
+  code{background:#0b0d11;padding:1px 6px;border-radius:5px;font-size:13px;
+    font-family:"SF Mono",Consolas,Menlo,monospace;color:#a3e3ff}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13.5px}
+  th,td{border:1px solid var(--border);padding:8px 11px;text-align:left;vertical-align:top}
+  th{background:var(--card2);color:#fff;font-weight:600}
+  tr:nth-child(even) td{background:rgba(255,255,255,.014)}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;
+    padding:20px 22px;margin:14px 0}
+  .badge{display:inline-block;font-size:10px;font-weight:800;padding:2px 8px;border-radius:4px;
+    margin-right:4px;letter-spacing:.3px;text-transform:uppercase}
+  .b-must{background:rgba(255,107,107,.16);color:var(--must);border:1px solid var(--must)}
+  .b-should{background:rgba(255,212,59,.16);color:var(--should);border:1px solid var(--should)}
+  .b-could{background:rgba(81,207,102,.16);color:var(--could);border:1px solid var(--could)}
+  .b-wont{background:rgba(154,164,178,.14);color:var(--wont);border:1px solid var(--wont)}
+  .legend{background:var(--card2);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;margin:16px 0;font-size:13px;display:flex;gap:18px;flex-wrap:wrap}
+  .meta{display:flex;gap:20px;flex-wrap:wrap;color:var(--muted);font-size:13px;margin:6px 0 0}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+  .mini{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+  .mini b{color:#fff}
+  .persona{border-left:3px solid var(--accent);border-radius:10px}
+  .kpi{border-left:3px solid var(--accent2)}
+  .note{color:var(--muted);font-size:13px}
+  hr{border:none;border-top:1px solid var(--border);margin:36px 0}
+  .journey{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+  .step{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-size:13px}
+  .step b{display:block;color:var(--accent);margin-bottom:4px;font-size:12px;text-transform:uppercase;letter-spacing:.4px}
+  .pill{display:inline-block;background:#0b0d11;border:1px solid var(--border);border-radius:20px;
+    padding:2px 10px;font-size:12px;margin:2px 3px 2px 0;color:#a3e3ff}
+  .callout{background:rgba(255,159,67,.08);border:1px solid var(--warn);border-radius:10px;padding:12px 16px;margin:14px 0;font-size:13.5px}
+  .ok-box{background:rgba(81,207,102,.07);border:1px solid var(--ok);border-radius:10px;padding:12px 16px;margin:14px 0}
+</style>
+</head>
+<body>
+<div class="layout">
+<nav>
+  <div class="grp">Chiến lược</div>
+  <a href="#vision">1. Tầm nhìn &amp; mục tiêu</a>
+  <a href="#personas">2. Khách hàng &amp; personas</a>
+  <a href="#journey">3. Hành trình khách hàng</a>
+  <div class="grp">Phạm vi</div>
+  <a href="#moscow">4. Tính năng (MoSCoW)</a>
+  <a href="#must">— Must-have (MVP)</a>
+  <a href="#should">— Should-have</a>
+  <a href="#could">— Could-have</a>
+  <a href="#wont">— Won't-have</a>
+  <a href="#eyewear">— Đặc thù mắt kính</a>
+  <div class="grp">Chất lượng</div>
+  <a href="#nfr">5. Yêu cầu phi chức năng</a>
+  <a href="#seo">6. Ưu tiên SEO</a>
+  <div class="grp">Ràng buộc</div>
+  <a href="#constraints">7. Ràng buộc &amp; nguyên tắc</a>
+  <a href="#success">8. Tiêu chí thành công MVP</a>
+</nav>
+
+<main>
+<span class="kicker">Business Requirements · ProjectSale</span>
+<h1>Yêu cầu kinh doanh — Website bán mắt kính</h1>
+<p class="lead">Tài liệu định hướng sản phẩm dưới góc nhìn kinh doanh cho MVP website thương mại điện tử bán mắt kính (gọng + tròng) tại thị trường Việt Nam. Dùng để BA/Dev bóc tách backlog và ước lượng.</p>
+<div class="meta">
+  <span><b>Giai đoạn:</b> MVP / Ra mắt (Năm 1)</span>
+  <span><b>Quy mô:</b> ~500 người dùng ban đầu</span>
+  <span><b>Kiến trúc:</b> Monolith · Spring Boot + Hibernate · MySQL · React/Vite</span>
+  <span><b>Nguyên tắc:</b> KISS · YAGNI · Mobile-first · SEO-first</span>
+  <span><b>Cập nhật:</b> 12/07/2026</span>
+</div>
+
+<div class="legend">
+  <span><span class="badge b-must">Must</span> Bắt buộc cho MVP — không có thì không ra mắt được</span>
+  <span><span class="badge b-should">Should</span> Quan trọng, làm ngay sau MVP</span>
+  <span><span class="badge b-could">Could</span> Có thì tốt, làm khi rảnh nguồn lực</span>
+  <span><span class="badge b-wont">Won't</span> Không làm ở giai đoạn này</span>
+</div>
+
+<!-- ============ 1. VISION ============ -->
+<h2 id="vision">1. Tầm nhìn &amp; mục tiêu kinh doanh</h2>
+<div class="card">
+<h3>Tầm nhìn</h3>
+<p>Trở thành cửa hàng mắt kính online <b>đáng tin cậy, giá minh bạch</b> cho khách hàng Việt trẻ (18–40 tuổi) — nơi khách có thể chọn gọng/tròng đúng nhu cầu, đúng khuôn mặt, được tư vấn rõ ràng và mua thuận tiện. Trong năm đầu, ưu tiên <b>chứng minh mô hình bán online có lãi</b> với chi phí vận hành thấp, thay vì mở rộng ồ ạt.</p>
+
+<h3>Vì sao làm</h3>
+<ul>
+  <li>Thị trường kính mắt VN phần lớn còn bán offline; mua online còn e ngại về độ vừa vặn và chất lượng tròng — đây là khoảng trống để tạo khác biệt bằng <b>nội dung tư vấn (blog SEO) + trải nghiệm chọn kính rõ ràng</b>.</li>
+  <li>Chi phí thuê mặt bằng cao; bán online giúp doanh nghiệp nhỏ tiếp cận khách toàn quốc với vốn thấp.</li>
+  <li>SEO tốt = nguồn traffic miễn phí bền vững, giảm phụ thuộc quảng cáo trả phí — phù hợp ngân sách hạn chế.</li>
+</ul>
+
+<h3>KPI năm đầu (mục tiêu định hướng, cần chốt lại theo dữ liệu thực)</h3>
+<table>
+<tr><th>Chỉ số</th><th>Mục tiêu năm 1</th><th>Ghi chú</th></tr>
+<tr><td>Đơn hàng / tháng</td><td>Q1: 30–50 → Q4: 150–250 đơn/tháng</td><td>Tăng dần theo SEO + repeat customer</td></tr>
+<tr><td>Giá trị đơn trung bình (AOV)</td><td>700.000 – 1.200.000đ</td><td>Combo gọng + tròng nâng AOV</td></tr>
+<tr><td>Doanh thu năm 1</td><td>≈ 900tr – 1,5 tỷ đồng</td><td>Kịch bản thận trọng; tùy biên lợi nhuận tròng</td></tr>
+<tr><td>Tỷ lệ chuyển đổi (CR)</td><td>0,8% → 1,5%</td><td>TMĐT VN thường 1–2%; mobile thấp hơn desktop</td></tr>
+<tr><td>Chi phí thu hút khách (CAC)</td><td>&lt; 120.000đ/khách</td><td>Giữ CAC &lt; 20% AOV để có lãi</td></tr>
+<tr><td>Tỷ trọng traffic organic (SEO)</td><td>≥ 40% vào cuối năm 1</td><td>Mục tiêu giảm lệ thuộc ads</td></tr>
+<tr><td>Tỷ lệ khách quay lại</td><td>≥ 15%</td><td>Tròng kính có nhu cầu thay định kỳ</td></tr>
+<tr><td>Tỷ lệ hủy/hoàn (COD)</td><td>&lt; 8%</td><td>Rủi ro đặc thù COD tại VN</td></tr>
+</table>
+<p class="note">KPI mang tính định hướng để đo lường, không phải cam kết cứng. Rà soát lại sau 2 tháng vận hành thực tế.</p>
+</div>
+
+<!-- ============ 2. PERSONAS ============ -->
+<h2 id="personas">2. Khách hàng mục tiêu &amp; personas</h2>
+<p class="lead">3 nhóm khách chính. Mỗi persona định hình tính năng ưu tiên.</p>
+<div class="grid">
+  <div class="mini persona">
+    <b>Persona A — Minh, 26 tuổi</b><br>
+    <span class="note">Người cận thị mua kính online</span>
+    <ul>
+      <li><b>Mục tiêu:</b> mua gọng + tròng theo độ cận, giá hợp lý, không phải ra tiệm.</li>
+      <li><b>Băn khoăn:</b> chọn độ tròng thế nào, có vừa mặt không, tròng chống ánh sáng xanh?</li>
+      <li><b>Cần:</b> nhập/chọn thông số độ cận, mô tả loại tròng rõ, chính sách đổi trả, tư vấn qua blog.</li>
+      <li><b>Kênh:</b> Google search ("kính cận giá rẻ"), điện thoại.</li>
+    </ul>
+  </div>
+  <div class="mini persona">
+    <b>Persona B — Trang, 22 tuổi</b><br>
+    <span class="note">Mua kính thời trang / phi độ</span>
+    <ul>
+      <li><b>Mục tiêu:</b> kính hợp gu, hợp khuôn mặt, theo trend, có nhiều màu.</li>
+      <li><b>Băn khoăn:</b> gọng này hợp mặt tròn không? Màu thật có giống ảnh?</li>
+      <li><b>Cần:</b> lọc theo hình dáng khuôn mặt, ảnh biến thể màu rõ, review có ảnh, wishlist.</li>
+      <li><b>Kênh:</b> mạng xã hội, Google, mobile.</li>
+    </ul>
+  </div>
+  <div class="mini persona">
+    <b>Persona C — Hùng, 34 tuổi</b><br>
+    <span class="note">Mua tặng người thân</span>
+    <ul>
+      <li><b>Mục tiêu:</b> mua nhanh làm quà, cần thương hiệu uy tín, đóng gói đẹp.</li>
+      <li><b>Băn khoăn:</b> hàng chính hãng không? Giao đúng hẹn? Có xuất hóa đơn?</li>
+      <li><b>Cần:</b> checkout nhanh (guest), trang thương hiệu, COD/chuyển khoản, theo dõi đơn.</li>
+      <li><b>Kênh:</b> Google thương hiệu ("Rayban chính hãng"), desktop + mobile.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ============ 3. JOURNEY ============ -->
+<h2 id="journey">3. Hành trình khách hàng</h2>
+<div class="journey">
+  <div class="step"><b>1 · Khám phá</b>Google/organic (SEO), mạng xã hội, blog tư vấn → landing vào trang danh mục hoặc bài viết.</div>
+  <div class="step"><b>2 · Cân nhắc</b>Duyệt danh mục, lọc (giá/thương hiệu/hình khuôn mặt), xem chi tiết, chọn màu/size, đọc review, thêm wishlist.</div>
+  <div class="step"><b>3 · Ra quyết định</b>Thêm giỏ, áp mã giảm giá, so sánh combo gọng+tròng, xem phí ship &amp; chính sách đổi trả.</div>
+  <div class="step"><b>4 · Mua (Checkout)</b>Guest hoặc đăng nhập → nhập/chọn địa chỉ → chọn thanh toán (COD/VNPAY/MOMO/CK) → đặt hàng.</div>
+  <div class="step"><b>5 · Sau bán</b>Nhận email/thông báo xác nhận, theo dõi trạng thái đơn, nhận hàng, viết đánh giá.</div>
+  <div class="step"><b>6 · Giữ chân</b>Thông báo khuyến mãi, gợi ý thay tròng định kỳ, mã cho khách cũ → quay lại mua.</div>
+</div>
+<p class="note">Điểm rơi (drop-off) cần theo dõi kỹ: bước lọc/chi tiết (thiếu thông tin tròng), bước checkout (bắt buộc đăng nhập, phí ẩn), và sau bán (không cập nhật trạng thái đơn).</p>
+
+<!-- ============ 4. MOSCOW ============ -->
+<h2 id="moscow">4. Danh sách tính năng theo MoSCoW</h2>
+
+<h3 id="must"><span class="badge b-must">Must</span> Must-have — Phạm vi MVP</h3>
+<table>
+<tr><th style="width:22%">Nhóm</th><th>Tính năng bắt buộc</th></tr>
+<tr><td><b>Duyệt &amp; tìm sản phẩm</b></td><td>Trang chủ; trang danh mục (gọng/tròng, kính cận, kính râm...); tìm kiếm theo tên/từ khóa; phân trang; sắp xếp (giá, mới nhất, bán chạy).</td></tr>
+<tr><td><b>Bộ lọc</b></td><td>Lọc theo danh mục, thương hiệu, khoảng giá, màu, giới tính, kính có/không độ. (Lọc theo hình khuôn mặt xem mục Đặc thù.)</td></tr>
+<tr><td><b>Trang chi tiết + biến thể</b></td><td>Gallery ảnh (đổi theo màu), mô tả, thông số, chọn biến thể màu/size (SKU), hiển thị tồn kho/giá theo biến thể, sản phẩm liên quan, breadcrumb.</td></tr>
+<tr><td><b>Giỏ hàng</b></td><td>Thêm/sửa số lượng/xóa; cập nhật giá &amp; tồn kho; giỏ cho cả guest &amp; user (gộp khi đăng nhập); tính tạm tính.</td></tr>
+<tr><td><b>Checkout</b></td><td>Guest checkout + checkout khi đăng nhập; nhập/chọn địa chỉ; hiển thị phí ship, giảm giá, tổng cuối rõ ràng; xác nhận đơn.</td></tr>
+<tr><td><b>Thanh toán</b></td><td><b>COD</b> (ưu tiên số 1 tại VN), <b>Chuyển khoản</b> (hiển thị QR/thông tin), <b>VNPAY</b>. (MOMO xem Should.)</td></tr>
+<tr><td><b>Quản lý đơn (khách)</b></td><td>Xem lịch sử đơn, chi tiết đơn, trạng thái đơn (PENDING→...→COMPLETED/CANCELLED), hủy đơn khi còn PENDING.</td></tr>
+<tr><td><b>Tài khoản &amp; sổ địa chỉ</b></td><td>Đăng ký/đăng nhập (email + mật khẩu, BCrypt), quên mật khẩu, hồ sơ cá nhân, sổ nhiều địa chỉ + địa chỉ mặc định.</td></tr>
+<tr><td><b>Khuyến mãi / mã giảm giá</b></td><td>Nhập mã tại giỏ/checkout; giảm theo % hoặc số tiền; kiểm tra hiệu lực (thời gian, giá trị tối thiểu, số lần dùng).</td></tr>
+<tr><td><b>Đánh giá</b></td><td>Khách hiển thị review đã publish (sao + nội dung); form gửi đánh giá (kiểm duyệt PENDING→PUBLISHED).</td></tr>
+<tr><td><b>Blog / SEO</b></td><td>Trang blog danh sách + chi tiết bài viết, slug thân thiện, dùng cho content marketing &amp; SEO.</td></tr>
+<tr><td><b>Thông báo</b></td><td>Email giao dịch (xác nhận đơn, đổi trạng thái, đặt lại mật khẩu). Thông báo in-app cơ bản (bảng notifications).</td></tr>
+<tr><td><b>Trang quản trị (Admin CMS)</b></td><td>Đăng nhập admin (role ADMIN); CRUD sản phẩm + biến thể + ảnh + tồn kho; quản lý đơn (đổi trạng thái); quản lý danh mục/thương hiệu; quản lý khuyến mãi; quản lý bài blog; duyệt đánh giá.</td></tr>
+<tr><td><b>SEO kỹ thuật nền</b></td><td>Slug, meta title/description theo trang, sitemap.xml, robots.txt, structured data cơ bản, 301 redirect khi đổi slug (url_redirects).</td></tr>
+<tr><td><b>Trang nội dung/pháp lý</b></td><td>Giới thiệu, chính sách đổi trả/bảo hành, chính sách giao hàng, liên hệ — cần để tạo tin cậy &amp; hỗ trợ chuyển đổi.</td></tr>
+</table>
+
+<h3 id="should"><span class="badge b-should">Should</span> Should-have — Ngay sau MVP</h3>
+<table>
+<tr><th style="width:22%">Nhóm</th><th>Tính năng</th></tr>
+<tr><td><b>Thanh toán</b></td><td><b>MOMO</b> (ví phổ biến); tự động đối soát trạng thái thanh toán online.</td></tr>
+<tr><td><b>Wishlist</b></td><td>Danh sách yêu thích cho user đăng nhập; chuyển nhanh từ wishlist → giỏ.</td></tr>
+<tr><td><b>Đặc thù tròng kính</b></td><td>Nhập/lưu thông số độ cận (SPH/CYL/AXIS, PD) khi mua tròng theo độ; chọn loại tròng (chống ánh sáng xanh, đổi màu, chiết suất).</td></tr>
+<tr><td><b>Lọc theo khuôn mặt</b></td><td>Bộ lọc "hợp khuôn mặt" (tròn/vuông/oval/trái xoan) — gắn thuộc tính vào sản phẩm.</td></tr>
+<tr><td><b>Đánh giá nâng cao</b></td><td>Review có ảnh; chỉ khách đã mua mới đánh giá (verified); lọc/sắp xếp review.</td></tr>
+<tr><td><b>Khuyến mãi nâng cao</b></td><td>Freeship theo ngưỡng giá trị; combo gọng+tròng; hiển thị banner khuyến mãi.</td></tr>
+<tr><td><b>Admin nâng cao</b></td><td>Dashboard số liệu cơ bản (doanh thu, đơn, tồn kho thấp); cảnh báo hết hàng; xuất đơn CSV.</td></tr>
+<tr><td><b>SEO nâng cao</b></td><td>Breadcrumb structured data, Product/Review/Article schema đầy đủ, Open Graph, canonical, tối ưu ảnh (WebP, lazy-load).</td></tr>
+<tr><td><b>Thông báo</b></td><td>Zalo/SMS trạng thái đơn (kênh phổ biến VN); email marketing cơ bản.</td></tr>
+<tr><td><b>Tài khoản</b></td><td>Đăng nhập mạng xã hội (Google) để giảm ma sát đăng ký.</td></tr>
+</table>
+
+<h3 id="could"><span class="badge b-could">Could</span> Could-have — Khi có nguồn lực</h3>
+<table>
+<tr><th style="width:22%">Nhóm</th><th>Tính năng</th></tr>
+<tr><td>Gợi ý sản phẩm</td><td>"Khách xem sản phẩm này cũng mua"; gợi ý theo lịch sử duyệt.</td></tr>
+<tr><td>So sánh sản phẩm</td><td>So sánh 2–3 gọng cạnh nhau.</td></tr>
+<tr><td>Chương trình khách hàng thân thiết</td><td>Tích điểm / hạng thành viên.</td></tr>
+<tr><td>Tư vấn trực tuyến</td><td>Live chat / chatbot cơ bản.</td></tr>
+<tr><td>Đa ngôn ngữ</td><td>Thêm tiếng Anh (nếu có khách quốc tế).</td></tr>
+<tr><td>Quiz chọn kính</td><td>Trắc nghiệm ngắn gợi ý gọng theo khuôn mặt/nhu cầu.</td></tr>
+</table>
+
+<h3 id="wont"><span class="badge b-wont">Won't</span> Won't-have — Không làm ở giai đoạn này</h3>
+<table>
+<tr><th style="width:26%">Không làm</th><th>Lý do</th></tr>
+<tr><td><b>Thử kính ảo (Virtual Try-On / AR)</b></td><td>Chi phí phát triển &amp; tích hợp AR/3D rất cao, cần model gọng 3D cho từng SKU, hiệu năng nặng trên mobile — vượt ngân sách &amp; đội dev nhỏ. Không phải yếu tố quyết định mua ở giai đoạn đầu; có thể thay thế bằng ảnh biến thể chất lượng cao + hướng dẫn chọn theo khuôn mặt. <b>Đánh giá: đưa vào Won't-have</b>, cân nhắc lại khi có doanh thu ổn định.</td></tr>
+<tr><td>App di động native (iOS/Android)</td><td>Web responsive mobile-first đã đủ; làm app tốn kém, chưa cần khi 500 user.</td></tr>
+<tr><td>Đo mắt / kê đơn online</td><td>Vấn đề pháp lý &amp; y tế; yêu cầu khách cung cấp đơn có sẵn thay vì tự đo.</td></tr>
+<tr><td>Đa cửa hàng / marketplace nhiều seller</td><td>Over-engineering; mô hình hiện tại là một nhà bán duy nhất.</td></tr>
+<tr><td>Kho đa chi nhánh / logistics phức tạp</td><td>Một điểm tồn kho là đủ cho quy mô hiện tại (YAGNI).</td></tr>
+<tr><td>Lưu thông tin thẻ / ví nội bộ</td><td>Rủi ro bảo mật &amp; tuân thủ; dùng cổng thanh toán bên thứ ba (VNPAY/MOMO).</td></tr>
+<tr><td>Microservices / hạ tầng phức tạp</td><td>Monolith đủ dùng; tránh chi phí vận hành không cần thiết.</td></tr>
+</table>
+
+<!-- Eyewear specifics -->
+<h3 id="eyewear">Đặc thù mắt kính — tóm tắt quyết định</h3>
+<div class="grid">
+  <div class="mini"><b>Chọn theo khuôn mặt</b><br><span class="badge b-should">Should</span><br><span class="note">Bộ lọc thuộc tính + gợi ý; không cần AI, chỉ cần gắn tag hình khuôn mặt vào sản phẩm.</span></div>
+  <div class="mini"><b>Thông số tròng / độ cận</b><br><span class="badge b-should">Should</span><br><span class="note">Form nhập SPH/CYL/AXIS/PD khi mua tròng theo độ; lưu vào order_item. MVP có thể để "liên hệ tư vấn độ".</span></div>
+  <div class="mini"><b>Thử kính ảo (AR)</b><br><span class="badge b-wont">Won't</span><br><span class="note">Quá tốn kém so với giá trị mang lại ở giai đoạn này. Thay bằng ảnh màu chất lượng cao + hướng dẫn.</span></div>
+</div>
+
+<!-- ============ 5. NFR ============ -->
+<h2 id="nfr">5. Yêu cầu phi chức năng (NFR)</h2>
+<table>
+<tr><th style="width:20%">Nhóm</th><th>Yêu cầu</th></tr>
+<tr><td><b>Hiệu năng</b></td><td>Trang chính (chủ, danh mục, chi tiết SP) tải &amp; hiển thị nội dung chính &lt; 2,5s trên 4G/mobile tầm trung. API phản hồi &lt; 300ms cho thao tác thường. Phân trang thay vì tải toàn bộ. Cache trang tĩnh/danh mục.</td></tr>
+<tr><td><b>Core Web Vitals</b></td><td>LCP &lt; 2,5s · INP &lt; 200ms · CLS &lt; 0,1. Tối ưu ảnh (WebP, kích thước đúng, lazy-load), tránh layout shift, ưu tiên render nội dung SEO.</td></tr>
+<tr><td><b>SEO</b></td><td>Mỗi trang có URL slug thân thiện, meta title/description riêng, thẻ H1 duy nhất, canonical; sitemap.xml + robots.txt; structured data (Product, Article, Breadcrumb, Organization); 301 redirect khi đổi slug (url_redirects); nội dung render được cho bot (SSR/prerender cho trang SEO trọng yếu — cân nhắc trong ràng buộc React/Vite).</td></tr>
+<tr><td><b>Bảo mật</b></td><td>Mật khẩu hash bằng <b>BCrypt</b>; <b>không lưu số thẻ</b> (dùng cổng thanh toán); HTTPS toàn site; chống SQL injection (Hibernate parameterized), XSS, CSRF; phân quyền USER/ADMIN chặt; rate-limit đăng nhập; validate đầu vào; ẩn thông tin nhạy cảm trong log.</td></tr>
+<tr><td><b>Khả năng bảo trì</b></td><td>Monolith module rõ ràng, code convention nhất quán, tài liệu DB/API, tránh over-engineering (KISS/YAGNI); dễ onboard dev mới; migration DB có version.</td></tr>
+<tr><td><b>Khả dụng (Availability)</b></td><td>Uptime mục tiêu ~99% (chấp nhận cho quy mô nhỏ); backup DB định kỳ hằng ngày; có kế hoạch khôi phục; xử lý lỗi thanh toán/đơn hàng an toàn (không mất đơn).</td></tr>
+<tr><td><b>Đa nền tảng</b></td><td><b>Mobile-first</b> (phần lớn traffic VN từ điện thoại); responsive cho tablet/desktop; hỗ trợ trình duyệt phổ biến (Chrome, Safari, Edge, Zalo/Facebook in-app browser).</td></tr>
+<tr><td><b>Khả năng mở rộng</b></td><td>Đủ chịu tải cho ~500 user &amp; tăng trưởng vừa; không thiết kế cho hàng triệu user (tránh phức tạp thừa). Index DB hợp lý cho truy vấn danh mục/tìm kiếm.</td></tr>
+<tr><td><b>Khả năng đo lường</b></td><td>Tích hợp Google Analytics 4 + Google Search Console; theo dõi funnel (thêm giỏ → checkout → mua); log đơn/thanh toán để đối soát.</td></tr>
+</table>
+
+<!-- ============ 6. SEO ============ -->
+<h2 id="seo">6. Ưu tiên SEO cụ thể</h2>
+<h3>Loại trang cần tối ưu SEO (theo thứ tự ưu tiên)</h3>
+<ol>
+  <li><b>Trang danh mục</b> (kính cận, kính râm, gọng nam/nữ...) — bắt từ khóa nhóm, traffic lớn.</li>
+  <li><b>Trang chi tiết sản phẩm</b> — từ khóa dài, tên model + thương hiệu.</li>
+  <li><b>Trang thương hiệu</b> — bắt từ khóa "&lt;thương hiệu&gt; chính hãng".</li>
+  <li><b>Bài blog</b> — nội dung tư vấn ("chọn kính hợp khuôn mặt", "cách chọn tròng") kéo traffic đầu phễu.</li>
+  <li><b>Trang chủ</b> — thương hiệu doanh nghiệp.</li>
+</ol>
+
+<h3>Cấu trúc URL mong muốn</h3>
+<table>
+<tr><th>Loại trang</th><th>Cấu trúc URL</th><th>Ví dụ</th></tr>
+<tr><td>Danh mục</td><td><code>/{category-slug}</code></td><td><code>/kinh-can</code>, <code>/kinh-ram</code></td></tr>
+<tr><td>Thương hiệu</td><td><code>/thuong-hieu/{brand-slug}</code></td><td><code>/thuong-hieu/rayban</code></td></tr>
+<tr><td>Chi tiết sản phẩm</td><td><code>/product/{slug}</code></td><td><code>/product/rayban-aviator-classic</code></td></tr>
+<tr><td>Bài blog</td><td><code>/blog/{slug}</code></td><td><code>/blog/cach-chon-kinh-hop-khuon-mat</code></td></tr>
+<tr><td>Danh sách blog</td><td><code>/blog</code></td><td><code>/blog</code></td></tr>
+<tr><td>Tìm kiếm/lọc</td><td><code>/{category}?brand=&amp;price=</code></td><td>tham số lọc dạng query, không index trùng lặp</td></tr>
+</table>
+<div class="callout"><b>Nguyên tắc SEO URL:</b> slug tiếng Việt không dấu, ngắn gọn, có từ khóa; URL bất biến khi có thể; đổi slug → tạo <code>301 redirect</code> qua bảng <code>url_redirects</code> để không mất thứ hạng; trang lọc/sắp xếp dùng canonical để tránh trùng lặp nội dung.</div>
+
+<!-- ============ 7. CONSTRAINTS ============ -->
+<h2 id="constraints">7. Ràng buộc &amp; nguyên tắc</h2>
+<div class="grid">
+  <div class="mini"><b>Ngân sách</b><br><span class="note">Hạn chế — ưu tiên công cụ/dịch vụ chi phí thấp, tận dụng SEO thay vì ads. Không đầu tư hạ tầng đắt tiền.</span></div>
+  <div class="mini"><b>Thời gian</b><br><span class="note">Ra mắt MVP nhanh (mục tiêu ~2–3 tháng). Chỉ làm Must-have trước khi go-live.</span></div>
+  <div class="mini"><b>Đội ngũ</b><br><span class="note">Dev ít — chọn stack quen thuộc, monolith, tránh microservices/DevOps phức tạp.</span></div>
+  <div class="mini"><b>Kỹ thuật</b><br><span class="note">Spring Boot + Hibernate + MySQL + React/Vite. 18 bảng đã chốt. Không đổi kiến trúc.</span></div>
+</div>
+<h3>Nguyên tắc (không over-engineering)</h3>
+<ul>
+  <li><b>KISS:</b> chọn giải pháp đơn giản nhất chạy được; ưu tiên thư viện chuẩn hơn tự viết.</li>
+  <li><b>YAGNI:</b> không xây tính năng "để dành cho tương lai"; chỉ làm khi có nhu cầu thật.</li>
+  <li><b>Không làm ở giai đoạn này:</b> AR/thử kính ảo, app native, microservices, đa chi nhánh/marketplace, đo mắt online, lưu số thẻ, đa ngôn ngữ, tích điểm.</li>
+  <li>Dùng dịch vụ bên thứ ba cho việc khó/rủi ro: cổng thanh toán (VNPAY/MOMO), gửi email, lưu ảnh.</li>
+</ul>
+
+<!-- ============ 8. SUCCESS ============ -->
+<h2 id="success">8. Tiêu chí thành công của MVP</h2>
+<div class="ok-box">
+<p><b>Định nghĩa "đủ tốt để ra mắt":</b> một khách hàng lạ có thể tìm thấy sản phẩm qua Google, xem chi tiết, chọn màu/size, thêm giỏ, đặt hàng bằng COD/VNPAY/chuyển khoản và nhận email xác nhận — trong khi admin có thể quản lý sản phẩm, kho và đơn hàng — tất cả ổn định trên mobile.</p>
+</div>
+<h3>Checklist go-live</h3>
+<ul>
+  <li>✅ Toàn bộ tính năng <span class="badge b-must">Must</span> hoạt động end-to-end, không lỗi chặn (blocker).</li>
+  <li>✅ Luồng mua hoàn chỉnh: duyệt → chi tiết → giỏ → checkout → thanh toán → email xác nhận → theo dõi đơn.</li>
+  <li>✅ Thanh toán COD + Chuyển khoản + VNPAY chạy thật (test giao dịch thành công &amp; thất bại).</li>
+  <li>✅ Admin CRUD được sản phẩm/biến thể/kho, đổi trạng thái đơn, đăng blog.</li>
+  <li>✅ SEO nền: slug, meta, sitemap, robots, structured data cơ bản, 301 redirect hoạt động; đã submit Search Console.</li>
+  <li>✅ Hiệu năng: trang trọng yếu đạt LCP &lt; 2,5s trên mobile; điểm PageSpeed mobile ≥ 70.</li>
+  <li>✅ Bảo mật: HTTPS, BCrypt, phân quyền, không lưu số thẻ, validate đầu vào.</li>
+  <li>✅ Nội dung tối thiểu: ≥ 30–50 sản phẩm thật có ảnh &amp; mô tả, ≥ 3–5 bài blog, đủ trang chính sách.</li>
+  <li>✅ Đo lường: GA4 + Search Console gắn xong, theo dõi được funnel &amp; đơn hàng.</li>
+  <li>✅ Responsive tốt trên điện thoại (kể cả in-app browser Zalo/Facebook).</li>
+</ul>
+<p class="note">Tiêu chí "thành công thương mại" sau ra mắt: đạt ≥ 30 đơn thật trong tháng đầu &amp; CR ≥ 0,8% — mốc để xác nhận tiếp tục đầu tư sang Should-have.</p>
+
+<hr>
+<p class="note">Tài liệu này là đầu vào kinh doanh cho BA bóc tách user stories &amp; Dev ước lượng. Xem thêm: <code>database-documentation.html</code> (data dictionary 18 bảng) và <code>erd-review.html</code> (rà soát ERD).</p>
+
+</main>
+</div>
+</body>
+</html>

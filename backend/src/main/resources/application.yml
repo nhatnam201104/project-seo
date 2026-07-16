@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: projectsale-api
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/projectsale}
+    username: ${DB_USERNAME:projectsale}
+    password: ${DB_PASSWORD:projectsale}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate.jdbc.time_zone: UTC
+  flyway:
+    enabled: true
+server:
+  error:
+    include-message: never
+app:
+  jwt:
+    secret-base64: ${JWT_SECRET_BASE64:b3d69d34ca1b729edfd8ba26f091ba994a3c5dc00dfcb6732f5a7f968f5aace6}
+    issuer: projectsale-api
+    audience: projectsale-web
+    access-ttl: PT15M
+    refresh-ttl: P30D
+    clock-skew: PT60S

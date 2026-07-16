@@ -1,0 +1,10 @@
+AGENTS.md
+database/
+.claude/
+.remember/
+backend/target/
+frontend/node_modules/
+frontend/build/
+backups/
+.env
+*.log

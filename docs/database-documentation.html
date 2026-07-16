@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tài liệu Database — ProjectSale (Website bán mắt kính)</title>
+<style>
+  :root{
+    --bg:#0f1115;--card:#171a21;--card2:#1d212b;--border:#2a2f3a;
+    --txt:#e6e8ec;--muted:#9aa4b2;--accent:#5b9dff;--accent2:#7c5cff;
+    --pk:#ffd43b;--fk:#5b9dff;--uk:#7c5cff;--nn:#ff9f43;--ok:#51cf66;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;font-size:15px}
+  .layout{display:flex;max-width:1280px;margin:0 auto}
+  nav{position:sticky;top:0;align-self:flex-start;width:230px;height:100vh;overflow-y:auto;
+    padding:24px 14px;border-right:1px solid var(--border);font-size:13px}
+  nav a{display:block;color:var(--muted);text-decoration:none;padding:4px 8px;border-radius:6px}
+  nav a:hover{background:var(--card2);color:var(--txt)}
+  nav .grp{color:var(--accent2);font-weight:700;text-transform:uppercase;font-size:11px;
+    letter-spacing:.5px;margin:16px 0 4px;padding-left:8px}
+  main{flex:1;min-width:0;padding:36px 30px 120px}
+  @media(max-width:860px){nav{display:none}main{padding:24px 18px 90px}}
+  h1{font-size:28px;margin:0 0 6px}
+  h2{font-size:22px;margin:44px 0 6px;padding-top:10px;border-top:1px solid var(--border)}
+  h3{font-size:17px;margin:22px 0 6px}
+  p{margin:7px 0}
+  .lead{color:var(--muted)}
+  .kicker{color:var(--accent2);font-weight:700;letter-spacing:1px;font-size:12px;text-transform:uppercase}
+  code{background:#0b0d11;padding:1px 6px;border-radius:5px;font-size:13px;
+    font-family:"SF Mono",Consolas,Menlo,monospace;color:#a3e3ff}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13.5px}
+  th,td{border:1px solid var(--border);padding:8px 11px;text-align:left;vertical-align:top}
+  th{background:var(--card2);color:#fff;font-weight:600;white-space:nowrap}
+  tr:nth-child(even) td{background:rgba(255,255,255,.014)}
+  .tbl-card{background:var(--card);border:1px solid var(--border);border-radius:14px;
+    padding:20px 22px;margin:14px 0}
+  .role{color:var(--muted);font-style:italic;margin-top:2px}
+  .badge{display:inline-block;font-size:10px;font-weight:800;padding:1px 6px;border-radius:4px;
+    margin-right:3px;letter-spacing:.3px}
+  .b-pk{background:rgba(255,212,59,.16);color:var(--pk);border:1px solid var(--pk)}
+  .b-fk{background:rgba(91,157,255,.16);color:var(--fk);border:1px solid var(--fk)}
+  .b-uk{background:rgba(124,92,255,.16);color:var(--uk);border:1px solid var(--uk)}
+  .b-nn{background:rgba(255,159,67,.14);color:var(--nn);border:1px solid var(--nn)}
+  .colname{font-family:"SF Mono",Consolas,monospace;color:#a3e3ff;font-size:13px}
+  .type{font-family:"SF Mono",Consolas,monospace;color:#9aa4b2;font-size:12.5px}
+  .yes{color:var(--ok)}.no{color:var(--muted)}
+  .meta{display:flex;gap:20px;flex-wrap:wrap;color:var(--muted);font-size:13px;margin:6px 0 0}
+  .legend{background:var(--card2);border:1px solid var(--border);border-radius:12px;
+    padding:12px 16px;margin:16px 0;font-size:13px;display:flex;gap:18px;flex-wrap:wrap}
+  .overview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+  .mini{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+  .mini b{color:#fff}
+  .rel td{font-size:13px}
+  hr{border:none;border-top:1px solid var(--border);margin:36px 0}
+  .note{color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<div class="layout">
+<nav>
+  <div class="grp">Tổng quan</div>
+  <a href="#intro">Giới thiệu</a>
+  <a href="#legend">Quy ước &amp; ký hiệu</a>
+  <a href="#enums">Danh sách Enum</a>
+  <a href="#map">Bản đồ 18 bảng</a>
+  <div class="grp">Người dùng</div>
+  <a href="#users">users</a>
+  <a href="#addresses">addresses</a>
+  <div class="grp">Catalog</div>
+  <a href="#categories">categories</a>
+  <a href="#brands">brands</a>
+  <a href="#products">products</a>
+  <a href="#product_variants">product_variants</a>
+  <a href="#product_images">product_images</a>
+  <div class="grp">Giỏ hàng</div>
+  <a href="#carts">carts</a>
+  <a href="#cart_items">cart_items</a>
+  <div class="grp">Đơn hàng</div>
+  <a href="#orders">orders</a>
+  <a href="#order_items">order_items</a>
+  <a href="#payments">payments</a>
+  <div class="grp">Marketing</div>
+  <a href="#promotions">promotions</a>
+  <a href="#reviews">reviews</a>
+  <a href="#wishlists">wishlists</a>
+  <a href="#blog_posts">blog_posts</a>
+  <a href="#notifications">notifications</a>
+  <a href="#url_redirects">url_redirects</a>
+  <div class="grp">Quan hệ</div>
+  <a href="#relationships">Ma trận FK</a>
+</nav>
+
+<main>
+<span class="kicker">Data Dictionary · ProjectSale</span>
+<h1 id="intro">Tài liệu Database — Website bán mắt kính</h1>
+<p class="lead">MySQL 8 · Spring Boot + Hibernate · React/Vite · quy mô ~500 user. Tài liệu mô tả chi tiết 18 bảng, cột, kiểu dữ liệu, ràng buộc, index và quan hệ.</p>
+<div class="meta">
+  <span><b>Engine:</b> InnoDB</span>
+  <span><b>Charset:</b> utf8mb4</span>
+  <span><b>Số bảng:</b> 18 (+8 enum)</span>
+  <span><b>PK:</b> BIGINT AUTO_INCREMENT</span>
+  <span><b>Cập nhật:</b> 09/07/2026</span>
+</div>
+
+<h2 id="legend">Quy ước &amp; ký hiệu</h2>
+<div class="legend">
+  <span><span class="badge b-pk">PK</span> Khoá chính</span>
+  <span><span class="badge b-fk">FK</span> Khoá ngoại</span>
+  <span><span class="badge b-uk">UK</span> Unique</span>
+  <span><span class="badge b-nn">NN</span> NOT NULL</span>
+  <span><span class="yes">●</span> Cho phép NULL: Không</span>
+  <span><span class="no">○</span> Cho phép NULL: Có</span>
+</div>
+<p class="note">Quy ước đặt tên: bảng &amp; cột dùng <code>snake_case</code>, PK luôn là <code>id</code>, FK dạng <code>&lt;bảng&gt;_id</code>, boolean tiền tố <code>is_</code>, thời gian hậu tố <code>_at</code>. Mọi thời điểm dùng <code>DATETIME</code>. Tiền tệ dùng <code>DECIMAL(12,2)</code> (không dùng float cho tiền).</p>
+
+<h2 id="enums">Danh sách Enum</h2>
+<table>
+<tr><th>Enum</th><th>Giá trị</th><th>Dùng ở</th></tr>
+<tr><td class="colname">user_role</td><td><code>USER</code>, <code>ADMIN</code></td><td>users.role</td></tr>
+<tr><td class="colname">entity_status</td><td><code>ACTIVE</code>, <code>INACTIVE</code></td><td>users, categories, brands, products, promotions</td></tr>
+<tr><td class="colname">order_status</td><td><code>PENDING</code>, <code>CONFIRMED</code>, <code>SHIPPING</code>, <code>COMPLETED</code>, <code>CANCELLED</code>, <code>REFUNDED</code></td><td>orders.status</td></tr>
+<tr><td class="colname">payment_status</td><td><code>PENDING</code>, <code>PAID</code>, <code>FAILED</code>, <code>REFUNDED</code></td><td>payments.status</td></tr>
+<tr><td class="colname">payment_method</td><td><code>COD</code>, <code>BANK_TRANSFER</code>, <code>VNPAY</code>, <code>MOMO</code></td><td>payments.method</td></tr>
+<tr><td class="colname">promo_type</td><td><code>PERCENT</code>, <code>AMOUNT</code></td><td>promotions.type</td></tr>
+<tr><td class="colname">review_status</td><td><code>PENDING</code>, <code>PUBLISHED</code>, <code>HIDDEN</code></td><td>reviews.status</td></tr>
+<tr><td class="colname">post_status</td><td><code>DRAFT</code>, <code>PUBLISHED</code></td><td>blog_posts.status</td></tr>
+</table>
+
+<h2 id="map">Bản đồ 18 bảng</h2>
+<div class="overview-grid">
+  <div class="mini"><b>users</b><br><span class="note">Tài khoản khách/admin</span></div>
+  <div class="mini"><b>addresses</b><br><span class="note">Sổ địa chỉ giao hàng</span></div>
+  <div class="mini"><b>categories</b><br><span class="note">Danh mục phân cấp</span></div>
+  <div class="mini"><b>brands</b><br><span class="note">Thương hiệu kính</span></div>
+  <div class="mini"><b>products</b><br><span class="note">Sản phẩm (gọng/tròng)</span></div>
+  <div class="mini"><b>product_variants</b><br><span class="note">SKU: màu/size + tồn kho</span></div>
+  <div class="mini"><b>product_images</b><br><span class="note">Gallery ảnh SP</span></div>
+  <div class="mini"><b>carts</b><br><span class="note">Giỏ hàng (1/user)</span></div>
+  <div class="mini"><b>cart_items</b><br><span class="note">Dòng trong giỏ</span></div>
+  <div class="mini"><b>orders</b><br><span class="note">Đơn hàng (header)</span></div>
+  <div class="mini"><b>order_items</b><br><span class="note">Dòng đơn (snapshot)</span></div>
+  <div class="mini"><b>payments</b><br><span class="note">Thanh toán</span></div>
+  <div class="mini"><b>promotions</b><br><span class="note">Mã giảm giá</span></div>
+  <div class="mini"><b>reviews</b><br><span class="note">Đánh giá + sao</span></div>
+  <div class="mini"><b>wishlists</b><br><span class="note">SP yêu thích</span></div>
+  <div class="mini"><b>blog_posts</b><br><span class="note">Bài viết SEO</span></div>
+  <div class="mini"><b>notifications</b><br><span class="note">Thông báo user</span></div>
+  <div class="mini"><b>url_redirects</b><br><span class="note">301 khi đổi slug</span></div>
+</div>
+
+<!-- ============ USERS ============ -->
+<h2 id="users">1. users</h2>
+<div class="tbl-card">
+<p class="role">Lưu tài khoản người dùng (khách hàng và quản trị viên). Là gốc của hầu hết quan hệ: địa chỉ, giỏ hàng, đơn hàng, đánh giá.</p>
+<table>
+<tr><th>Cột</th><th>Kiểu</th><th>NULL</th><th>Khoá</th><th>Mặc định</th><th>Mô tả</th></tr>
+<tr><td class="colname">id</td><td class="type">BIGINT</td><td class="yes">●</td><td><span class="badge b-pk">PK</span></td><td>auto</td><td>Định danh nội bộ.</td></tr>
+<tr><td class="colname">email</td><td class="type">VARCHAR(190)</td><td class="yes">●</td><td><span class="badge b-uk">UK</span></td><td>—</td><td>Email đăng nhập, duy nhất.</td></tr>
+<tr><td class="colname">password_hash</td><td class="type">VARCHAR(100)</td><td class="yes">●</td><td></td><td>—</td><td>Mật khẩu đã băm <b>BCrypt</b>. Không lưu plaintext.</td></tr>
+<tr><td class="colname">full_name</td><td class="type">VARCHAR(120)</td><td class="no">○</td><td></td><td>—</td><td>Họ tên hiển thị.</td></tr>
+<tr><td class="colname">phone</td><td class="type">VARCHAR(20)</td><td class="no">○</td><td></td><td>—</td><td>Số điện thoại.</td></tr>
+<tr><td class="colname">role</td><td class="type">user_role</td><td class="yes">●</td><td></td><td>USER</td><td>Phân quyền USER/ADMIN.</td></tr>
+<tr><td class="colname">status</td><td class="type">entity_status</td><td class="yes">●</td><td></td><td>ACTIVE</td><td>Trạng thái tài khoản.</td></tr>
+<tr><td class="colname">created_at</td><td class="type">DATETIME</td><td class="yes">●</td><td></td><td>now()</td><td>Thời điểm tạo.</td></tr>
+<tr><td class="colname">updated_at</td><td class="type">DATETIME</td><td class="no">○</td><td></td><td>—</td><td>Lần cập nhật cuối.</td></tr>
+<tr><td class="colname">deleted_at</td><td class="type">DATETIME</td><td class="no">○</td><td></td><td>NULL</td><td>Soft delete / vô hiệu hoá.</td></tr>
+</table>
+<p class="note"><b>Index:</b> UNIQUE(email). <b>Được tham chiếu bởi:</b> addresses, carts, orders, reviews, wishlists, blog_posts, notifications.</p>
+</div>
+
+<!-- ============ ADDRESSES ============ -->
+<h2 id="addresses">2. addresses</h2>
+<div class="tbl-card">
+<p class="role">Sổ địa chỉ giao hàng của user (1 user – N địa chỉ). Tách khỏi users để hỗ trợ nhiều người nhận.</p>
+<table>
+<tr><th>Cột</th><th>Kiểu</th><th>NULL</th><th>Khoá</th><th>Mặc định</th><th>Mô tả</th></tr>
+<tr><td class="colname">id</td><td class="type">BIGINT</td><td class="yes">●</td><td><span class="badge b-pk">PK</span></td><td>auto</td><td>Định danh.</td></tr>
+<tr><td class="colname">user_id</td><td class="type">BIGINT</td><td class="yes">●</td><td><span class="badge b-fk">FK</span></td><td>—</td><td>→ users.id (CASCADE).</td></tr>
+<tr><td class="colname">receiver_name</td><td class="type">VARCHAR(120)</td><td class="yes">●</td><td></td><td>—</td><td>Tên người nhận.</td></tr>
+<tr><td class="colname">receiver_phone</td><td class="type">VARCHAR(20)</td><td class="yes">●</td><td></td><td>—</td><td>SĐT người nhận.</td></tr>
+<tr><td class="colname">line</td><td class="type">VARCHAR(255)</td><td class="yes">●</td><td></td><td>—</td><td>Số nhà, tên đường.</td></tr>
+<tr><td class="colname">ward</td><td class="type">VARCHAR(120)</td><td class="no">○</td><td></td><td>—</td><td>Phường/xã.</td></tr>
+<tr><td class="colname">district</td><td class="type">VARCHAR(120)</td><td class="no">○</td><td></td><td>—</td><td>Quận/huyện.</td></tr>
+<tr><td class="colname">city</td><td class="type">VARCHAR(120)</td><td class="yes">●</td><td></td><td>—</td><td>Tỉnh/thành.</td></tr>
+<tr><td class="colname">is_default</td><td class="type">BOOLEAN</td><td class="yes">●</td><td></td><td>false</td><td>Địa chỉ mặc định.</td></tr>
+</table>
+<p class="note"><b>Index:</b> (user_id).</p>
+</div>
+
+<!-- ============ CATEGORIES ============ -->
+<h2 id="categories">3. categories</h2>
+<div class="tbl-card">
+<p class="role">Danh mục sản phẩm phân cấp (tự tham chiếu qua parent_id), ví dụ "Kính cận › Gọng". Có trường SEO cho URL <code>/category/kinh-can</code>.</p>
+<table>
+<tr><th>Cột</th><th>Kiểu</th><th>NULL</th><th>Khoá</th><th>Mặc định</th><th>Mô tả</th></tr>
+<tr><td class="colname">id</td><td class="type">BIGINT</td><td class="yes">●</td><td><span class="badge b-pk">PK</span></td><td>auto</td><td>Định danh.</td></tr>
+<tr><td class="colname">parent_id</td><td class="type">BIGINT</td><td class="no">○</td><td><span class="badge b-fk">FK</span></td><td>NULL</td><td>→ categories.id. NULL = danh mục gốc.</td></tr>
+<tr><td class="colname">name</td><td class="type">VARCHAR(120)</td><td class="yes">●</td><td></td><td>—</td><td>Tên danh mục.</td></tr>
+<tr><td class="colname">slug</td><td class="type">VARCHAR(150)</td><td class="yes">●</td><td><span class="badge b-uk">UK</span></td><td>—</td><td>URL slug, duy nhất.</td></tr>
+<tr><td class="colname">image_url</td><td class="type">VARCHAR(255)</td><td class="no">○</td><td></td><td>—</td><td>Ảnh đại diện.</td></tr>
+<tr><td class="colname">meta_title</td><td class="type">VARCHAR(160)</td><td class="no">○</td><td></td><td>—</td><td>SEO title.</td></tr>
+<tr><td class="colname">meta_description</td><td class="type">VARCHAR(255)</td><td class="no">○</td><td></td><td>—</td><td>SEO description.</td></tr>
+<tr><td class="colname">status</td><td class="type">entity_status</td><td class="yes">●</td><td></td><td>ACTIVE</td><td>Hiển thị / ẩn.</td></tr>
+<tr><td class="colname">created_at</td><td class="type">DATETIME</td><td class="yes">●</td><td></td><td>now()</td><td>Thời điểm tạo.</td></tr>
+<tr><td class="colname">deleted_at</td><td class="type">DATETIME</td><td class="no">○</td><td></td><td>NULL</td><td>Soft delete.</td></tr>
+</table>
+<p class="note"><b>Index:</b> UNIQUE(slug), (parent_id). <b>Quan hệ:</b> tự tham chiếu (RESTRICT); được products tham chiếu.</p>
+</div>
+
+<!-- ============ BRANDS ============ -->
+<h2 id="brands">4. brands</h2>
+<div class="tbl-card">
+<p class="role">Thương hiệu (Ray-Ban, Gucci…). Có SEO cho URL <code>/thuong-hieu/rayban</code>.</p>
+<table>
+<tr><th>Cột</th><th>Kiểu</th><th>NULL</th><th>Khoá</th><th>Mặc định</th><th>Mô tả</th></tr>
+<tr><td class="colname">id</td><td class="type">BIGINT</td><td class="yes">●</td><td><span class="badge b-pk">PK</span></td><td>auto</td><td>Định danh.</td></tr>
+<tr><td class="colname">name</td><td class="type">VARCHAR(120)</td><td class="yes">●</td><td></td><td>—</td><td>Tên thương hiệu.</td></tr>
+<tr><td class="colname">slug</td><td class="type">VARCHAR(150)</td><td class="yes">●</td><td><span class="badge b-uk">UK</span></td><td>—</td><td>URL slug, duy nhất.</td></tr>
+<tr><td class="colname">logo_url</td><td class="type">VARCHAR(255)</td><td class="no">○</td><td></td><td>—</td><td>Logo.</td></tr>
+<tr><td class="colname">info</td><td class="type">TEXT</td><td class="no">○</td><td></td><td>—</td><td>Giới thiệu thương hiệu.</td></tr>
+<tr><td class="colname">meta_title</td><td class="type">VARCHAR(160)</td><td class="no">○</td><td></td><td>—</td><td>SEO title.</td></tr>
+<tr><td class="colname">meta_description</td><td class="type">VARCHAR(255)</td><td class="no">○</td><td></td><td>—</td><td>SEO description.</td></tr>
+<tr><td class="colname">status</td><td class="type">entity_status</td><td class="yes">●</td><td></td><td>ACTIVE</td><td>Hiển thị / ẩn.</td></tr>
+<tr><td class="colname">deleted_at</td><td class="type">DATETIME</td><td class="no">○</td><td></td><td>NULL</td><td>Soft delete.</td></tr>
+</table>
+<p class="note"><b>Index:</b> UNIQUE(slug). <b>Được tham chiếu bởi:</b> products.</p>
+</div>
+
+<!-- ============ PRODUCTS ============ -->
+<h2 id="products">5. products</h2>
+<div class="tbl-card">
+<p class="role">Sản phẩm cấp "model" (gọng/tròng kính). Giữ thông tin chung + SEO + counter denormalize để render danh sách nhanh. Giá thực và tồn kho nằm ở product_variants.</p>
+<table>
+<tr><th>Cột</th><th>Kiểu</th><th>NULL</th><th>Khoá</th><th>Mặc định</th><th>Mô tả</th></tr>
+<tr><td class="colname">id</td><td class="type">BIGINT</td><td class="yes">●</td><td><span class="badge b-pk">PK</span></td><td>auto</td><td>Định danh.</td></tr>
+<tr><td class="colname">category_id</td><td class="type">BIGINT</td><td class="yes">●</td><td><span class="badge b-fk">FK</span></td><td>—</td><td>→ categories.id (RESTRICT).</td></tr>
+<tr><td class="colname">brand_id</td><td class="type">BIGINT</td><td class="yes">●</td><td><span class="badge b-fk">FK</span></td><td>—</td><td>→ brands.id (RESTRICT).</td></tr>
+<tr><td class="colname">name</td><td class="type">VARCHAR(200)</td><td class="yes">●</td><td></td><td>—</td><td>Tên sản phẩm.</td></tr>
+<tr><td class="colname">slug</td><td class="type">VARCHAR(220)</td><td class="yes">●</td><td><span class="badge b-uk">UK</span></td><td>—</td><td>URL <code>/product/gong-titan-x123</code>.</td></tr>
+<tr><td class="colname">description</td><td class="type">TEXT</td><td class="no">○</td><td></td><td>—</td><td>Mô tả chi tiết.</td></tr>
+<tr><td class="colname">min_price</td><td class="type">DECIMAL(12,2)</td><td class="no">○</td><td></td><td>—</td><td>Giá thấp nhất trong các variant (denormalize).</td></tr>
+<tr><td class="colname">thumbnail_url</td><td class="type">VARCHAR(255)</td><td class="no">○</td><td></td><td>—</td><td>Ảnh đại diện listing.</td></tr>
+<tr><td class="colname">rating_avg</td><td class="type">DECIMAL(2,1)</td><td class="no">○</td><td></td><td>0</td><td>Điểm trung bình (counter).</td></tr>
+<tr><td class="colname">review_count</td><td class="type">INT</td><td class="yes">●</td><td></td><td>0</td><td>Số lượt đánh giá (counter).</td></tr>
+<tr><td class="colname">warranty_months</td><td class="type">INT</td><td class="no">○</td><td></td><td>0</td><td>Số tháng bảo hành (thay bảng Warranty).</td></tr>
+<tr><td class="colname">meta_title</td><td class="type">VARCHAR(160)</td><td class="no">○</td><td></td><td>—</td><td>SEO title.</td></tr>
+<tr><td class="colname">meta_description</td><td class="type">VARCHAR(255)</td><td class="no">○</td><td></td><td>—</td><td>SEO description.</td></tr>
+<tr><td class="colname">og_image</td><td class="type">VARCHAR(255)</td><td class="no">○</td><td></td><td>—</td><td>Ảnh Open Graph khi share.</td></tr>
+<tr><td class="colname">status</td><td class="type">entity_status</td><td class="yes">●</td><td></td><td>ACTIVE</td><td>Đang bán / ngừng.</td></tr>
+<tr><td class="colname">created_at</td><td class="type">DATETIME</td><td class="yes">●</td><td></td><td>now()</td><td>Thời điểm tạo.</td></tr>
+<tr><td class="colname">updated_at</td><td class="type">DATETIME</td><td class="no">○</td><td></td><td>—</td><td>Cập nhật cuối.</td></tr>
+<tr><td class="colname">deleted_at</td><td class="type">DATETIME</td><td class="no">○</td><td></td><td>NULL</td><td>Soft delete.</td></tr>
+</table>
+<p class="note"><b>Index:</b> UNIQUE(slug), (category_id), (brand_id), (status, created_at), (status, min_price), FULLTEXT(name, description). <b>Được tham chiếu bởi:</b> product_variants, product_images, reviews, wishlists.</p>
+</div>
+
+<!-- ============ PRODUCT_VARIANTS ============ -->
+<h2 id="product_variants">6. product_variants</h2>
+<div class="tbl-card">
+<p class="role">Biến thể bán được (SKU): tổ hợp màu/size/chất liệu/loại tròng. <b>Nơi giữ giá thực và tồn kho</b>. Có <code>version</code> cho optimistic locking chống oversell.</p>
+<table>
+<tr><th>Cột</th><th>Kiểu</th><th>NULL</th><th>Khoá</th><th>Mặc định</th><th>Mô tả</th></tr>
+<tr><td class="colname">id</td><td class="type">BIGINT</td><td class="yes">●</td><td><span class="badge b-pk">PK</span></td><td>auto</td><td>Định danh.</td></tr>
+<tr><td class="colname">product_id</td><td class="type">BIGINT</td><td class="yes">●</td><td><span class="badge b-fk">FK</span></td><td>—</td><td>→ products.id (CASCADE).</td></tr>
+<tr><td class="colname">sku</td><td class="type">VARCHAR(64)</td><td class="yes">●</td><td><span class="badge b-uk">UK</span></td><td>—</td><td>Mã hàng, duy nhất.</td></tr>
+<tr><td class="colname">color</td><td class="type">VARCHAR(60)</td><td class="no">○</td><td></td><td>—</td><td>Màu sắc.</td></tr>
+<tr><td class="colname">size</td><td class="type">VARCHAR(30)</td><td class="no">○</td><td></td><td>—</td><td>Kích thước.</td></tr>
+<tr><td class="colname">material</td><td class="type">VARCHAR(60)</td><td class="no">○</td><td></td><td>—</td><td>Chất liệu gọng.</td></tr>
+<tr><td class="colname">lens_option</td><td class="type">VARCHAR(60)</td><td class="no">○</td><td></td><td>—</td><td>Loại tròng (nếu bán kèm).</td></tr>
+<tr><td class="colname">price</td><td class="type">DECIMAL(12,2)</td><td class="yes">●</td><td></td><td>—</td><td>Giá bán thực của SKU.</td></tr>
+<tr><td class="colname">stock_qty</td><td class="type">INT</td><td class="yes">●</td><td></td><td>0</td><td><b>Tồn kho</b> theo SKU.</td></tr>
+<tr><td class="colname">version</td><td class="type">INT</td><td class="yes">●</td><td></td><td>0</td><td><code>@Version</code> — optimistic lock.</td></tr>
+<tr><td class="colname">deleted_at</td><td class="type">DATETIME</td><td class="no">○</td><td></td><td>NULL</td><td>Soft delete (giữ lịch sử đơn).</td></tr>
+</table>
+<p class="note"><b>Index:</b> UNIQUE(sku), (product_id). <b>Được tham chiếu bởi:</b> cart_items, order_items.</p>
+</div>
+
+<!-- ============ PRODUCT_IMAGES ============ -->
+<h2 id="product_images">7. product_images</h2>
+<div class="tbl-card">
+<p class="role">Thư viện ảnh của sản phẩm (1 SP – N ảnh), có thứ tự sắp xếp và alt text hỗ trợ SEO.</p>
+<table>
+<tr><th>Cột</th><th>Kiểu</th><th>NULL</th><th>Khoá</th><th>Mặc định</th><th>Mô tả</th></tr>
+<tr><td class="colname">id</td><td class="type">BIGINT</td><td class="yes">●</td><td><span class="badge b-pk">PK</span></td><td>auto</td><td>Định danh.</td></tr>
+<tr><td class="colname">product_id</td><td class="type">BIGINT</td><td class="yes">●</td><td><span class="badge b-fk">FK</span></td><td>—</td><td>→ products.id (CASCADE).</td></tr>
+<tr><td class="colname">url</td><td class="type">VARCHAR(255)</td><td class="yes">●</td><td></td><td>—</td><td>Đường dẫn ảnh.</td></tr>
+<tr><td class="colname">alt</td><td class="type">VARCHAR(160)</td><td class="no">○</td><td></td><td>—</td><td>Alt text (SEO/accessibility).</td></tr>
+<tr><td class="colname">sort_order</td><td class="type">INT</td><td class="yes">●</td><td></td><td>0</td><td>Thứ tự hiển thị.</td></tr>
+</table>
+<p class="note"><b>Index:</b> (product_id).</p>
+</div>
+
+<!-- ============ CARTS ============ -->
+<h2 id="carts">8. carts</h2>
+<div class="tbl-card">
+<p class="role">Giỏ hàng — mỗi user có tối đa 1 giỏ (quan hệ 1–1).</p>
+<table>
+<tr><th>Cột</th><th>Kiểu</th><th>NULL</th><th>Khoá</th><th>Mặc định</th><th>Mô tả</th></tr>
+<tr><td class="colname">id</td><td class="type">BIGINT</td><td class="yes">●</td><td><span class="badge b-pk">PK</span></td><td>auto</td><td>Định danh.</td></tr>
+<tr><td class="colname">user_id</td><td class="type">BIGINT</td><td class="yes">●</td><td><span class="badge b-fk">FK</span> <span class="badge b-uk">UK</span></td><td>—</td><td>→ users.id (CASCADE), duy nhất.</td></tr>
+<tr><td class="colname">updated_at</td><td class="type">DATETIME</td><td class="no">○</td><td></td><td>—</td><td>Lần thay đổi cuối.</td></tr>
+</table>
+<p class="note"><b>Index:</b> UNIQUE(user_id).</p>
+</div>
+
+<!-- ============ CART_ITEMS ============ -->
+<h2 id="cart_items">9. cart_items</h2>
+<div class="tbl-card">
+<p class="role">Dòng sản phẩm trong giỏ — bảng nối carts ↔ product_variants kèm số lượng.</p>
+<table>
+<tr><th>Cột</th><th>Kiểu</th><th>NULL</th><th>Khoá</th><th>Mặc định</th><th>Mô tả</th></tr>
+<tr><td class="colname">id</td><td class="type">BIGINT</td><td class="yes">●</td><td><span class="badge b-pk">PK</span></td><td>auto</td><td>Định danh.</td></tr>
+<tr><td class="colname">cart_id</td><td class="type">BIGINT</td><td class="yes">●</td><td><span class="badge b-fk">FK</span></td><td>—</td><td>→ carts.id (CASCADE).</td></tr>
+<tr><td class="colname">variant_id</td><td class="type">BIGINT</td><td class="yes">●</td><td><span class="badge b-fk">FK</span></td><td>—</td><td>→ product_variants.id (RESTRICT).</td></tr>
+<tr><td class="colname">quantity</td><td class="type">INT</td><td class="yes">●</td><td></td><td>1</td><td>Số lượng.</td></tr>
+</table>
+<p class="note"><b>Index:</b> UNIQUE(cart_id, variant_id) — không trùng SKU trong giỏ; (variant_id).</p>
+</div>
+
+<!-- ============ ORDERS ============ -->
+<h2 id="orders">10. orders</h2>
+<div class="tbl-card">
+<p class="role">Đơn hàng (header). Lưu tổng tiền, giảm giá, phí ship, snapshot địa chỉ giao. Bản ghi tài chính — không xoá cứng, dùng status. Có <code>version</code> chống double-submit.</p>
+<table>
+<tr><th>Cột</th><th>Kiểu</th><th>NULL</th><th>Khoá</th><th>Mặc định</th><th>Mô tả</th></tr>
+<tr><td class="colname">id</td><td class="type">BIGINT</td><td class="yes">●</td><td><span class="badge b-pk">PK</span></td><td>auto</td><td>Định danh nội bộ.</td></tr>
+<tr><td class="colname">user_id</td><td class="type">BIGINT</td><td class="yes">●</td><td><span class="badge b-fk">FK</span></td><td>—</td><td>→ users.id (RESTRICT).</td></tr>
+<tr><td class="colname">order_code</td><td class="type">VARCHAR(30)</td><td class="yes">●</td><td><span class="badge b-uk">UK</span></td><td>—</td><td>Mã hiển thị, không lộ id tuần tự.</td></tr>
+<tr><td class="colname">promotion_id</td><td class="type">BIGINT</td><td class="no">○</td><td><span class="badge b-fk">FK</span></td><td>NULL</td><td>→ promotions.id (SET NULL).</td></tr>
+<tr><td class="colname">subtotal</td><td class="type">DECIMAL(12,2)</td><td class="yes">●</td><td></td><td>—</td><td>Tổng tiền hàng trước giảm.</td></tr>
+<tr><td class="colname">discount_amount</td><td class="type">DECIMAL(12,2)</td><td class="yes">●</td><td></td><td>0</td><td>Số tiền giảm.</td></tr>
+<tr><td class="colname">shipping_fee</td><td class="type">DECIMAL(12,2)</td><td class="yes">●</td><td></td><td>0</td><td>Phí vận chuyển.</td></tr>
+<tr><td class="colname">total</td><td class="type">DECIMAL(12,2)</td><td class="yes">●</td><td></td><td>—</td><td>Tổng thanh toán cuối.</td></tr>
+<tr><td class="colname">shipping_address</td><td class="type">VARCHAR(500)</td><td class="yes">●</td><td></td><td>—</td><td>Snapshot địa chỉ lúc đặt.</td></tr>
+<tr><td class="colname">receiver_name</td><td class="type">VARCHAR(120)</td><td class="no">○</td><td></td><td>—</td><td>Người nhận (snapshot).</td></tr>
+<tr><td class="colname">receiver_phone</td><td class="type">VARCHAR(20)</td><td class="no">○</td><td></td><td>—</td><td>SĐT người nhận (snapshot).</td></tr>
+<tr><td class="colname">tracking_code</td><td class="type">VARCHAR(60)</td><td class="no">○</td><td></td><td>—</td><td>Mã vận đơn.</td></tr>
+<tr><td class="colname">status</td><td class="type">order_status</td><td class="yes">●</td><td></td><td>PENDING</td><td>Trạng thái đơn.</td></tr>
+<tr><td class="colname">note</td><td class="type">VARCHAR(500)</td><td class="no">○</td><td></td><td>—</td><td>Ghi chú của khách.</td></tr>
+<tr><td class="colname">created_at</td><td class="type">DATETIME</td><td class="yes">●</td><td></td><td>now()</td><td>Thời điểm đặt.</td></tr>
+<tr><td class="colname">updated_at</td><td class="type">DATETIME</td><td class="no">○</td><td></td><td>—</td><td>Cập nhật cuối.</td></tr>
+<tr><td class="colname">version</td><td class="type">INT</td><td class="yes">●</td><td></td><td>0</td><td>Optimistic lock.</td></tr>
+</table>
+<p class="note"><b>Index:</b> UNIQUE(order_code), (user_id, status, created_at), (promotion_id). <b>Được tham chiếu bởi:</b> order_items, payments, reviews.</p>
+</div>
+
+<!-- ============ ORDER_ITEMS ============ -->
+<h2 id="order_items">11. order_items</h2>
+<div class="tbl-card">
+<p class="role">Dòng chi tiết đơn hàng. <b>Snapshot</b> tên/SKU/giá tại thời điểm mua để không đổi khi sản phẩm cập nhật giá sau này.</p>
+<table>
+<tr><th>Cột</th><th>Kiểu</th><th>NULL</th><th>Khoá</th><th>Mặc định</th><th>Mô tả</th></tr>
+<tr><td class="colname">id</td><td class="type">BIGINT</td><td class="yes">●</td><td><span class="badge b-pk">PK</span></td><td>auto</td><td>Định danh.</td></tr>
+<tr><td class="colname">order_id</td><td class="type">BIGINT</td><td class="yes">●</td><td><span class="badge b-fk">FK</span></td><td>—</td><td>→ orders.id (CASCADE).</td></tr>
+<tr><td class="colname">variant_id</td><td class="type">BIGINT</td><td class="yes">●</td><td><span class="badge b-fk">FK</span></td><td>—</td><td>→ product_variants.id (RESTRICT).</td></tr>
+<tr><td class="colname">product_name</td><td class="type">VARCHAR(200)</td><td class="yes">●</td><td></td><td>—</td><td>Tên SP tại thời điểm mua.</td></tr>
+<tr><td class="colname">sku</td><td class="type">VARCHAR(64)</td><td class="no">○</td><td></td><td>—</td><td>SKU snapshot.</td></tr>
+<tr><td class="colname">unit_price</td><td class="type">DECIMAL(12,2)</td><td class="yes">●</td><td></td><td>—</td><td>Đơn giá lúc mua.</td></tr>
+<tr><td class="colname">quantity</td><td class="type">INT</td><td class="yes">●</td><td></td><td>—</td><td>Số lượng.</td></tr>
+<tr><td class="colname">line_total</td><td class="type">DECIMAL(12,2)</td><td class="yes">●</td><td></td><td>—</td><td>Thành tiền dòng.</td></tr>
+</table>
+<p class="note"><b>Index:</b> (order_id), (variant_id).</p>
+</div>
+
+<!-- ============ PAYMENTS ============ -->
+<h2 id="payments">12. payments</h2>
+<div class="tbl-card">
+<p class="role">Bản ghi thanh toán gắn với đơn hàng (1 đơn – 1..N lần thanh toán). Thay cho bảng Bill cũ. Chỉ lưu token/ref từ cổng, không lưu số thẻ.</p>
+<table>
+<tr><th>Cột</th><th>Kiểu</th><th>NULL</th><th>Khoá</th><th>Mặc định</th><th>Mô tả</th></tr>
+<tr><td class="colname">id</td><td class="type">BIGINT</td><td class="yes">●</td><td><span class="badge b-pk">PK</span></td><td>auto</td><td>Định danh.</td></tr>
+<tr><td class="colname">order_id</td><td class="type">BIGINT</td><td class="yes">●</td><td><span class="badge b-fk">FK</span></td><td>—</td><td>→ orders.id (RESTRICT).</td></tr>
+<tr><td class="colname">method</td><td class="type">payment_method</td><td class="yes">●</td><td></td><td>—</td><td>Phương thức thanh toán.</td></tr>
+<tr><td class="colname">amount</td><td class="type">DECIMAL(12,2)</td><td class="yes">●</td><td></td><td>—</td><td>Số tiền.</td></tr>
+<tr><td class="colname">status</td><td class="type">payment_status</td><td class="yes">●</td><td></td><td>PENDING</td><td>Trạng thái.</td></tr>
+<tr><td class="colname">payment_ref</td><td class="type">VARCHAR(120)</td><td class="no">○</td><td></td><td>—</td><td>Mã giao dịch từ cổng.</td></tr>
+<tr><td class="colname">paid_at</td><td class="type">DATETIME</td><td class="no">○</td><td></td><td>—</td><td>Thời điểm thanh toán thành công.</td></tr>
+<tr><td class="colname">created_at</td><td class="type">DATETIME</td><td class="yes">●</td><td></td><td>now()</td><td>Thời điểm tạo bản ghi.</td></tr>
+</table>
+<p class="note"><b>Index:</b> (order_id).</p>
+</div>
+
+<!-- ============ PROMOTIONS ============ -->
+<h2 id="promotions">13. promotions</h2>
+<div class="tbl-card">
+<p class="role">Mã giảm giá / khuyến mãi. Theo dõi giới hạn lượt dùng và thời gian hiệu lực.</p>
+<table>
+<tr><th>Cột</th><th>Kiểu</th><th>NULL</th><th>Khoá</th><th>Mặc định</th><th>Mô tả</th></tr>
+<tr><td class="colname">id</td><td class="type">BIGINT</td><td class="yes">●</td><td><span class="badge b-pk">PK</span></td><td>auto</td><td>Định danh.</td></tr>
+<tr><td class="colname">code</td><td class="type">VARCHAR(40)</td><td class="yes">●</td><td><span class="badge b-uk">UK</span></td><td>—</td><td>Mã nhập khi checkout, duy nhất.</td></tr>
+<tr><td class="colname">name</td><td class="type">VARCHAR(150)</td><td class="no">○</td><td></td><td>—</td><td>Tên chương trình.</td></tr>
+<tr><td class="colname">type</td><td class="type">promo_type</td><td class="yes">●</td><td></td><td>—</td><td>PERCENT hoặc AMOUNT.</td></tr>
+<tr><td class="colname">value</td><td class="type">DECIMAL(12,2)</td><td class="yes">●</td><td></td><td>—</td><td>Giá trị giảm (% hoặc tiền).</td></tr>
+<tr><td class="colname">min_value</td><td class="type">DECIMAL(12,2)</td><td class="no">○</td><td></td><td>0</td><td>Giá trị đơn tối thiểu.</td></tr>
+<tr><td class="colname">usage_limit</td><td class="type">INT</td><td class="no">○</td><td></td><td>NULL</td><td>Tổng lượt cho phép (NULL = vô hạn).</td></tr>
+<tr><td class="colname">used_count</td><td class="type">INT</td><td class="yes">●</td><td></td><td>0</td><td>Số lượt đã dùng.</td></tr>
+<tr><td class="colname">start_at</td><td class="type">DATETIME</td><td class="no">○</td><td></td><td>—</td><td>Bắt đầu hiệu lực.</td></tr>
+<tr><td class="colname">end_at</td><td class="type">DATETIME</td><td class="no">○</td><td></td><td>—</td><td>Hết hiệu lực.</td></tr>
+<tr><td class="colname">status</td><td class="type">entity_status</td><td class="yes">●</td><td></td><td>ACTIVE</td><td>Bật / tắt.</td></tr>
+</table>
+<p class="note"><b>Index:</b> UNIQUE(code). <b>Được tham chiếu bởi:</b> orders.</p>
+</div>
+
+<!-- ============ REVIEWS ============ -->
+<h2 id="reviews">14. reviews</h2>
+<div class="tbl-card">
+<p class="role">Đánh giá sản phẩm (sao + nội dung). Gắn order_id để đánh dấu "đã mua" (verified purchase). Có kiểm duyệt qua status.</p>
+<table>
+<tr><th>Cột</th><th>Kiểu</th><th>NULL</th><th>Khoá</th><th>Mặc định</th><th>Mô tả</th></tr>
+<tr><td class="colname">id</td><td class="type">BIGINT</td><td class="yes">●</td><td><span class="badge b-pk">PK</span></td><td>auto</td><td>Định danh.</td></tr>
+<tr><td class="colname">user_id</td><td class="type">BIGINT</td><td class="yes">●</td><td><span class="badge b-fk">FK</span></td><td>—</td><td>→ users.id (CASCADE).</td></tr>
+<tr><td class="colname">product_id</td><td class="type">BIGINT</td><td class="yes">●</td><td><span class="badge b-fk">FK</span></td><td>—</td><td>→ products.id (RESTRICT).</td></tr>
+<tr><td class="colname">order_id</td><td class="type">BIGINT</td><td class="no">○</td><td><span class="badge b-fk">FK</span></td><td>NULL</td><td>→ orders.id (SET NULL).</td></tr>
+<tr><td class="colname">rating</td><td class="type">TINYINT</td><td class="yes">●</td><td></td><td>—</td><td>Số sao 1–5 (CHECK).</td></tr>
+<tr><td class="colname">content</td><td class="type">TEXT</td><td class="no">○</td><td></td><td>—</td><td>Nội dung đánh giá.</td></tr>
+<tr><td class="colname">status</td><td class="type">review_status</td><td class="yes">●</td><td></td><td>PENDING</td><td>Kiểm duyệt.</td></tr>
+<tr><td class="colname">created_at</td><td class="type">DATETIME</td><td class="yes">●</td><td></td><td>now()</td><td>Thời điểm gửi.</td></tr>
+</table>
+<p class="note"><b>Index:</b> (product_id), (user_id).</p>
+</div>
+
+<!-- ============ WISHLISTS ============ -->
+<h2 id="wishlists">15. wishlists</h2>
+<div class="tbl-card">
+<p class="role">Danh sách sản phẩm yêu thích — bảng nối users ↔ products.</p>
+<table>
+<tr><th>Cột</th><th>Kiểu</th><th>NULL</th><th>Khoá</th><th>Mặc định</th><th>Mô tả</th></tr>
+<tr><td class="colname">id</td><td class="type">BIGINT</td><td class="yes">●</td><td><span class="badge b-pk">PK</span></td><td>auto</td><td>Định danh.</td></tr>
+<tr><td class="colname">user_id</td><td class="type">BIGINT</td><td class="yes">●</td><td><span class="badge b-fk">FK</span></td><td>—</td><td>→ users.id (CASCADE).</td></tr>
+<tr><td class="colname">product_id</td><td class="type">BIGINT</td><td class="yes">●</td><td><span class="badge b-fk">FK</span></td><td>—</td><td>→ products.id (CASCADE).</td></tr>
+<tr><td class="colname">created_at</td><td class="type">DATETIME</td><td class="yes">●</td><td></td><td>now()</td><td>Thời điểm thêm.</td></tr>
+</table>
+<p class="note"><b>Index:</b> UNIQUE(user_id, product_id).</p>
+</div>
+
+<!-- ============ BLOG_POSTS ============ -->
+<h2 id="blog_posts">16. blog_posts</h2>
+<div class="tbl-card">
+<p class="role">Bài viết blog phục vụ SEO/content marketing (URL <code>/blog/huong-dan-chon-kinh</code>). Tác giả là một user (admin).</p>
+<table>
+<tr><th>Cột</th><th>Kiểu</th><th>NULL</th><th>Khoá</th><th>Mặc định</th><th>Mô tả</th></tr>
+<tr><td class="colname">id</td><td class="type">BIGINT</td><td class="yes">●</td><td><span class="badge b-pk">PK</span></td><td>auto</td><td>Định danh.</td></tr>
+<tr><td class="colname">author_id</td><td class="type">BIGINT</td><td class="yes">●</td><td><span class="badge b-fk">FK</span></td><td>—</td><td>→ users.id (RESTRICT).</td></tr>
+<tr><td class="colname">title</td><td class="type">VARCHAR(200)</td><td class="yes">●</td><td></td><td>—</td><td>Tiêu đề.</td></tr>
+<tr><td class="colname">slug</td><td class="type">VARCHAR(220)</td><td class="yes">●</td><td><span class="badge b-uk">UK</span></td><td>—</td><td>URL slug, duy nhất.</td></tr>
+<tr><td class="colname">excerpt</td><td class="type">VARCHAR(300)</td><td class="no">○</td><td></td><td>—</td><td>Tóm tắt.</td></tr>
+<tr><td class="colname">content</td><td class="type">TEXT</td><td class="no">○</td><td></td><td>—</td><td>Nội dung.</td></tr>
+<tr><td class="colname">cover_image</td><td class="type">VARCHAR(255)</td><td class="no">○</td><td></td><td>—</td><td>Ảnh bìa.</td></tr>
+<tr><td class="colname">meta_title</td><td class="type">VARCHAR(160)</td><td class="no">○</td><td></td><td>—</td><td>SEO title.</td></tr>
+<tr><td class="colname">meta_description</td><td class="type">VARCHAR(255)</td><td class="no">○</td><td></td><td>—</td><td>SEO description.</td></tr>
+<tr><td class="colname">status</td><td class="type">post_status</td><td class="yes">●</td><td></td><td>DRAFT</td><td>Nháp / đã xuất bản.</td></tr>
+<tr><td class="colname">published_at</td><td class="type">DATETIME</td><td class="no">○</td><td></td><td>—</td><td>Thời điểm xuất bản.</td></tr>
+<tr><td class="colname">created_at</td><td class="type">DATETIME</td><td class="yes">●</td><td></td><td>now()</td><td>Thời điểm tạo.</td></tr>
+</table>
+<p class="note"><b>Index:</b> UNIQUE(slug), (status, published_at).</p>
+</div>
+
+<!-- ============ NOTIFICATIONS ============ -->
+<h2 id="notifications">17. notifications</h2>
+<div class="tbl-card">
+<p class="role">Thông báo gửi tới user (đơn hàng, khuyến mãi…). Đánh dấu đã đọc.</p>
+<table>
+<tr><th>Cột</th><th>Kiểu</th><th>NULL</th><th>Khoá</th><th>Mặc định</th><th>Mô tả</th></tr>
+<tr><td class="colname">id</td><td class="type">BIGINT</td><td class="yes">●</td><td><span class="badge b-pk">PK</span></td><td>auto</td><td>Định danh.</td></tr>
+<tr><td class="colname">user_id</td><td class="type">BIGINT</td><td class="yes">●</td><td><span class="badge b-fk">FK</span></td><td>—</td><td>→ users.id (CASCADE).</td></tr>
+<tr><td class="colname">title</td><td class="type">VARCHAR(160)</td><td class="no">○</td><td></td><td>—</td><td>Tiêu đề.</td></tr>
+<tr><td class="colname">body</td><td class="type">VARCHAR(500)</td><td class="no">○</td><td></td><td>—</td><td>Nội dung.</td></tr>
+<tr><td class="colname">type</td><td class="type">VARCHAR(40)</td><td class="no">○</td><td></td><td>—</td><td>Loại thông báo.</td></tr>
+<tr><td class="colname">is_read</td><td class="type">BOOLEAN</td><td class="yes">●</td><td></td><td>false</td><td>Đã đọc chưa.</td></tr>
+<tr><td class="colname">created_at</td><td class="type">DATETIME</td><td class="yes">●</td><td></td><td>now()</td><td>Thời điểm gửi.</td></tr>
+</table>
+<p class="note"><b>Index:</b> (user_id, is_read).</p>
+</div>
+
+<!-- ============ URL_REDIRECTS ============ -->
+<h2 id="url_redirects">18. url_redirects</h2>
+<div class="tbl-card">
+<p class="role">Bảng chuyển hướng 301 — giữ SEO khi slug sản phẩm/danh mục thay đổi. (Tuỳ chọn, thêm khi cần.)</p>
+<table>
+<tr><th>Cột</th><th>Kiểu</th><th>NULL</th><th>Khoá</th><th>Mặc định</th><th>Mô tả</th></tr>
+<tr><td class="colname">id</td><td class="type">BIGINT</td><td class="yes">●</td><td><span class="badge b-pk">PK</span></td><td>auto</td><td>Định danh.</td></tr>
+<tr><td class="colname">old_path</td><td class="type">VARCHAR(255)</td><td class="yes">●</td><td><span class="badge b-uk">UK</span></td><td>—</td><td>Đường dẫn cũ, duy nhất.</td></tr>
+<tr><td class="colname">new_path</td><td class="type">VARCHAR(255)</td><td class="yes">●</td><td></td><td>—</td><td>Đường dẫn mới.</td></tr>
+<tr><td class="colname">status</td><td class="type">INT</td><td class="yes">●</td><td></td><td>301</td><td>Mã HTTP redirect.</td></tr>
+<tr><td class="colname">created_at</td><td class="type">DATETIME</td><td class="yes">●</td><td></td><td>now()</td><td>Thời điểm tạo.</td></tr>
+</table>
+<p class="note"><b>Index:</b> UNIQUE(old_path).</p>
+</div>
+
+<!-- ============ RELATIONSHIPS ============ -->
+<h2 id="relationships">Ma trận quan hệ (Foreign Key)</h2>
+<table class="rel">
+<tr><th>Bảng con</th><th>Cột FK</th><th>→ Bảng cha</th><th>Kiểu</th><th>ON DELETE</th></tr>
+<tr><td>addresses</td><td>user_id</td><td>users</td><td>N–1</td><td>CASCADE</td></tr>
+<tr><td>categories</td><td>parent_id</td><td>categories</td><td>tự tham chiếu</td><td>RESTRICT</td></tr>
+<tr><td>products</td><td>category_id</td><td>categories</td><td>N–1</td><td>RESTRICT</td></tr>
+<tr><td>products</td><td>brand_id</td><td>brands</td><td>N–1</td><td>RESTRICT</td></tr>
+<tr><td>product_variants</td><td>product_id</td><td>products</td><td>N–1</td><td>CASCADE</td></tr>
+<tr><td>product_images</td><td>product_id</td><td>products</td><td>N–1</td><td>CASCADE</td></tr>
+<tr><td>carts</td><td>user_id</td><td>users</td><td>1–1</td><td>CASCADE</td></tr>
+<tr><td>cart_items</td><td>cart_id</td><td>carts</td><td>N–1</td><td>CASCADE</td></tr>
+<tr><td>cart_items</td><td>variant_id</td><td>product_variants</td><td>N–1</td><td>RESTRICT</td></tr>
+<tr><td>orders</td><td>user_id</td><td>users</td><td>N–1</td><td>RESTRICT</td></tr>
+<tr><td>orders</td><td>promotion_id</td><td>promotions</td><td>N–1</td><td>SET NULL</td></tr>
+<tr><td>order_items</td><td>order_id</td><td>orders</td><td>N–1</td><td>CASCADE</td></tr>
+<tr><td>order_items</td><td>variant_id</td><td>product_variants</td><td>N–1</td><td>RESTRICT</td></tr>
+<tr><td>payments</td><td>order_id</td><td>orders</td><td>N–1</td><td>RESTRICT</td></tr>
+<tr><td>reviews</td><td>user_id</td><td>users</td><td>N–1</td><td>CASCADE</td></tr>
+<tr><td>reviews</td><td>product_id</td><td>products</td><td>N–1</td><td>RESTRICT</td></tr>
+<tr><td>reviews</td><td>order_id</td><td>orders</td><td>N–1</td><td>SET NULL</td></tr>
+<tr><td>wishlists</td><td>user_id</td><td>users</td><td>N–1</td><td>CASCADE</td></tr>
+<tr><td>wishlists</td><td>product_id</td><td>products</td><td>N–1</td><td>CASCADE</td></tr>
+<tr><td>blog_posts</td><td>author_id</td><td>users</td><td>N–1</td><td>RESTRICT</td></tr>
+<tr><td>notifications</td><td>user_id</td><td>users</td><td>N–1</td><td>CASCADE</td></tr>
+</table>
+
+<hr>
+<p class="note">Tài liệu Database — ProjectSale · Sinh từ <code>database/schema.dbml</code> · 09/07/2026. Xem sơ đồ trực quan bằng cách dán schema.dbml vào dbdiagram.io.</p>
+</main>
+</div>
+</body>
+</html>
