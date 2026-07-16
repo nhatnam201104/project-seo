@@ -1,0 +1,58 @@
+name: Backend CI
+
+on:
+  pull_request:
+    branches:
+      - dev
+      - main
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-ci.yml"
+
+  push:
+    branches:
+      - dev
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-ci.yml"
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backend-ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend-check:
+    name: Test and Build
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+          cache-dependency-path: backend/pom.xml
+
+      - name: Grant execute permission to Maven Wrapper
+        run: chmod +x mvnw
+
+      - name: Check Java and Maven versions
+        run: |
+          java --version
+          ./mvnw --version
+
+      - name: Run tests and build application
+        run: ./mvnw --batch-mode clean verify
