@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ERD Review — Website bán mắt kính (ProjectSale)</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root{
+    --bg:#0f1115; --card:#171a21; --card2:#1d212b; --border:#2a2f3a;
+    --txt:#e6e8ec; --muted:#9aa4b2; --accent:#5b9dff; --accent2:#7c5cff;
+    --crit:#ff5c72; --high:#ff9f43; --med:#ffd43b; --low:#63e6be; --ok:#51cf66;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.65;font-size:16px}
+  .wrap{max-width:1080px;margin:0 auto;padding:40px 24px 120px}
+  h1{font-size:30px;margin:0 0 6px;line-height:1.25}
+  h2{font-size:23px;margin:52px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--border)}
+  h3{font-size:18px;margin:28px 0 8px;color:#fff}
+  h4{font-size:15px;margin:18px 0 6px;color:var(--accent)}
+  p{margin:8px 0}
+  code{background:#0b0d11;padding:2px 6px;border-radius:5px;font-size:13px;
+    font-family:"SF Mono",Consolas,Menlo,monospace;color:#a3e3ff}
+  pre{background:#0b0d11;border:1px solid var(--border);border-radius:10px;padding:16px;
+    overflow-x:auto;font-size:13px;line-height:1.5}
+  pre code{background:none;padding:0;color:#cdd6e4}
+  .lead{color:var(--muted);font-size:15px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;
+    padding:20px 24px;margin:18px 0}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:760px){.grid2{grid-template-columns:1fr}}
+  .pill{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.3px;
+    padding:3px 10px;border-radius:999px;text-transform:uppercase}
+  .p-crit{background:rgba(255,92,114,.15);color:var(--crit);border:1px solid var(--crit)}
+  .p-high{background:rgba(255,159,67,.13);color:var(--high);border:1px solid var(--high)}
+  .p-med{background:rgba(255,212,59,.12);color:var(--med);border:1px solid var(--med)}
+  .p-low{background:rgba(99,230,190,.12);color:var(--low);border:1px solid var(--low)}
+  .p-ok{background:rgba(81,207,102,.14);color:var(--ok);border:1px solid var(--ok)}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px}
+  th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+  th{background:var(--card2);color:#fff;font-weight:600}
+  tr:nth-child(even) td{background:rgba(255,255,255,.015)}
+  ul,ol{margin:8px 0;padding-left:22px}
+  li{margin:5px 0}
+  .good::before{content:"✔ ";color:var(--ok);font-weight:700}
+  .bad::before{content:"\2717  ";color:var(--crit);font-weight:700}
+  .tag{color:var(--muted);font-size:13px}
+  .score{display:flex;align-items:center;gap:12px;margin:10px 0}
+  .score .lbl{width:190px;font-size:14px}
+  .bar{flex:1;height:12px;background:#0b0d11;border-radius:999px;overflow:hidden}
+  .bar>i{display:block;height:100%;border-radius:999px;
+    background:linear-gradient(90deg,var(--accent),var(--accent2))}
+  .num{width:44px;text-align:right;font-weight:700;font-size:14px}
+  .toc{columns:2;column-gap:26px}
+  @media(max-width:760px){.toc{columns:1}}
+  .toc a{color:var(--accent);text-decoration:none;font-size:14px}
+  .toc a:hover{text-decoration:underline}
+  blockquote{margin:14px 0;padding:10px 16px;border-left:3px solid var(--accent2);
+    background:var(--card2);border-radius:0 10px 10px 0;color:var(--muted)}
+  .mermaid{background:#fbfbfd;border-radius:14px;padding:20px;margin:18px 0;overflow-x:auto}
+  .kicker{color:var(--accent2);font-weight:700;letter-spacing:1px;font-size:12px;text-transform:uppercase}
+  hr{border:none;border-top:1px solid var(--border);margin:40px 0}
+  .verdict{background:linear-gradient(135deg,rgba(124,92,255,.12),rgba(91,157,255,.08));
+    border:1px solid var(--accent2)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<span class="kicker">Principal Solution &amp; Database Architect Review</span>
+<h1>Đánh giá ERD — Website bán mắt kính</h1>
+<p class="lead">Monolith · Spring Boot + Hibernate · MySQL · React/Vite · ~500 users · Mục tiêu: dễ maintain, chuẩn SEO, đủ dùng, không over-engineering.</p>
+
+<div class="card">
+<strong>TL;DR —</strong> ERD hiện tại là một bản nháp học thuật (ER kiểu thực thể–quan hệ có thuộc tính hình elip) đã nắm được các khối chính, nhưng <em>chưa dùng được cho production</em>. Có <strong>4 lỗi Critical</strong> chặn nghiệp vụ: (1) <b>Order không có bảng OrderItem</b> — không biết đơn hàng gồm sản phẩm gì; (2) <b>Cart↔Product và Order↔Product thiếu bảng trung gian</b> cho quan hệ N–N; (3) <b>không có bất kỳ trường SEO nào</b> dù mục tiêu là "chuẩn SEO"; (4) <b>tồn kho (Quantity) đặt sai chỗ</b> — ở Product thay vì ở biến thể (màu/size). Cộng thêm thiếu timestamp/audit và thiếu slug. Tin tốt: quy mô 500 user nên bản sửa <em>rất gọn</em>, không cần EAV, StockTransaction hay microservice.</p>
+</div>
+
+<h2>Mục lục</h2>
+<div class="toc">
+<a href="#tq">1. Tổng quan</a><br>
+<a href="#bang">2. Phân tích từng bảng</a><br>
+<a href="#issue">3. Các vấn đề nghiêm trọng</a><br>
+<a href="#db">4. Database Design chi tiết</a><br>
+<a href="#seo">5. SEO &amp; URL Structure</a><br>
+<a href="#product">6. Product / Variant / Attribute</a><br>
+<a href="#inv">7. Inventory</a><br>
+<a href="#order">8. Order / Payment / Shipment</a><br>
+<a href="#perf">9. Performance</a><br>
+<a href="#index">10. Index đề xuất</a><br>
+<a href="#soft">11. Soft Delete</a><br>
+<a href="#audit">12. Audit</a><br>
+<a href="#sec">13. Security</a><br>
+<a href="#maint">14. Maintainability &amp; Convention</a><br>
+<a href="#scale">15. Scalability roadmap</a><br>
+<a href="#over">16. Over-engineering</a><br>
+<a href="#erd">17. ERD đề xuất (Mermaid)</a><br>
+<a href="#score">18. Production Readiness (chấm điểm)</a><br>
+<a href="#kl">19. Kết luận</a>
+</div>
+
+<h2 id="tq">1. Tổng quan</h2>
+<div class="grid2">
+  <div class="card">
+    <h3 style="margin-top:0">Điểm mạnh</h3>
+    <ul>
+      <li class="good">Đã tách đúng các khối cốt lõi: User, Product, Category, Brand, Cart, Order.</li>
+      <li class="good">Có ý thức về biến thể sản phẩm (ProductDetail: Size/Color/Material) — đúng hướng cho mắt kính.</li>
+      <li class="good">Có Promotion, Warranty, Notification, Feedback — bao phủ nghiệp vụ rộng.</li>
+      <li class="good">Quy mô đề bài nhỏ → không sa đà vào abstraction phức tạp. Nền tảng để refactor gọn.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3 style="margin-top:0">Điểm yếu</h3>
+    <ul>
+      <li class="bad"><b>Thiếu OrderItem</b> — lỗ hổng nghiệp vụ nghiêm trọng nhất.</li>
+      <li class="bad">Quan hệ N–N (Cart↔Product, Order↔Product) chưa có bảng nối kèm số lượng/giá tại thời điểm mua.</li>
+      <li class="bad">Không có trường SEO (slug, meta) → mâu thuẫn trực tiếp với mục tiêu.</li>
+      <li class="bad">Tồn kho ở Product, không ở biến thể → sai khi 1 gọng có nhiều màu/size.</li>
+      <li class="bad">Không có created_at/updated_at, không soft delete, không optimistic locking.</li>
+      <li class="bad">Bill vs Order trùng dữ liệu (cùng TotalPrice); Payment gần như "trôi nổi".</li>
+      <li class="bad">Naming lẫn lộn (IdUser / CategoryID / ProductId), typo <code>Warrenty</code>, cột mơ hồ (<code>Extract</code>, <code>ExtraInfo</code>).</li>
+    </ul>
+  </div>
+</div>
+<p><strong>Đánh giá tổng thể:</strong> Đây là ERD ở mức <em>"đúng ý tưởng, sai thi công"</em>. Về mặt mô hình khái niệm nó thể hiện được tư duy, nhưng nếu đem thẳng sang Hibernate entity + MySQL sẽ vấp ngay ở luồng đặt hàng và SEO. Ước lượng cần <strong>1–2 ngày refactor schema</strong> trước khi code — rẻ hơn rất nhiều so với sửa khi đã có dữ liệu thật.</p>
+
+<h2 id="bang">2. Phân tích từng bảng</h2>
+
+<h3>User</h3>
+<p class="tag">Vai trò: tài khoản khách hàng (và có thể cả admin).</p>
+<ul>
+  <li class="good"><b>Tốt:</b> có đủ trường định danh cơ bản (Email, Phone, Fullname).</li>
+  <li class="bad"><b>Chưa hợp lý:</b> <code>Address</code> nhét thẳng vào User → mỗi user chỉ 1 địa chỉ, không lưu được nhiều địa chỉ giao hàng, không tách được người nhận. <code>Password</code> trong ERD phải hiểu là <b>password_hash</b> (BCrypt), tuyệt đối không lưu plaintext. Không có <code>role</code>, không có <code>status</code>/<code>email_verified</code>.</li>
+  <li><b>Đề xuất:</b> tách <code>Address</code> ra bảng riêng (1 User – N Address, có <code>is_default</code>, <code>receiver_name</code>, <code>receiver_phone</code>). Thêm <code>role</code> (enum USER/ADMIN), <code>status</code>, <code>created_at</code>.</li>
+  <li><span class="tag">Trade-off:</span> tách Address thêm 1 bảng + 1 join, nhưng là chuẩn e-commerce và cần cho việc "giao tới địa chỉ khác". Với mắt kính (hay mua tặng) rất đáng.</li>
+</ul>
+
+<h3>Product</h3>
+<p class="tag">Vai trò: sản phẩm (gọng/tròng kính).</p>
+<ul>
+  <li class="good"><b>Tốt:</b> có Price, Description, liên kết Category &amp; Brand — trục chính hợp lý.</li>
+  <li class="bad"><b>Chưa hợp lý:</b> <code>Quantity</code> (tồn kho) và <code>Price</code> đặt ở Product trong khi <code>ProductDetail</code> lại giữ Color/Size → mâu thuẫn: một gọng đen size M và đỏ size L phải có tồn kho + có thể có giá khác nhau. <code>ProductImg</code> chỉ 1 ảnh — mắt kính cần gallery nhiều ảnh. <code>ExtraInfo</code> trùng vai trò với <code>Description</code>. Không có slug/SEO.</li>
+  <li><b>Đề xuất:</b> Product giữ thông tin "chung" (tên, mô tả, brand, category, SEO, giá niêm yết tham chiếu). Chuyển <b>tồn kho + giá thực + SKU</b> xuống <code>ProductVariant</code>. Tách <code>ProductImage</code> (N ảnh, có <code>sort_order</code>, <code>alt</code>). Thêm counter <code>rating_avg</code>, <code>review_count</code>, <code>min_price</code> để render listing nhanh.</li>
+  <li><span class="tag">Trade-off:</span> phân tách Product/Variant thêm 1 bảng, nhưng đây là chuẩn bắt buộc cho hàng có biến thể; không làm sẽ nợ kỹ thuật rất nặng.</li>
+</ul>
+
+<h3>ProductDetail (weak entity)</h3>
+<ul>
+  <li class="bad"><b>Vấn đề:</b> đang đóng hai vai mập mờ — vừa như "thông số kỹ thuật" (Material) vừa như "biến thể" (Color, Size). <code>Extract</code> không rõ nghĩa. Không có tồn kho, không có SKU, không có giá.</li>
+  <li><b>Đề xuất:</b> đổi thành <code>ProductVariant</code> = 1 SKU bán được (color + size + lens_option) mang <code>sku</code>, <code>price</code>, <code>stock_qty</code>, <code>version</code>. Các thông số cố định (chất liệu, trọng lượng, hình dáng, độ rộng cầu kính…) nếu ít và cố định thì để cột trên Product; nếu nhiều/đa dạng mới cân nhắc bảng spec.</li>
+</ul>
+
+<h3>Category &amp; Brand</h3>
+<ul>
+  <li class="good"><b>Tốt:</b> tách Brand riêng (Ray-Ban, Gucci…) là đúng, không nhồi vào Category.</li>
+  <li class="bad"><b>Chưa hợp lý:</b> Category không có <code>parent_id</code> → không làm được cây "Kính cận › Gọng › Titan". Cả hai thiếu <code>slug</code> + meta cho URL <code>/thuong-hieu/rayban</code>, <code>/category/kinh-can</code>.</li>
+  <li><b>Đề xuất:</b> thêm <code>parent_id</code> (self-reference, nullable) cho Category; thêm <code>slug</code> unique, <code>meta_title</code>, <code>meta_description</code>, <code>image</code> cho cả hai.</li>
+  <li><span class="tag">Trade-off:</span> self-reference gọn hơn nhiều so với bảng đóng (closure table). Với danh mục kính chỉ 2–3 tầng, <code>parent_id</code> là đủ — closure table là over-engineering.</li>
+</ul>
+
+<h3>Cart</h3>
+<ul>
+  <li class="bad"><b>Vấn đề:</b> Cart nối thẳng Product (N–N) mà không có bảng <code>CartItem</code> chứa <code>quantity</code> + <code>variant_id</code>. Không lưu được "2 cái gọng đen size M". <code>Shipping</code>, <code>Subtotal</code> nằm trên Cart nên tính động, không nên lưu cứng (dễ lệch khi giá đổi).</li>
+  <li><b>Đề xuất:</b> thêm <code>CartItem(cart_id, variant_id, quantity)</code>. Subtotal/shipping tính ở runtime hoặc chỉ cache tạm.</li>
+</ul>
+
+<h3>Order + Bill + Payment</h3>
+<ul>
+  <li class="bad"><b>Critical:</b> Order có <code>TotalItem</code>, <code>TotalPrice</code> nhưng <b>không có OrderItem</b> — không thể biết đơn gồm sản phẩm/biến thể nào, giá lúc mua bao nhiêu. Đây là lỗi chặn nghiệp vụ.</li>
+  <li class="bad">Bill và Order cùng có <code>TotalPrice</code> → <b>trùng dữ liệu</b>, dễ lệch. Payment chỉ có <code>PaymentId/PaymentType</code> và không có FK rõ ràng tới Order → "trôi nổi".</li>
+  <li><b>Đề xuất:</b> giữ <code>Order</code> (header) + thêm <code>OrderItem</code> (line, snapshot <code>unit_price</code>, <code>quantity</code>, <code>product_name</code> tại thời điểm mua). Gộp <b>Bill → Payment</b> (một bản ghi thanh toán gắn <code>order_id</code>, <code>method</code>, <code>status</code>, <code>paid_at</code>, <code>amount</code>). Không cần bảng Invoice riêng ở giai đoạn này — hoá đơn là view render từ Order.</li>
+</ul>
+
+<h3>Feedback</h3>
+<ul>
+  <li class="bad"><b>Vấn đề:</b> nối User–Report–Feedback nhưng <b>không nối tới Product</b> → không biết đang đánh giá sản phẩm nào. Thiếu <code>rating</code> (số sao) dù đề bài yêu cầu Review + Rating.</li>
+  <li><b>Đề xuất:</b> đổi thành <code>Review(user_id, product_id, order_id, rating 1–5, content, images, status, created_at)</code>. Gắn <code>order_id</code> để hỗ trợ "verified purchase".</li>
+</ul>
+
+<h3>Warranty</h3>
+<ul>
+  <li class="bad"><b>Vấn đề:</b> Warranty nối tới Product nói chung. Thực tế bảo hành gắn với <b>lần mua</b> (order item) của một khách, không phải với "sản phẩm" trừu tượng.</li>
+  <li><b>Đề xuất:</b> nếu chỉ cần "chính sách bảo hành X tháng" → đặt <code>warranty_months</code> làm cột trên Product (đơn giản, đủ dùng). Chỉ tạo bảng Warranty riêng khi cần theo dõi từng phiếu bảo hành theo serial — hiện tại là YAGNI.</li>
+</ul>
+
+<h3>Promotion</h3>
+<ul>
+  <li class="good"><b>Tốt:</b> có <code>Value</code>, <code>MinValue</code>, <code>Type</code>, <code>Expired</code>, <code>Quantity</code> — mô hình coupon khá đầy đủ.</li>
+  <li class="bad"><b>Chưa hợp lý:</b> thiếu <code>code</code> (mã nhập), thiếu cách theo dõi "đã dùng bao nhiêu / ai đã dùng". Quan hệ Apply nối trực tiếp Order là ổn nhưng nên có <code>discount_amount</code> lưu trên Order.</li>
+  <li><b>Đề xuất:</b> thêm <code>code</code> unique, <code>start_at/end_at</code>, <code>used_count</code>. Lưu <code>promotion_id</code> + <code>discount_amount</code> trên Order (snapshot).</li>
+</ul>
+
+<h3>Notification</h3>
+<ul>
+  <li class="bad"><b>Vấn đề:</b> không thấy FK rõ tới User (gửi cho ai?). <code>Describe</code> vs <code>Info</code> mơ hồ.</li>
+  <li><b>Đề xuất:</b> <code>Notification(user_id, title, body, type, is_read, created_at)</code>. Với 500 user có thể để sau (không phải core).</li>
+</ul>
+
+<h3>Bảng còn THIẾU so với yêu cầu</h3>
+<table>
+<tr><th>Entity</th><th>Cần không?</th><th>Ghi chú</th></tr>
+<tr><td>OrderItem</td><td><span class="pill p-crit">Bắt buộc</span></td><td>Không có thì không bán được hàng.</td></tr>
+<tr><td>ProductVariant (SKU)</td><td><span class="pill p-crit">Bắt buộc</span></td><td>Thay cho ProductDetail; giữ giá + tồn kho.</td></tr>
+<tr><td>ProductImage</td><td><span class="pill p-high">Nên có</span></td><td>Mắt kính cần nhiều ảnh.</td></tr>
+<tr><td>Address</td><td><span class="pill p-high">Nên có</span></td><td>Tách khỏi User.</td></tr>
+<tr><td>Review (thay Feedback)</td><td><span class="pill p-high">Nên có</span></td><td>Gắn product_id + rating.</td></tr>
+<tr><td>Blog / Post</td><td><span class="pill p-high">Nên có</span></td><td>Đề bài yêu cầu <code>/blog</code> cho SEO.</td></tr>
+<tr><td>Banner</td><td><span class="pill p-low">Tuỳ</span></td><td>CMS nhỏ; có thể để sau.</td></tr>
+<tr><td>Wishlist</td><td><span class="pill p-low">Tuỳ</span></td><td>Nice-to-have, bảng nối User–Product đơn giản.</td></tr>
+<tr><td>Shipment</td><td><span class="pill p-med">Sau</span></td><td>Ban đầu nhồi vài cột shipping vào Order là đủ.</td></tr>
+<tr><td>Refund / Return</td><td><span class="pill p-low">YAGNI</span></td><td>Chưa cần cho 500 user; thêm khi có quy trình đổi trả.</td></tr>
+<tr><td>StockTransaction / InventoryHistory</td><td><span class="pill p-low">YAGNI</span></td><td>Cột <code>stock_qty</code> + <code>version</code> là đủ.</td></tr>
+</table>
+
+<h2 id="issue">3. Các vấn đề nghiêm trọng (theo mức độ)</h2>
+<table>
+<tr><th style="width:110px">Mức</th><th>Vấn đề</th><th>Vì sao / Hệ quả</th><th>Cách sửa</th></tr>
+<tr><td><span class="pill p-crit">Critical</span></td><td>Thiếu bảng <b>OrderItem</b></td><td>Không lưu được đơn gồm gì, giá lúc mua → không thể vận hành bán hàng, không báo cáo doanh thu theo SP.</td><td>Thêm OrderItem với snapshot giá/tên.</td></tr>
+<tr><td><span class="pill p-crit">Critical</span></td><td>Quan hệ N–N thiếu bảng nối (Cart↔Product)</td><td>Không lưu số lượng, không lưu biến thể trong giỏ.</td><td>CartItem(cart_id, variant_id, qty).</td></tr>
+<tr><td><span class="pill p-crit">Critical</span></td><td>Không có trường <b>SEO</b> nào</td><td>Mâu thuẫn mục tiêu "chuẩn SEO"; không có slug → URL xấu.</td><td>Thêm slug + meta cho Product/Category/Brand/Blog.</td></tr>
+<tr><td><span class="pill p-crit">Critical</span></td><td>Tồn kho ở Product, không ở biến thể</td><td>Bán quá số hàng, không biết còn màu/size nào.</td><td>Chuyển stock xuống ProductVariant.</td></tr>
+<tr><td><span class="pill p-high">High</span></td><td>Bill trùng Order; Payment không có FK rõ</td><td>Dữ liệu tiền lệch nhau, khó đối soát.</td><td>Gộp Bill→Payment, gắn order_id.</td></tr>
+<tr><td><span class="pill p-high">High</span></td><td>Feedback không gắn Product, thiếu rating</td><td>Không hiển thị được đánh giá theo SP.</td><td>Đổi thành Review(product_id, rating).</td></tr>
+<tr><td><span class="pill p-high">High</span></td><td>Không có timestamp / optimistic locking</td><td>Không audit, race condition khi trừ kho đồng thời.</td><td>created_at/updated_at + @Version.</td></tr>
+<tr><td><span class="pill p-high">High</span></td><td>Address nhét trong User</td><td>Không lưu nhiều địa chỉ, không tách người nhận.</td><td>Tách bảng Address.</td></tr>
+<tr><td><span class="pill p-med">Medium</span></td><td>Category không phân cấp</td><td>Không làm menu/breadcrumb đa tầng.</td><td>Thêm parent_id.</td></tr>
+<tr><td><span class="pill p-med">Medium</span></td><td>1 ảnh / sản phẩm</td><td>Trang chi tiết kính cần gallery.</td><td>Bảng ProductImage.</td></tr>
+<tr><td><span class="pill p-med">Medium</span></td><td>Status/Type là chuỗi tự do</td><td>Dữ liệu bẩn, khó filter.</td><td>Dùng enum/tinyint.</td></tr>
+<tr><td><span class="pill p-low">Low</span></td><td>Naming lẫn lộn, typo <code>Warrenty</code>, cột <code>Extract</code>/<code>ExtraInfo</code> mơ hồ</td><td>Khó onboard, khó maintain.</td><td>Chuẩn hoá convention (mục 14).</td></tr>
+</table>
+
+<h2 id="db">4. Database Design chi tiết (khoá, constraint, chuẩn hoá)</h2>
+<div class="grid2">
+<div class="card">
+<h4>Chuẩn hoá</h4>
+<p>Hiện tại vi phạm 1NF/nghiệp vụ ở chỗ N–N không có bảng nối. Sau refactor đạt <b>3NF</b> — đủ cho e-commerce. <b>Không</b> nên đẩy lên cao hơn (BCNF cực đoan / EAV) vì sẽ over-normalization, join nhiều, khó đọc.</p>
+</div>
+<div class="card">
+<h4>Duplicate data</h4>
+<p>Đang có duplicate "thật" (Bill.TotalPrice vs Order.TotalPrice) — cần bỏ. Nhưng có duplicate "cố ý" hợp lý cần <b>thêm</b>: snapshot <code>unit_price</code>, <code>product_name</code> trên OrderItem (giá lúc mua không đổi khi SP đổi giá). Đây là denormalization đúng.</p>
+</div>
+</div>
+
+<h4>Khoá chính (PK)</h4>
+<p>Dùng <code>BIGINT AUTO_INCREMENT</code> làm PK kỹ thuật cho mọi bảng. Đơn giản, index nhỏ, join nhanh — phù hợp MySQL/InnoDB (clustered index theo PK). Không dùng UUID làm PK ở quy mô này (UUID v4 phân mảnh clustered index, ghi chậm). Riêng dữ liệu lộ ra URL thì dùng <code>slug</code>, không lộ id chạy tuần tự nếu ngại đối thủ đếm đơn.</p>
+
+<h4>Composite key vs surrogate</h4>
+<p>Bảng nối (CartItem, OrderItem, Wishlist, ProductPromotion) dùng <b>surrogate PK</b> + <b>UNIQUE(a_id, b_id)</b> thay vì composite PK. Lý do: Hibernate xử lý surrogate dễ hơn nhiều so với <code>@EmbeddedId</code>, và vẫn đảm bảo không trùng bằng unique constraint.</p>
+
+<h4>Foreign key, Cascade</h4>
+<table>
+<tr><th>Quan hệ</th><th>ON DELETE</th><th>Lý do</th></tr>
+<tr><td>OrderItem → Order</td><td>CASCADE</td><td>Xoá order thì xoá line (nhưng Order nên soft-delete/huỷ, hiếm khi xoá cứng).</td></tr>
+<tr><td>CartItem → Cart</td><td>CASCADE</td><td>Giỏ là dữ liệu tạm.</td></tr>
+<tr><td>ProductImage/Variant → Product</td><td>CASCADE</td><td>Ảnh/biến thể không tồn tại độc lập.</td></tr>
+<tr><td>OrderItem → ProductVariant</td><td>RESTRICT</td><td><b>Không</b> cho xoá variant đã từng bán → giữ toàn vẹn lịch sử. Dùng soft-delete variant.</td></tr>
+<tr><td>Product → Category/Brand</td><td>RESTRICT</td><td>Không cho xoá category còn sản phẩm.</td></tr>
+<tr><td>Payment → Order</td><td>RESTRICT</td><td>Bản ghi tài chính bất biến.</td></tr>
+</table>
+<blockquote>Cascade <b>UPDATE</b> gần như không cần vì PK là surrogate không đổi. Tránh lạm dụng CASCADE DELETE cho dữ liệu tài chính — ưu tiên trạng thái (CANCELLED) hơn xoá.</blockquote>
+
+<h4>Nullable / Default / Check</h4>
+<ul>
+<li><code>NOT NULL</code>: mọi FK bắt buộc, email, slug, price, stock_qty, các *_at hệ thống.</li>
+<li><code>NULL</code> hợp lý: parent_id (category gốc), deleted_at (chưa xoá), paid_at (chưa thanh toán), promotion_id trên Order.</li>
+<li><code>DEFAULT</code>: <code>stock_qty DEFAULT 0</code>, <code>status DEFAULT 'ACTIVE'</code>, <code>created_at DEFAULT CURRENT_TIMESTAMP</code>, <code>is_read DEFAULT 0</code>.</li>
+<li><code>CHECK</code> (MySQL 8.0.16+ mới enforce): <code>rating BETWEEN 1 AND 5</code>, <code>price &gt;= 0</code>, <code>stock_qty &gt;= 0</code>. Nếu MySQL cũ, validate ở tầng Bean Validation (<code>@Min</code>).</li>
+<li><code>UNIQUE</code>: <code>user.email</code>, <code>product.slug</code>, <code>category.slug</code>, <code>brand.slug</code>, <code>variant.sku</code>, <code>promotion.code</code>, và <code>(cart_id, variant_id)</code>, <code>(user_id, product_id)</code> cho wishlist.</li>
+</ul>
+
+<h2 id="seo">5. SEO &amp; URL Structure</h2>
+<p>Đây là mục điểm 1/10 của thiết kế hiện tại. Cần thêm nhóm trường SEO cho mọi entity có trang riêng: <b>Product, Category, Brand, Blog</b> (và Landing nếu có).</p>
+<table>
+<tr><th>Trường</th><th>Bắt buộc?</th><th>Ghi chú</th></tr>
+<tr><td><code>slug</code></td><td>✔ Bắt buộc</td><td>Unique, dùng cho URL đẹp. Sinh từ tên + bỏ dấu tiếng Việt.</td></tr>
+<tr><td><code>meta_title</code></td><td>✔</td><td>Fallback về tên nếu rỗng.</td></tr>
+<tr><td><code>meta_description</code></td><td>✔</td><td>~155 ký tự.</td></tr>
+<tr><td><code>og_image</code></td><td>Nên</td><td>Có thể tái dùng ảnh chính; 1 cột là đủ.</td></tr>
+<tr><td><code>canonical_url</code></td><td>Tuỳ</td><td>Thường tự sinh từ slug; chỉ lưu khi cần override.</td></tr>
+<tr><td><code>robots</code> (index/noindex)</td><td>Tuỳ</td><td>Mặc định index; cột nhỏ tinyint/enum.</td></tr>
+<tr><td>structured data / schema</td><td>Không lưu DB</td><td>Sinh JSON-LD ở tầng render (Product, BreadcrumbList, Article) từ dữ liệu sẵn có — <b>không</b> cần cột.</td></tr>
+</table>
+<h4>Tách bảng SEO riêng hay nhúng vào entity? — Trade-off</h4>
+<div class="grid2">
+<div class="card">
+<h4>Nhúng thẳng cột vào entity <span class="pill p-ok">Khuyến nghị</span></h4>
+<ul>
+<li class="good">Truy vấn 1 lần, không join → nhanh, đúng cho SSR/SEO.</li>
+<li class="good">Đơn giản, dễ đọc, hợp team nhỏ &amp; YAGNI.</li>
+<li class="bad">Lặp ~4 cột ở vài bảng (chấp nhận được).</li>
+</ul>
+</div>
+<div class="card">
+<h4>Bảng <code>seo_meta</code> polymorphic riêng</h4>
+<ul>
+<li class="good">DRY, gom logic SEO một chỗ.</li>
+<li class="bad">Quan hệ polymorphic (entity_type, entity_id) phá vỡ FK, Hibernate map khó, thêm join mỗi trang.</li>
+<li class="bad">Over-engineering ở quy mô 500 user.</li>
+</ul>
+</div>
+</div>
+<blockquote><b>Kết luận:</b> Nhúng thẳng các cột SEO vào từng entity. Chỉ tách bảng khi số entity cần SEO tăng mạnh và cần quản trị tập trung — hiện tại chưa.</blockquote>
+
+<h4>URL &amp; slug history / Redirect</h4>
+<p>ERD sau refactor hỗ trợ tốt: <code>/product/{slug}</code>, <code>/category/{slug}</code> (map <code>/kinh-can</code>), <code>/thuong-hieu/{slug}</code>, <code>/blog/{slug}</code>.</p>
+<ul>
+<li><b>Slug history / Redirect table:</b> <span class="pill p-med">Nên có nhưng tối giản</span>. Khi đổi tên SP làm slug đổi, link cũ 404 → mất SEO. Giải pháp gọn: 1 bảng <code>url_redirect(old_path, new_path, type=301, created_at)</code> — chỉ ghi khi thực sự đổi slug. Không cần "URL mapping engine" phức tạp.</li>
+<li>Với 500 user và ít khi đổi tên SP, có thể ra mắt <b>không có</b> bảng redirect rồi thêm sau — nhưng thêm sẵn bảng này rất rẻ và cứu SEO về lâu dài. Đây là ranh giới YAGNI hợp lý để "làm sớm".</li>
+</ul>
+
+<h2 id="product">6. Product Design — Variant vs Attribute/EAV</h2>
+<table>
+<tr><th>Phương án</th><th>Ưu</th><th>Nhược</th><th>Phù hợp?</th></tr>
+<tr><td><b>Chỉ Product (nhồi color/size vào 1 dòng)</b></td><td>Cực đơn giản.</td><td>Không quản được tồn kho theo màu/size, không có SKU.</td><td>❌ Sai với mắt kính.</td></tr>
+<tr><td><b>Product + Variant (SKU)</b></td><td>Chuẩn ngành, tồn kho + giá theo SKU, dễ hiểu, Hibernate map thẳng.</td><td>Thêm 1 bảng.</td><td>✅ <b>Khuyến nghị</b></td></tr>
+<tr><td><b>Product + Variant + Attribute/AttributeValue (EAV)</b></td><td>Thuộc tính động vô hạn.</td><td>Query phức tạp, N+1, khó validate, khó đọc, chậm.</td><td>⚠️ Over-engineering cho shop kính có bộ thuộc tính cố định.</td></tr>
+</table>
+<blockquote><b>Chốt:</b> Dùng <b>Product + ProductVariant</b>. Bộ thuộc tính mắt kính khá cố định (màu, size, chất liệu gọng, loại tròng) → để thành cột trên Variant/Product. Chỉ chuyển sang EAV nếu sau này bán đa ngành hàng với thuộc tính rất khác nhau — hiện tại đừng.</blockquote>
+<p><span class="tag">Ghi chú ngành kính:</span> nếu bán <b>tròng kính theo đơn (độ cận, PD)</b>, dữ liệu đơn thuốc nên đặt ở <b>OrderItem</b> (mỗi lần mua một thông số), không phải ở Product. Nếu chỉ bán gọng + tròng đóng gói sẵn thì bỏ qua — YAGNI.</p>
+
+<h2 id="inv">7. Inventory</h2>
+<ul>
+<li><b>Gắn tồn kho vào đâu?</b> → <b>ProductVariant</b> (mỗi SKU một <code>stock_qty</code>). Đây là câu trả lời dứt khoát: một gọng nhiều màu/size thì tồn kho phải theo màu/size.</li>
+<li><b>StockTransaction / InventoryHistory?</b> → <span class="pill p-low">YAGNI</span> ở 500 user. Chỉ cần <code>stock_qty</code> + <code>@Version</code> (optimistic lock) để tránh oversell khi 2 người mua cùng lúc.</li>
+<li><b>Khi nào cần stock ledger?</b> Khi cần: nhiều kho, audit nhập/xuất, hoặc đối soát chênh lệch. Lúc đó thêm bảng <code>stock_movement(variant_id, delta, reason, ref_id, created_at)</code> và coi <code>stock_qty</code> là cache. Không làm bây giờ.</li>
+</ul>
+
+<h2 id="order">8. Order / Payment / Shipment / Return</h2>
+<table>
+<tr><th>Bảng</th><th>Quyết định</th><th>Lý do</th></tr>
+<tr><td>Order (header)</td><td>Giữ</td><td>Thêm user_id, address snapshot, subtotal, discount, shipping_fee, total, status, timestamps.</td></tr>
+<tr><td>OrderItem</td><td><b>THÊM (bắt buộc)</b></td><td>Line item + snapshot giá/tên/variant.</td></tr>
+<tr><td>Payment</td><td>Giữ, gộp Bill vào</td><td>1 order – 1..N payment; method, status, amount, paid_at.</td></tr>
+<tr><td>Bill</td><td><b>BỎ</b> (gộp)</td><td>Trùng Order/Payment.</td></tr>
+<tr><td>Invoice</td><td>Không tạo bảng</td><td>Render từ Order khi cần xuất hoá đơn.</td></tr>
+<tr><td>Shipment</td><td>Hoãn</td><td>Ban đầu nhồi tracking_code, shipping_status, carrier vào Order. Tách bảng khi có nhiều kiện/đối tác vận chuyển.</td></tr>
+<tr><td>Refund / Return</td><td>YAGNI</td><td>Thêm khi có quy trình đổi trả thực tế.</td></tr>
+</table>
+
+<h2 id="perf">9. Performance</h2>
+<ul>
+<li><b>N+1 query:</b> rủi ro cao ở trang danh sách SP (Product → Brand, Category, Variant, Image, Review). Xử lý bằng <code>JOIN FETCH</code>/<code>@EntityGraph</code> trong Hibernate, luôn phân trang, và <b>tránh <code>FetchType.EAGER</code></b> mặc định (đặt LAZY, fetch có chủ đích).</li>
+<li><b>Denormalize hợp lý:</b> thêm <code>min_price</code>, <code>thumbnail_url</code>, <code>rating_avg</code>, <code>review_count</code> lên Product để render listing không cần join/aggregate. Cập nhật bằng trigger tầng ứng dụng khi có review/variant mới.</li>
+<li><b>Cache:</b> ở 500 user thường <b>chưa cần Redis</b>. Cache tầng ứng dụng (Caffeine / Spring Cache) cho danh mục, brand, trang chủ là đủ. Bật HTTP cache/ETag cho trang SSR.</li>
+<li><b>Materialized view:</b> MySQL không có MV gốc → dùng <b>summary/aggregate table</b> hoặc counter column thay thế. Với quy mô này, counter column là đủ; chưa cần bảng tổng hợp.</li>
+</ul>
+
+<h2 id="index">10. Index đề xuất</h2>
+<pre><code>-- Unique / slug (tra cứu theo URL, SSR)
+UNIQUE product(slug), category(slug), brand(slug), blog_post(slug)
+UNIQUE product_variant(sku), users(email), promotion(code)
+
+-- Foreign key (MySQL không tự tạo index cho FK ở mọi engine → tạo tay)
+INDEX product(category_id), product(brand_id)
+INDEX product_variant(product_id), product_image(product_id)
+INDEX order_item(order_id), order_item(variant_id)
+INDEX orders(user_id), review(product_id)
+
+-- Lọc / sắp xếp danh sách
+INDEX product(status, created_at)      -- list SP mới, đang bán
+INDEX product(status, min_price)       -- lọc + sort theo giá
+INDEX orders(user_id, status, created_at)  -- lịch sử đơn của user
+INDEX blog_post(status, published_at)
+
+-- Tìm kiếm sản phẩm
+FULLTEXT product(name, description)    -- InnoDB FULLTEXT cho search cơ bản
+</code></pre>
+<p><b>Giải thích:</b> index slug/sku/email/code phục vụ tra cứu 1 dòng cực nhanh và ép tính duy nhất. Index FK tăng tốc join và bắt buộc cho hiệu năng listing. Composite <code>(status, created_at)</code>/<code>(status, min_price)</code> theo đúng thứ tự cột dùng trong <code>WHERE ... ORDER BY</code> (nguyên tắc leftmost-prefix).</p>
+<blockquote><b>Lưu ý:</b> đề bài nhắc <b>GIN index</b> — đó là của PostgreSQL. Bạn dùng <b>MySQL</b> nên tương đương là <b>FULLTEXT index (InnoDB)</b>. Nếu sau này cần tìm kiếm tiếng Việt có dấu/tương đối tốt hơn, chuyển search sang <b>Meilisearch/Elasticsearch</b> thay vì ép MySQL.</blockquote>
+
+<h2 id="soft">11. Soft Delete</h2>
+<table>
+<tr><th>Entity</th><th>Soft delete?</th><th>Lý do</th></tr>
+<tr><td>Product, ProductVariant, Category, Brand, BlogPost</td><td><span class="pill p-ok">Có</span></td><td>Ngừng bán nhưng phải giữ để đơn cũ/review còn tham chiếu; SEO/redirect.</td></tr>
+<tr><td>User</td><td><span class="pill p-ok">Có (deactivate)</span></td><td>Giữ lịch sử đơn; cân nhắc ẩn danh hoá PII khi user yêu cầu xoá.</td></tr>
+<tr><td>Order, OrderItem, Payment</td><td><span class="pill p-crit">Không</span></td><td>Bản ghi tài chính bất biến — dùng <code>status</code> (CANCELLED/REFUNDED), không xoá.</td></tr>
+<tr><td>CartItem, Notification</td><td><span class="pill p-crit">Không</span></td><td>Dữ liệu tạm — xoá cứng cho gọn.</td></tr>
+</table>
+<blockquote><b>Trade-off:</b> Soft delete = mọi query phải <code>WHERE deleted_at IS NULL</code> (Hibernate <code>@SQLRestriction</code>/<code>@Where</code> lo được), index phình nhẹ. Đổi lại giữ toàn vẹn tham chiếu. Đừng soft-delete tràn lan — chỉ nơi có lịch sử tham chiếu.</blockquote>
+
+<h2 id="audit">12. Audit</h2>
+<ul>
+<li><b>created_at / updated_at:</b> ✔ mọi bảng. Dùng <code>@CreationTimestamp</code> / <code>@UpdateTimestamp</code> (hoặc <code>@EnableJpaAuditing</code>).</li>
+<li><b>deleted_at:</b> ✔ chỉ các entity soft-delete ở mục 11.</li>
+<li><b>created_by / updated_by:</b> chỉ cho nội dung do admin quản trị (Product, BlogPost, Promotion, Banner). Bỏ ở dữ liệu do user tự sinh.</li>
+<li><b>version (@Version) — optimistic locking:</b> ✔ <b>quan trọng</b> ở ProductVariant.stock_qty (chống oversell) và Order (chống double-submit). Đây là thứ đáng làm nhất trong nhóm audit.</li>
+<li><b>Audit Log table:</b> <span class="pill p-low">YAGNI</span>. <code>updated_at</code>+<code>version</code> đủ cho 500 user. Chỉ thêm khi có yêu cầu compliance/theo dõi thay đổi giá.</li>
+</ul>
+
+<h2 id="sec">13. Security</h2>
+<ul>
+<li class="bad"><b>Password:</b> ERD ghi <code>Password</code> — bắt buộc lưu <b>hash BCrypt</b> (cost ~10–12), không bao giờ plaintext. Đặt tên cột <code>password_hash</code> cho rõ.</li>
+<li><b>PII (email, phone, address):</b> ở 500 user, <b>không cần</b> encrypt cột trong DB (over-engineering, khó query). Đủ an toàn với: HTTPS/TLS, phân quyền, không log PII, backup có kiểm soát. Cân nhắc mã hoá <b>at-rest ở tầng đĩa</b> nếu hosting hỗ trợ.</li>
+<li><b>Tách bảng nhạy cảm:</b> có thể tách <code>user_credential</code> (email, password_hash, tokens) khỏi <code>user_profile</code> — nice-to-have, không bắt buộc ở quy mô này.</li>
+<li><b>Không lưu:</b> số thẻ/CVV (để cổng thanh toán lo — PCI). Chỉ lưu <code>payment_ref</code>/token từ cổng.</li>
+<li><b>Lộ dữ liệu qua id:</b> id đơn hàng chạy tuần tự có thể bị đếm/dò — dùng <code>order_code</code> (mã ngẫu nhiên) hiển thị ra ngoài, giữ BIGINT id nội bộ.</li>
+</ul>
+
+<h2 id="maint">14. Maintainability &amp; Convention</h2>
+<p>Điểm trừ lớn hiện tại là <b>convention không nhất quán</b>: <code>IdUser</code>, <code>CategoryID</code>, <code>ProductId</code>, <code>WarrentyId</code> (typo), trộn PascalCase và camelCase, cột mơ hồ (<code>Extract</code>, <code>ExtraInfo</code>, <code>Describe</code>).</p>
+<h4>Quy ước đề xuất (MySQL + Hibernate)</h4>
+<ul>
+<li>Bảng: <code>snake_case</code>, số ít: <code>product</code>, <code>order_item</code>, <code>product_variant</code>.</li>
+<li>Cột: <code>snake_case</code>. PK luôn là <code>id</code>. FK là <code>&lt;bảng&gt;_id</code>: <code>category_id</code>.</li>
+<li>Boolean: tiền tố <code>is_</code>/<code>has_</code>: <code>is_active</code>, <code>is_default</code>.</li>
+<li>Thời gian: hậu tố <code>_at</code>: <code>created_at</code>, <code>paid_at</code>.</li>
+<li>Enum trạng thái: cột <code>status</code> kiểu <code>VARCHAR</code>+<code>@Enumerated(STRING)</code> (đọc dễ) hoặc tinyint (gọn). Ưu tiên STRING cho dễ đọc/maintain team nhỏ.</li>
+<li>Trong Java entity dùng camelCase, map bằng <code>@Column(name="...")</code> hoặc naming strategy — không để Hibernate tự suy diễn lẫn lộn.</li>
+</ul>
+<blockquote>Nhất quán đặt tên là khoản đầu tư rẻ nhất cho onboarding. Sửa <b>ngay bây giờ</b> khi chưa có dữ liệu, đừng để sau.</blockquote>
+
+<h2 id="scale">15. Scalability roadmap</h2>
+<table>
+<tr><th>Quy mô</th><th>Cần làm gì</th></tr>
+<tr><td><b>500 (hiện tại)</b></td><td>Monolith + 1 MySQL. Index đúng, JOIN FETCH, cache in-memory. <b>Không cần gì thêm.</b></td></tr>
+<tr><td><b>10.000</b></td><td>Thêm Redis (cache + session), CDN cho ảnh, tách media sang object storage (S3/R2), bật read replica nếu đọc nặng.</td></tr>
+<tr><td><b>100.000</b></td><td>Search engine riêng (Meilisearch/Elastic), tách service ảnh, hàng đợi (queue) cho email/đơn hàng, giám sát (APM), stock ledger thật.</td></tr>
+<tr><td><b>1.000.000</b></td><td>Cân nhắc tách service (catalog/order/payment), sharding/partition bảng order theo thời gian, event-driven. <b>Chỉ khi thật sự chạm ngưỡng.</b></td></tr>
+</table>
+<blockquote>Điều quan trọng: schema sau refactor <b>không cản trở</b> các bước trên. Bạn có thể tiến hoá từng phần mà không phải đập đi làm lại — đó là mục tiêu "mở rộng từng phần".</blockquote>
+
+<h2 id="over">16. Over-engineering — những gì KHÔNG nên làm bây giờ</h2>
+<ul>
+<li class="bad"><b>EAV (Attribute/AttributeValue):</b> không cần cho bộ thuộc tính kính cố định.</li>
+<li class="bad"><b>StockTransaction / InventoryHistory:</b> chưa cần; <code>stock_qty</code>+<code>version</code> đủ.</li>
+<li class="bad"><b>Bảng seo_meta polymorphic:</b> nhúng cột đơn giản hơn.</li>
+<li class="bad"><b>Invoice / Refund / Return / Shipment tách riêng:</b> hoãn tới khi có nghiệp vụ thật.</li>
+<li class="bad"><b>Closure table cho Category:</b> <code>parent_id</code> đủ cho 2–3 tầng.</li>
+<li class="bad"><b>Audit Log, Microservice, CQRS, sharding:</b> YAGNI ở 500 user.</li>
+</ul>
+<p>Nguyên tắc: mỗi bảng thêm vào phải trả lời được "nghiệp vụ nào ngay bây giờ cần nó?". Nếu câu trả lời là "phòng khi sau này" → hoãn, nhưng thiết kế sao cho <b>thêm được mà không phá</b>.</p>
+
+<h2 id="erd">17. ERD đề xuất (refactor đầy đủ)</h2>
+<p>Bản dưới đây đã: thêm OrderItem/CartItem, tách Variant/Image/Address/Review/Blog, gộp Bill→Payment, thêm SEO + timestamps, thêm parent_id cho Category. Vẫn giữ tối giản cho ~500 user.</p>
+<div class="mermaid">
+erDiagram
+  USER ||--o{ ADDRESS : has
+  USER ||--o| CART : has
+  USER ||--o{ ORDERS : places
+  USER ||--o{ REVIEW : writes
+  USER ||--o{ WISHLIST : keeps
+  USER ||--o{ NOTIFICATION : receives
+
+  CATEGORY ||--o{ CATEGORY : parent_of
+  CATEGORY ||--o{ PRODUCT : categorizes
+  BRAND ||--o{ PRODUCT : makes
+
+  PRODUCT ||--o{ PRODUCT_VARIANT : has
+  PRODUCT ||--o{ PRODUCT_IMAGE : has
+  PRODUCT ||--o{ REVIEW : receives
+  PRODUCT ||--o{ WISHLIST : in
+
+  PRODUCT_VARIANT ||--o{ CART_ITEM : in
+  PRODUCT_VARIANT ||--o{ ORDER_ITEM : in
+
+  CART ||--o{ CART_ITEM : contains
+  ORDERS ||--o{ ORDER_ITEM : contains
+  ORDERS ||--o{ PAYMENT : paid_by
+  ORDERS }o--o| PROMOTION : applies
+
+  BLOG_POST }o--o| USER : author
+
+  USER {
+    bigint id PK
+    string email UK
+    string password_hash
+    string full_name
+    string phone
+    string role
+    string status
+    datetime created_at
+    datetime updated_at
+  }
+  ADDRESS {
+    bigint id PK
+    bigint user_id FK
+    string receiver_name
+    string receiver_phone
+    string line
+    string ward_district_city
+    bool is_default
+  }
+  CATEGORY {
+    bigint id PK
+    bigint parent_id FK
+    string name
+    string slug UK
+    string meta_title
+    string meta_description
+    string status
+  }
+  BRAND {
+    bigint id PK
+    string name
+    string slug UK
+    string logo_url
+    string meta_title
+    string meta_description
+  }
+  PRODUCT {
+    bigint id PK
+    bigint category_id FK
+    bigint brand_id FK
+    string name
+    string slug UK
+    text description
+    decimal min_price
+    string thumbnail_url
+    float rating_avg
+    int review_count
+    int warranty_months
+    string meta_title
+    string meta_description
+    string og_image
+    string status
+    datetime created_at
+    datetime deleted_at
+  }
+  PRODUCT_VARIANT {
+    bigint id PK
+    bigint product_id FK
+    string sku UK
+    string color
+    string size
+    string material
+    string lens_option
+    decimal price
+    int stock_qty
+    int version
+    datetime deleted_at
+  }
+  PRODUCT_IMAGE {
+    bigint id PK
+    bigint product_id FK
+    string url
+    string alt
+    int sort_order
+  }
+  CART {
+    bigint id PK
+    bigint user_id FK
+    datetime updated_at
+  }
+  CART_ITEM {
+    bigint id PK
+    bigint cart_id FK
+    bigint variant_id FK
+    int quantity
+  }
+  ORDERS {
+    bigint id PK
+    bigint user_id FK
+    string order_code UK
+    decimal subtotal
+    decimal discount_amount
+    decimal shipping_fee
+    decimal total
+    bigint promotion_id FK
+    string shipping_address_snapshot
+    string tracking_code
+    string status
+    datetime created_at
+    int version
+  }
+  ORDER_ITEM {
+    bigint id PK
+    bigint order_id FK
+    bigint variant_id FK
+    string product_name_snapshot
+    decimal unit_price
+    int quantity
+  }
+  PAYMENT {
+    bigint id PK
+    bigint order_id FK
+    string method
+    decimal amount
+    string status
+    string payment_ref
+    datetime paid_at
+  }
+  PROMOTION {
+    bigint id PK
+    string code UK
+    string name
+    string type
+    decimal value
+    decimal min_value
+    int usage_limit
+    int used_count
+    datetime start_at
+    datetime end_at
+    string status
+  }
+  REVIEW {
+    bigint id PK
+    bigint user_id FK
+    bigint product_id FK
+    bigint order_id FK
+    int rating
+    text content
+    string status
+    datetime created_at
+  }
+  WISHLIST {
+    bigint id PK
+    bigint user_id FK
+    bigint product_id FK
+  }
+  BLOG_POST {
+    bigint id PK
+    bigint author_id FK
+    string title
+    string slug UK
+    text content
+    string cover_image
+    string meta_title
+    string meta_description
+    string status
+    datetime published_at
+  }
+  NOTIFICATION {
+    bigint id PK
+    bigint user_id FK
+    string title
+    string body
+    string type
+    bool is_read
+    datetime created_at
+  }
+</div>
+<p class="tag">So với bản gốc: bỏ Bill &amp; ProductDetail &amp; Feedback &amp; Warranty(bảng); thêm ORDER_ITEM, CART_ITEM, PRODUCT_VARIANT, PRODUCT_IMAGE, ADDRESS, REVIEW, WISHLIST, BLOG_POST; nhúng SEO + timestamps; Category tự tham chiếu.</p>
+
+<h2 id="score">18. Production Readiness — chấm điểm</h2>
+<p class="tag">Thang điểm cho ERD <b>hiện tại</b> (chưa refactor):</p>
+<div class="card">
+  <div class="score"><div class="lbl">Database Design</div><div class="bar"><i style="width:40%"></i></div><div class="num">4/10</div></div>
+  <div class="score"><div class="lbl">Maintainability</div><div class="bar"><i style="width:50%"></i></div><div class="num">5/10</div></div>
+  <div class="score"><div class="lbl">SEO</div><div class="bar"><i style="width:10%"></i></div><div class="num">1/10</div></div>
+  <div class="score"><div class="lbl">Performance</div><div class="bar"><i style="width:40%"></i></div><div class="num">4/10</div></div>
+  <div class="score"><div class="lbl">Scalability</div><div class="bar"><i style="width:50%"></i></div><div class="num">5/10</div></div>
+  <div class="score"><div class="lbl">Simplicity</div><div class="bar"><i style="width:70%"></i></div><div class="num">7/10</div></div>
+  <div class="score"><div class="lbl">Business Fit</div><div class="bar"><i style="width:40%"></i></div><div class="num">4/10</div></div>
+</div>
+<p class="tag">Sau khi áp dụng refactor ở mục 17, ước lượng: DB Design 8, Maintainability 8, SEO 8, Performance 7, Scalability 7, Simplicity 8, Business Fit 8.</p>
+
+<h2 id="kl">19. Kết luận</h2>
+<div class="card verdict">
+<p><b>Có nên dùng ERD hiện tại để lên production không?</b> — <b>Chưa.</b> Nó thiếu OrderItem (không bán được hàng), thiếu SEO (trái mục tiêu), và đặt sai tồn kho. Đây là các lỗi chặn, không phải tinh chỉnh.</p>
+<p><b>Ưu tiên sửa trước (theo thứ tự):</b></p>
+<ol>
+<li>Thêm <b>OrderItem</b> + <b>CartItem</b> (mở luồng mua hàng).</li>
+<li>Đổi ProductDetail → <b>ProductVariant</b> mang giá + tồn kho + SKU + <code>@Version</code>.</li>
+<li>Thêm <b>slug + meta</b> cho Product/Category/Brand/Blog.</li>
+<li>Gộp <b>Bill → Payment</b>; thêm <b>created_at/updated_at</b> toàn bộ.</li>
+<li>Tách <b>Address</b>, đổi Feedback → <b>Review</b> (có product_id + rating).</li>
+<li>Chuẩn hoá <b>naming</b> khi chưa có dữ liệu.</li>
+</ol>
+<p><b>Mức phù hợp doanh nghiệp nhỏ (~500 user):</b> bản refactor cố tình giữ gọn — không EAV, không stock ledger, không microservice. Đủ đơn giản để onboard nhanh, đủ chuẩn để không phải đập đi làm lại, và <b>chuẩn SEO</b> ngay từ đầu. Đây là điểm cân bằng đúng giữa YAGNI và production-ready.</p>
+<p style="margin-bottom:0"><b>Một câu:</b> giữ nguyên tư duy khối, nhưng thi công lại theo mục 17 — bạn sẽ có schema production-ready mà vẫn nhẹ cho team nhỏ.</p>
+</div>
+
+<hr>
+<p class="tag">Tài liệu review kiến trúc — ProjectSale · Tạo ngày 09/07/2026. Không chỉnh sửa schema gốc; đây là đề xuất để bạn quyết định.</p>
+
+<script>
+  mermaid.initialize({startOnLoad:true, theme:'default', er:{useMaxWidth:true}});
+</script>
+</div>
+</body>
+</html>
