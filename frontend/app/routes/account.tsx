@@ -1,4 +1,4 @@
-import { data, Form, Link } from "react-router";
+import { data } from "react-router";
 import type { Route } from "./+types/account";
 import * as authApi from "~/features/auth/api/auth.api";
 import { requireUser } from "~/lib/auth.server";
@@ -25,8 +25,8 @@ export async function loader({ request }: Route.LoaderArgs) {
 export default function Account({ loaderData }: Route.ComponentProps) {
   const { me } = loaderData;
   return (
-    <main style={{ maxWidth: 560, margin: "6vh auto", padding: "0 16px" }}>
-      <h1>Tài khoản</h1>
+    <section style={{ maxWidth: 560, margin: "3vh auto" }} aria-labelledby="account-heading">
+      <h1 id="account-heading">Tài khoản</h1>
       <dl style={{ display: "grid", gridTemplateColumns: "140px 1fr", gap: 8 }}>
         <dt>Email</dt>
         <dd>{me.email}</dd>
@@ -37,12 +37,6 @@ export default function Account({ loaderData }: Route.ComponentProps) {
         <dt>Vai trò</dt>
         <dd>{me.role}</dd>
       </dl>
-      <div style={{ display: "flex", gap: 12, marginTop: 20 }}>
-        <Link to="/">← Trang chủ</Link>
-        <Form method="post" action="/logout">
-          <button type="submit">Đăng xuất</button>
-        </Form>
-      </div>
-    </main>
+    </section>
   );
 }
