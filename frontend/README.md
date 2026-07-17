@@ -19,6 +19,22 @@ npm run build && npm start
 > `npm run typecheck` chạy `react-router typegen` trước để sinh types cho
 > `./+types/*`. Trước khi typegen chạy, tsc sẽ báo thiếu các module này — bình thường.
 
+## Landing page eyewear (`/`)
+
+Trang chủ là landing page editorial của ProjectSale (GSAP + ScrollTrigger + Lenis),
+giới thiệu gọng kính, kính râm và tròng kính theo định hướng PRD. Motion system
+gốc được ghi lại tại [`specs/landing-campaign-video-analysis.md`](../specs/landing-campaign-video-analysis.md),
+còn quyết định chuyển nội dung sang eyewear nằm ở
+[`specs/landing-eyewear-content-refresh.md`](../specs/landing-eyewear-content-refresh.md).
+
+- Code: `app/components/landing/` (mỗi section 1 component, style ở `landing.css`).
+- **Đổi nội dung/ảnh/sản phẩm**: ưu tiên registry `app/components/landing/content.ts`;
+  tiêu đề hero và metadata route nằm ở component/route tương ứng.
+- **Tinh chỉnh animation**: hằng số duration/easing/breakpoint ở `app/lib/animation.ts`.
+- Ảnh + font self-host ở `public/landing/` (nguồn + giấy phép: `public/landing/CREDITS.md`).
+- Danh sách sản phẩm chuyển sang route `/products`.
+- Landing **không phụ thuộc backend** (không loader) — luôn chạy được khi API tắt.
+
 ## Quyết định kiến trúc cốt lõi
 
 ### 1. httpOnly session-cookie bridge (bảo mật token)

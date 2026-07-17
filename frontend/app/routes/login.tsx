@@ -1,4 +1,4 @@
-import { Form, Link, redirect } from "react-router";
+import { Form, redirect } from "react-router";
 import { data } from "react-router";
 import type { Route } from "./+types/login";
 import { isApiError } from "~/core/api";
@@ -63,8 +63,8 @@ export async function action({ request }: Route.ActionArgs) {
 
 export default function Login({ actionData }: Route.ComponentProps) {
   return (
-    <main style={{ maxWidth: 380, margin: "8vh auto", padding: "0 16px" }}>
-      <h1>Đăng nhập</h1>
+    <section style={{ maxWidth: 380, margin: "5vh auto" }} aria-labelledby="login-heading">
+      <h1 id="login-heading">Đăng nhập</h1>
       {actionData?.error ? (
         <p style={{ color: "var(--color-danger)" }}>{actionData.error}</p>
       ) : null}
@@ -84,9 +84,6 @@ export default function Login({ actionData }: Route.ComponentProps) {
         </label>
         <button type="submit">Đăng nhập</button>
       </Form>
-      <p style={{ marginTop: 16 }}>
-        <Link to="/">← Về trang chủ</Link>
-      </p>
-    </main>
+    </section>
   );
 }
