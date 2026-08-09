@@ -1,0 +1,60 @@
+import type { AdminResourceRecord } from "~/features/admin-shared/lib/admin-resource.types";
+
+export const ADMIN_CATALOG_MOCK: ReadonlyArray<AdminResourceRecord> = [
+  {
+    id: "c-01",
+    title: "Kính cận",
+    subtitle: "Danh mục gốc",
+    status: "ACTIVE",
+    attributes: { type: "Danh mục", slug: "kinh-can", items: 84 },
+    updatedAt: "2026-08-08T10:00:00Z",
+  },
+  {
+    id: "c-02",
+    title: "Kính râm",
+    subtitle: "Danh mục gốc",
+    status: "ACTIVE",
+    attributes: { type: "Danh mục", slug: "kinh-ram", items: 52 },
+    updatedAt: "2026-08-08T09:30:00Z",
+  },
+  {
+    id: "c-03",
+    title: "Gọng titan",
+    subtitle: "Con của Kính cận",
+    status: "ACTIVE",
+    attributes: { type: "Danh mục", slug: "gong-titan", items: 31 },
+    updatedAt: "2026-08-07T11:00:00Z",
+  },
+  {
+    id: "b-01",
+    title: "RayBan",
+    subtitle: "Thương hiệu quốc tế",
+    status: "ACTIVE",
+    attributes: { type: "Thương hiệu", slug: "rayban", items: 28 },
+    updatedAt: "2026-08-06T14:00:00Z",
+  },
+  {
+    id: "b-02",
+    title: "Gentle Monster",
+    subtitle: "Thương hiệu quốc tế",
+    status: "ACTIVE",
+    attributes: { type: "Thương hiệu", slug: "gentle-monster", items: 19 },
+    updatedAt: "2026-08-05T10:15:00Z",
+  },
+  {
+    id: "b-03",
+    title: "Bolon",
+    subtitle: "Thương hiệu quốc tế",
+    status: "ACTIVE",
+    attributes: { type: "Thương hiệu", slug: "bolon", items: 16 },
+    updatedAt: "2026-08-04T08:45:00Z",
+  },
+  {
+    id: "c-04",
+    title: "Bộ sưu tập cũ",
+    subtitle: "Danh mục lưu trữ",
+    status: "INACTIVE",
+    attributes: { type: "Danh mục", slug: "bo-suu-tap-cu", items: 0 },
+    updatedAt: "2026-08-03T09:20:00Z",
+  },
+];

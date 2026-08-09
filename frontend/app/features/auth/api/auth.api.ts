@@ -23,9 +23,13 @@ export async function login(
   body: LoginRequest,
   signal?: AbortSignal,
 ): Promise<LoginResponse> {
-  const res = await client.post<ApiEnvelope<LoginResponse>>(AUTH_ENDPOINTS.login, body, {
-    signal,
-  });
+  const res = await client.post<ApiEnvelope<LoginResponse>>(
+    AUTH_ENDPOINTS.login,
+    body,
+    {
+      signal,
+    },
+  );
   return unwrapData(res.data);
 }
 
@@ -66,6 +70,8 @@ export async function getMe(
   client: AxiosInstance,
   signal?: AbortSignal,
 ): Promise<AuthUser> {
-  const res = await client.get<ApiEnvelope<AuthUser>>(AUTH_ENDPOINTS.me, { signal });
+  const res = await client.get<ApiEnvelope<AuthUser>>(AUTH_ENDPOINTS.me, {
+    signal,
+  });
   return unwrapData(res.data);
 }

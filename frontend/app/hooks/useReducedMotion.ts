@@ -3,13 +3,19 @@ import { useSyncExternalStore } from "react";
 const QUERY = "(prefers-reduced-motion: reduce)";
 
 function subscribe(onChange: () => void): () => void {
+  if (typeof window.matchMedia !== "function") {
+    return () => undefined;
+  }
+
   const mql = window.matchMedia(QUERY);
   mql.addEventListener("change", onChange);
   return () => mql.removeEventListener("change", onChange);
 }
 
 function getSnapshot(): boolean {
-  return window.matchMedia(QUERY).matches;
+  return typeof window.matchMedia === "function"
+    ? window.matchMedia(QUERY).matches
+    : false;
 }
 
 /** SSR trả về false; client theo dõi thay đổi trực tiếp từ media query. */

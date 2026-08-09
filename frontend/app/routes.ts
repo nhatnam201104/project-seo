@@ -20,7 +20,14 @@ export default [
   route("logout", "routes/logout.tsx"),
 
   layout("layouts/admin-layout.tsx", [
-    // Mỗi leaf loader đặc quyền vẫn tự requireAdmin().
+    // UI prototype công khai, chỉ dùng mock. Khôi phục guard trước khi nối API thật.
     route("admin", "routes/admin.tsx"),
+    route("admin/products", "routes/admin.products.tsx"),
+    route("admin/orders", "routes/admin.orders.tsx"),
+    route("admin/catalog", "routes/admin.catalog.tsx"),
+    route("admin/promotions", "routes/admin.promotions.tsx"),
+    route("admin/blog", "routes/admin.blog.tsx"),
+    route("admin/reviews", "routes/admin.reviews.tsx"),
+    route("admin/users", "routes/admin.users.tsx"),
   ]),
 ] satisfies RouteConfig;

@@ -21,10 +21,13 @@ export async function getProducts(
   params: GetProductsParams,
   signal?: AbortSignal,
 ): Promise<Page<ProductSummary>> {
-  const res = await client.get<ApiEnvelope<ProductSummary[]>>(PRODUCT_ENDPOINTS.list, {
-    params,
-    signal,
-  });
+  const res = await client.get<ApiEnvelope<ProductSummary[]>>(
+    PRODUCT_ENDPOINTS.list,
+    {
+      params,
+      signal,
+    },
+  );
   return unwrapPage(res.data);
 }
 
@@ -33,10 +36,13 @@ export async function searchProducts(
   params: SearchProductsParams,
   signal?: AbortSignal,
 ): Promise<Page<ProductSummary>> {
-  const res = await client.get<ApiEnvelope<ProductSummary[]>>(PRODUCT_ENDPOINTS.search, {
-    params,
-    signal,
-  });
+  const res = await client.get<ApiEnvelope<ProductSummary[]>>(
+    PRODUCT_ENDPOINTS.search,
+    {
+      params,
+      signal,
+    },
+  );
   return unwrapPage(res.data);
 }
 
@@ -45,9 +51,12 @@ export async function getProductBySlug(
   slug: string,
   signal?: AbortSignal,
 ): Promise<ProductDetail> {
-  const res = await client.get<ApiEnvelope<ProductDetail>>(PRODUCT_ENDPOINTS.detail(slug), {
-    signal,
-  });
+  const res = await client.get<ApiEnvelope<ProductDetail>>(
+    PRODUCT_ENDPOINTS.detail(slug),
+    {
+      signal,
+    },
+  );
   return unwrapData(res.data);
 }
 
