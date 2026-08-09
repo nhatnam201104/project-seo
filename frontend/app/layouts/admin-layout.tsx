@@ -1,24 +1,42 @@
 import { Outlet } from "react-router";
-import type { Route } from "./+types/admin-layout";
 import { AdminFooter } from "~/components/layout/admin/AdminFooter";
 import { AdminHeader } from "~/components/layout/admin/AdminHeader";
 import { MainLayout } from "~/components/layout/MainLayout";
-import { requireAdmin } from "~/lib/auth.server";
+import { useAdminTheme } from "~/features/admin-dashboard/hooks/useAdminTheme";
+import { AdminSidebar } from "~/features/admin-shell/components/AdminSidebar";
+import { useAdminSidebar } from "~/features/admin-shell/hooks/useAdminSidebar";
 import "~/components/layout/layout.css";
+import "~/features/admin-shell/styles/admin-shell.css";
 
-export async function loader({ request }: Route.LoaderArgs) {
-  const auth = await requireAdmin(request);
-  return { user: auth.user };
-}
+export default function AdminLayout() {
+  const { theme, toggleTheme } = useAdminTheme();
+  const sidebar = useAdminSidebar();
 
-export default function AdminLayout({ loaderData }: Route.ComponentProps) {
   return (
-    <MainLayout
-      variant="admin"
-      header={<AdminHeader user={loaderData.user} />}
-      footer={<AdminFooter />}
-    >
-      <Outlet />
-    </MainLayout>
+    <div className="admin-preview" data-theme={theme}>
+      <MainLayout
+        variant="admin"
+        header={
+          <AdminHeader
+            theme={theme}
+            onThemeToggle={toggleTheme}
+            onMenuToggle={sidebar.openMobile}
+          />
+        }
+        footer={<AdminFooter />}
+      >
+        <div className="admin-shell-body">
+          <AdminSidebar
+            collapsed={sidebar.isCollapsed}
+            mobileOpen={sidebar.isMobileOpen}
+            onCollapseToggle={sidebar.toggleCollapsed}
+            onCloseMobile={sidebar.closeMobile}
+          />
+          <div className="admin-shell-content">
+            <Outlet />
+          </div>
+        </div>
+      </MainLayout>
+    </div>
   );
 }
