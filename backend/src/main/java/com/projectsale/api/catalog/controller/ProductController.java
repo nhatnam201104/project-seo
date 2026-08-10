@@ -4,8 +4,9 @@ import static com.projectsale.api.catalog.dto.CatalogDtos.ProductDetail;
 import static com.projectsale.api.catalog.dto.CatalogDtos.ProductSummary;
 
 import com.projectsale.api.catalog.service.CatalogService;
-import com.projectsale.api.common.exception.AppException;
-import com.projectsale.api.common.response.ApiResponse;
+import com.projectsale.common.exception.AppException;
+import com.projectsale.common.response.ApiResponse;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

@@ -10,5 +10,5 @@ RUN useradd --system --uid 10001 spring
 USER spring
 WORKDIR /app
 COPY --from=build /workspace/target/projectsale-api-*.jar app.jar
-EXPOSE 8080
-ENTRYPOINT ["java","-jar","/app/app.jar"]
+EXPOSE 8081
+ENTRYPOINT ["java","-Duser.timezone=UTC","-jar","/app/app.jar"]

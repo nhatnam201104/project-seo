@@ -9,15 +9,16 @@ import static com.projectsale.api.catalog.dto.CatalogDtos.ProductImageResponse;
 import static com.projectsale.api.catalog.dto.CatalogDtos.ProductSummary;
 import static com.projectsale.api.catalog.dto.CatalogDtos.ProductVariantResponse;
 
-import com.projectsale.api.catalog.entity.Brand;
-import com.projectsale.api.catalog.entity.Category;
-import com.projectsale.api.catalog.entity.Product;
-import com.projectsale.api.catalog.entity.ProductImage;
-import com.projectsale.api.catalog.entity.ProductVariant;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.ReportingPolicy;
+
+import com.projectsale.entity.Brand;
+import com.projectsale.entity.Category;
+import com.projectsale.entity.Product;
+import com.projectsale.entity.ProductImage;
+import com.projectsale.entity.ProductVariant;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING, unmappedTargetPolicy = ReportingPolicy.ERROR)
 public interface CatalogMapper {
@@ -29,7 +30,7 @@ public interface CatalogMapper {
     @Mapping(target = "id", source = "publicId")
     @Mapping(target = "brand", expression = "java(new com.projectsale.api.catalog.dto.CatalogDtos.NamedRef(product.getBrand().getName(), product.getBrand().getSlug()))")
     @Mapping(target = "category", expression = "java(new com.projectsale.api.catalog.dto.CatalogDtos.NamedRef(product.getCategory().getName(), product.getCategory().getSlug()))")
-    @Mapping(target = "faceTags", expression = "java(product.getFaceTags() == null ? java.util.List.of() : java.util.List.of(product.getFaceTags()))")
+    @Mapping(target = "faceTags", expression = "java(product.getFaceTags() == null ? java.util.List.of() : java.util.List.copyOf(product.getFaceTags()))")
     ProductDetail toDetail(Product product);
 
     @Mapping(target = "variantId", source = "publicId")

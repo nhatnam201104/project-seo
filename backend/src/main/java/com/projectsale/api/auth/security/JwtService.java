@@ -7,7 +7,8 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import com.projectsale.api.user.entity.User;
+import com.projectsale.entity.User;
+
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
