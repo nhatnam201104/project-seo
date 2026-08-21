@@ -8,14 +8,15 @@ import static com.projectsale.api.catalog.dto.CatalogDtos.CategoryTree;
 import static com.projectsale.api.catalog.dto.CatalogDtos.ProductDetail;
 import static com.projectsale.api.catalog.dto.CatalogDtos.ProductSummary;
 
-import com.projectsale.api.catalog.entity.Category;
-import com.projectsale.api.catalog.entity.Product;
 import com.projectsale.api.catalog.mapper.CatalogMapper;
 import com.projectsale.api.catalog.repository.BrandRepository;
 import com.projectsale.api.catalog.repository.CategoryRepository;
 import com.projectsale.api.catalog.repository.ProductRepository;
-import com.projectsale.api.common.exception.AppException;
-import com.projectsale.api.user.entity.EntityStatus;
+import com.projectsale.common.exception.AppException;
+import com.projectsale.entity.Category;
+import com.projectsale.entity.Product;
+import com.projectsale.enums.StatusEnum;
+
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -94,28 +95,28 @@ public class CatalogService {
     Product product = findActiveProduct(slug);
     return productRepository
         .findTop4ByCategoryIdAndIdNotAndStatusAndDeletedAtIsNullOrderByRatingAvgDescCreatedAtDescIdDesc(
-            product.getCategory().getId(), product.getId(), EntityStatus.ACTIVE)
+            product.getCategory().getId(), product.getId(), StatusEnum.ACTIVE)
         .stream()
         .map(catalogMapper::toSummary)
         .toList();
   }
 
   public List<CategoryResponse> categories() {
-    return categoryRepository.findAllByStatusAndDeletedAtIsNullOrderByNameAsc(EntityStatus.ACTIVE).stream()
+    return categoryRepository.findAllByStatusAndDeletedAtIsNullOrderByNameAsc(StatusEnum.ACTIVE).stream()
         .map(catalogMapper::toCategory)
         .toList();
   }
 
   public CategoryDetail category(String slug) {
     Category category = categoryRepository
-        .findBySlugAndStatusAndDeletedAtIsNull(slug, EntityStatus.ACTIVE)
+        .findBySlugAndStatusAndDeletedAtIsNull(slug, StatusEnum.ACTIVE)
         .orElseThrow(() -> AppException.notFound("Không tìm thấy danh mục"));
     return catalogMapper.toCategoryDetail(category);
   }
 
   public List<CategoryTree> categoryTree() {
     List<Category> activeCategories = categoryRepository
-        .findAllByStatusAndDeletedAtIsNullOrderByNameAsc(EntityStatus.ACTIVE);
+        .findAllByStatusAndDeletedAtIsNullOrderByNameAsc(StatusEnum.ACTIVE);
     Map<Long, List<Category>> childrenByParentId = activeCategories.stream()
         .filter(category -> category.getParent() != null)
         .collect(
@@ -132,21 +133,21 @@ public class CatalogService {
   }
 
   public List<BrandResponse> brands() {
-    return brandRepository.findAllByStatusAndDeletedAtIsNullOrderByNameAsc(EntityStatus.ACTIVE).stream()
+    return brandRepository.findAllByStatusAndDeletedAtIsNullOrderByNameAsc(StatusEnum.ACTIVE).stream()
         .map(catalogMapper::toBrand)
         .toList();
   }
 
   public BrandDetail brand(String slug) {
     return brandRepository
-        .findBySlugAndStatusAndDeletedAtIsNull(slug, EntityStatus.ACTIVE)
+        .findBySlugAndStatusAndDeletedAtIsNull(slug, StatusEnum.ACTIVE)
         .map(catalogMapper::toBrandDetail)
         .orElseThrow(() -> AppException.notFound("Không tìm thấy thương hiệu"));
   }
 
   private Product findActiveProduct(String slug) {
     return productRepository
-        .findBySlugAndStatusAndDeletedAtIsNull(slug, EntityStatus.ACTIVE)
+        .findBySlugAndStatusAndDeletedAtIsNull(slug, StatusEnum.ACTIVE)
         .orElseThrow(() -> AppException.notFound("Không tìm thấy sản phẩm"));
   }
 

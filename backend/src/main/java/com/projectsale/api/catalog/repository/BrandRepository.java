@@ -1,12 +1,13 @@
 package com.projectsale.api.catalog.repository;
 
-import com.projectsale.api.catalog.entity.Brand;
-import com.projectsale.api.user.entity.EntityStatus;
+import com.projectsale.entity.Brand;
+import com.projectsale.enums.StatusEnum;
+
 import java.util.*;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface BrandRepository extends JpaRepository<Brand, Long> {
-    List<Brand> findAllByStatusAndDeletedAtIsNullOrderByNameAsc(EntityStatus status);
+    List<Brand> findAllByStatusAndDeletedAtIsNullOrderByNameAsc(StatusEnum status);
 
-    Optional<Brand> findBySlugAndStatusAndDeletedAtIsNull(String slug, EntityStatus status);
+    Optional<Brand> findBySlugAndStatusAndDeletedAtIsNull(String slug, StatusEnum status);
 }

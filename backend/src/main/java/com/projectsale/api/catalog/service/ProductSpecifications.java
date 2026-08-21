@@ -1,9 +1,11 @@
 package com.projectsale.api.catalog.service;
 
-import com.projectsale.api.catalog.entity.Product;
-import com.projectsale.api.catalog.entity.ProductVariant;
-import com.projectsale.api.user.entity.EntityStatus;
+import com.projectsale.entity.Product;
+import com.projectsale.entity.ProductVariant;
+import com.projectsale.enums.StatusEnum;
+
 import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Subquery;
 import java.math.BigDecimal;
@@ -33,7 +35,7 @@ final class ProductSpecifications {
       String faceTag) {
     return (root, query, builder) -> {
       List<Predicate> predicates = new ArrayList<>();
-      predicates.add(builder.equal(root.get("status"), EntityStatus.ACTIVE));
+      predicates.add(builder.equal(root.get("status"), StatusEnum.ACTIVE));
       predicates.add(builder.isNull(root.get("deletedAt")));
 
       if (categoryId != null) {
@@ -56,14 +58,9 @@ final class ProductSpecifications {
         predicates.add(builder.equal(root.get("hasLens"), hasLens));
       }
       if (faceTag != null && !faceTag.isBlank()) {
-        predicates.add(
-            builder.greaterThan(
-                builder.function(
-                    "array_position",
-                    Integer.class,
-                    root.get("faceTags"),
-                    builder.literal(normalize(faceTag))),
-                0));
+        Join<Product, String> faceTags = root.join("faceTags");
+        predicates.add(builder.equal(builder.lower(faceTags), normalize(faceTag)));
+        query.distinct(true);
       }
       if (color != null && !color.isBlank()) {
         Subquery<Integer> variantSubquery = query.subquery(Integer.class);

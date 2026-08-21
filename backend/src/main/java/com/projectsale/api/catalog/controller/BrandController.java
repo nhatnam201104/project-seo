@@ -4,7 +4,8 @@ import static com.projectsale.api.catalog.dto.CatalogDtos.BrandDetail;
 import static com.projectsale.api.catalog.dto.CatalogDtos.BrandResponse;
 
 import com.projectsale.api.catalog.service.CatalogService;
-import com.projectsale.api.common.response.ApiResponse;
+import com.projectsale.common.response.ApiResponse;
+
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
