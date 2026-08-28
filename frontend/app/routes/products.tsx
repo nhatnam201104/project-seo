@@ -25,7 +25,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
   const { products } = loaderData;
 
   return (
-    <section aria-labelledby="products-heading">
+    <section aria-labelledby="products-heading" style={{ width: "min(1120px, 100%)", margin: "0 auto", padding: "48px 20px 72px" }}>
       <h1 id="products-heading">Sản phẩm</h1>
       <p style={{ color: "var(--color-muted)" }}>
         {products.totalElements} sản phẩm · trang {products.number + 1}/

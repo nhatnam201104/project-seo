@@ -1,3 +1,5 @@
+@import "./components/storefront/storefront.css";
+
 :root {
   --color-bg: #ffffff;
   --color-surface: #f6f7f9;
@@ -9,19 +11,8 @@
 
   --radius: 10px;
   --space: 16px;
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
-    Arial, sans-serif;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-bg: #0f1115;
-    --color-surface: #171a21;
-    --color-text: #e6e8ec;
-    --color-muted: #9aa4b2;
-    --color-border: #2a2f3a;
-    --color-accent: #5b9dff;
-  }
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
 }
 
 * {

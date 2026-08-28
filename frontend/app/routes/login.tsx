@@ -1,4 +1,4 @@
-import { Form, redirect } from "react-router";
+import { Form, Link, redirect } from "react-router";
 import { data } from "react-router";
 import type { Route } from "./+types/login";
 import { isApiError } from "~/core/api";
@@ -11,6 +11,8 @@ import {
   createAuthedServerApi,
   publicServerApi,
 } from "~/lib/http.server";
+import { AuthField } from "~/components/storefront/AuthField";
+import { AuthShell } from "~/components/storefront/AuthShell";
 
 export function meta(_: Route.MetaArgs) {
   return [{ title: "Đăng nhập — ProjectSale" }];
@@ -19,7 +21,8 @@ export function meta(_: Route.MetaArgs) {
 export async function loader({ request }: Route.LoaderArgs) {
   const auth = await getAuth(request);
   if (auth.isAuthenticated) throw redirect("/account");
-  return null;
+  const url = new URL(request.url);
+  return { redirectTo: url.searchParams.get("redirectTo") ?? "/account" };
 }
 
 export async function action({ request }: Route.ActionArgs) {
@@ -30,7 +33,13 @@ export async function action({ request }: Route.ActionArgs) {
 
   if (!email || !password) {
     return data(
-      { error: "Vui lòng nhập email và mật khẩu." },
+      {
+        error: "Vui lòng kiểm tra lại thông tin đăng nhập.",
+        fieldErrors: {
+          email: email ? undefined : "Vui lòng nhập email.",
+          password: password ? undefined : "Vui lòng nhập mật khẩu.",
+        },
+      },
       { status: 400 },
     );
   }
@@ -57,33 +66,29 @@ export async function action({ request }: Route.ActionArgs) {
   } catch (err) {
     const message = isApiError(err) ? err.message : "Đăng nhập thất bại.";
     const status = isApiError(err) && err.status ? err.status : 400;
-    return data({ error: message }, { status });
+    return data({
+      error: message,
+      fieldErrors: { email: undefined, password: undefined },
+    }, { status });
   }
 }
 
-export default function Login({ actionData }: Route.ComponentProps) {
+export default function Login({ actionData, loaderData }: Route.ComponentProps) {
   return (
-    <section style={{ maxWidth: 380, margin: "5vh auto" }} aria-labelledby="login-heading">
-      <h1 id="login-heading">Đăng nhập</h1>
-      {actionData?.error ? (
-        <p style={{ color: "var(--color-danger)" }}>{actionData.error}</p>
-      ) : null}
-      <Form method="post" style={{ display: "grid", gap: 12 }}>
-        <label>
-          Email
-          <input type="email" name="email" required autoComplete="email" />
-        </label>
-        <label>
-          Mật khẩu
-          <input
-            type="password"
-            name="password"
-            required
-            autoComplete="current-password"
-          />
-        </label>
-        <button type="submit">Đăng nhập</button>
+    <AuthShell title="LOGIN" eyebrow="MEMBER ACCESS">
+      <Form method="post" className="auth-form">
+        <input type="hidden" name="redirectTo" value={loaderData.redirectTo} />
+        {actionData?.error ? <p className="auth-form__error" role="alert">{actionData.error}</p> : null}
+        <AuthField label="Email" type="email" name="email" placeholder="Email của bạn" required autoComplete="email" error={actionData?.fieldErrors?.email} />
+        <AuthField label="Mật khẩu" type="password" name="password" placeholder="Mật khẩu" required autoComplete="current-password" error={actionData?.fieldErrors?.password} />
+        <div className="auth-form__options">
+          <label className="auth-check"><input type="checkbox" name="remember" /> Ghi nhớ tôi</label>
+          <Link to="/login">Quên mật khẩu?</Link>
+        </div>
+        <button className="auth-button" type="submit">LOGIN</button>
+        <button className="auth-button auth-button--secondary" type="button" disabled aria-disabled="true">CONTINUE WITH GOOGLE</button>
+        <p className="auth-form__switch">NEW HERE? <Link to="/register">REGISTER</Link></p>
       </Form>
-    </section>
+    </AuthShell>
   );
 }
