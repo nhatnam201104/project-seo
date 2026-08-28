@@ -13,12 +13,13 @@ import org.mapstruct.ReportingPolicy;
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING, unmappedTargetPolicy = ReportingPolicy.ERROR)
 public interface UserMapper {
 
-  @Mapping(target = "id", source = "publicId")
+  @Mapping(target = "id", source = "user.publicId")
   UserResponse toResponse(User user);
 
   @BeanMapping(ignoreByDefault = true)
   @Mapping(target = "email", source = "email")
   @Mapping(target = "fullName", source = "fullName")
   @Mapping(target = "phone", source = "phone")
+
   User toUserEntity(RegisterRequest request);
 }

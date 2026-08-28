@@ -5,12 +5,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.projectsale.entity.User;
 
-
+    
 public interface UserRepository extends JpaRepository<User, Long> {
-    Optional<User> findByEmailIgnoreCase(String email);
+    Optional<User> findByEmail(String email);
 
     Optional<User> findByPublicId(UUID publicId);
 
-    boolean existsByEmailIgnoreCase(String email);
+    boolean existsByEmail(String email);
     boolean existsByPhone(String phone);
 }

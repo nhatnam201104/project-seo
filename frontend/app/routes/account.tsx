@@ -1,18 +1,17 @@
 import { data, Form, Link } from "react-router";
 import type { Route } from "./+types/account";
-import * as authApi from "~/features/auth/api/auth.api";
 import { requireUser } from "~/lib/auth.server";
 
 export function meta(_: Route.MetaArgs) {
   return [{ title: "Tài khoản — ProjectSale" }];
 }
 
-export async function loader({ request }: Route.LoaderArgs) {
+export async function loader({ request, context }: Route.LoaderArgs) {
   // requireUser → ném redirect /login nếu chưa đăng nhập.
-  const auth = await requireUser(request);
+  const auth = await requireUser(request, context);
 
   // Gọi API có auth qua bridge; nếu access token hết hạn, refresh tự chạy.
-  const me = await authApi.getMe(auth.client, request.signal);
+  const me = auth.user;
 
   // Nếu vừa refresh, ghi token mới vào session cookie (Set-Cookie).
   const setCookie = await auth.commit();

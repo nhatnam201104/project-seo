@@ -1,7 +1,7 @@
 import { Link } from "react-router";
 import type { Route } from "./+types/products";
 import { loadProductList } from "~/features/catalog/services/product.service";
-import { publicServerApi } from "~/lib/http.server";
+import { createPublicServerApi } from "~/lib/http.server";
 import { formatVnd } from "~/lib/format";
 
 export function meta(_: Route.MetaArgs) {
@@ -15,9 +15,9 @@ export function meta(_: Route.MetaArgs) {
   ];
 }
 
-export async function loader({ request }: Route.LoaderArgs) {
+export async function loader({ request, context }: Route.LoaderArgs) {
   const url = new URL(request.url);
-  const products = await loadProductList(publicServerApi, url, request.signal);
+  const products = await loadProductList(createPublicServerApi(request, context), url, request.signal);
   return { products };
 }
 

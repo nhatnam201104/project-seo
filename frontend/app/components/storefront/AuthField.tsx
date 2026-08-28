@@ -1,8 +1,9 @@
-import { useState, type InputHTMLAttributes } from "react";
+import { useState, type InputHTMLAttributes, type Ref } from "react";
 
 type AuthFieldProps = InputHTMLAttributes<HTMLInputElement> & {
   label: string;
   error?: string;
+  ref?: Ref<HTMLInputElement>;
 };
 
 export function AuthField({ label, error, type = "text", id, ...props }: AuthFieldProps) {

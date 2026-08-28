@@ -17,8 +17,8 @@ import "./app.css";
  * Root loader: cung cấp user (nếu có) cho TOÀN app từ session server. Đây là
  * nguồn để đồng bộ auth store phía client (chỉ để hiển thị/điều hướng).
  */
-export async function loader({ request }: Route.LoaderArgs) {
-  const auth = await getAuth(request);
+export async function loader({ request, context }: Route.LoaderArgs) {
+  const auth = await getAuth(request, context);
   return { user: auth.user };
 }
 

@@ -41,6 +41,7 @@ describe("application layout shells", () => {
     renderWithRouter(
       <ClientHeader
         user={{
+          id: "f9f72790-5713-4f56-a931-99c08b747f5f",
           email: "admin@projectsale.vn",
           full_name: "Quản trị viên",
           phone: null,

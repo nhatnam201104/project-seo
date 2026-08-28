@@ -1,6 +1,7 @@
 package com.projectsale.api.auth.security;
 
 import com.projectsale.api.user.repository.UserRepository;
+import com.projectsale.api.auth.security.dto.AccessTokenClaims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -46,7 +47,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
   private void authenticate(String token) {
     try {
-      JwtService.Claims claims = jwtService.verify(token);
+      AccessTokenClaims claims = jwtService.verifyAccessToken(token);
       var user = userRepository
           .findByPublicId(claims.userId())
           .filter(

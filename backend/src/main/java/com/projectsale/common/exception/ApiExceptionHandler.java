@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Path;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -11,13 +12,16 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSourceResolvable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
+import com.projectsale.api.auth.security.RefreshTokenService;
 import com.projectsale.common.config.CorrelationIdFilter;
 import com.projectsale.common.response.ApiError;
 import com.projectsale.common.response.ApiResponse;
@@ -47,6 +51,40 @@ public class ApiExceptionHandler {
   ResponseEntity<ApiResponse<Void>> handleBodyValidation(MethodArgumentNotValidException exception) {
     String detail = fieldErrorsDetail(exception.getBindingResult().getFieldErrors());
     return validationError(detail);
+  }
+
+  /** Body không đọc được (JSON hỏng, sai kiểu) là lỗi của client, không phải 500. */
+  @ExceptionHandler(HttpMessageNotReadableException.class)
+  ResponseEntity<ApiResponse<Void>> handleUnreadableBody(HttpMessageNotReadableException exception) {
+    return validationError(null);
+  }
+
+  /**
+   * Refresh token sai/hết hạn/bị thu hồi/bị replay → 401. Lỗi kho lưu trữ (Redis)
+   * được xử lý riêng bên dưới: trả 401 cho sự cố hạ tầng sẽ khiến client huỷ
+   * một phiên vẫn còn hợp lệ.
+   */
+  @ExceptionHandler(RefreshTokenService.RefreshTokenException.class)
+  ResponseEntity<ApiResponse<Void>> handleRefreshToken(RefreshTokenService.RefreshTokenException exception) {
+    return build(
+        ErrorCode.INVALID_REFRESH_TOKEN,
+        ApiError.of(ErrorCode.INVALID_REFRESH_TOKEN.defaultMessage()));
+  }
+
+  @ExceptionHandler(RefreshTokenService.RefreshTokenStoreException.class)
+  ResponseEntity<ApiResponse<Void>> handleRefreshTokenStore(
+      RefreshTokenService.RefreshTokenStoreException exception) {
+    log.error("Refresh token store unavailable", exception);
+    return build(ErrorCode.REDIS_ERROR, ApiError.of(ErrorCode.REDIS_ERROR.defaultMessage()));
+  }
+
+  /** Cùng envelope với mọi lỗi khác; Retry-After là thời gian còn lại thật của cửa sổ. */
+  @ExceptionHandler(RateLimitExceededException.class)
+  ResponseEntity<ApiResponse<Void>> handleRateLimitExceeded(RateLimitExceededException exception) {
+    return ResponseEntity
+        .status(ErrorCode.TOO_MANY_REQUESTS.httpStatus())
+        .header(HttpHeaders.RETRY_AFTER, Long.toString(exception.retryAfterSeconds()))
+        .body(ApiResponse.error(ApiError.of(ErrorCode.TOO_MANY_REQUESTS.defaultMessage())));
   }
 
   /**

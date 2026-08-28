@@ -185,7 +185,7 @@ public class CatalogService {
     String sort = (rawSort == null || rawSort.isBlank()) ? DEFAULT_SORT : rawSort;
     String[] parts = sort.split(",", -1);
     boolean validDirection = parts.length == 2
-        && (parts[1].equalsIgnoreCase("asc") || parts[1].equalsIgnoreCase("desc"));
+        && (parts[1].equals("asc") || parts[1].equals("desc"));
     if (!validDirection) {
       throw AppException.validation("Tham số sort phải có dạng field,asc|desc");
     }
