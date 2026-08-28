@@ -1,4 +1,5 @@
 import { cleanup, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import type { ReactElement } from "react";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import { afterEach, describe, expect, it } from "vitest";
@@ -28,13 +29,15 @@ describe("application layout shells", () => {
       </MainLayout>,
     );
 
-    expect(screen.getByRole("banner")).toHaveClass("client-header");
-    expect(screen.getByRole("link", { name: "Đăng nhập" })).toHaveAttribute("href", "/login");
+    expect(screen.getByRole("banner")).toHaveClass("sf-header");
+    expect(screen.getByRole("link", { name: "LOGIN" })).toHaveAttribute("href", "/login");
+    expect(screen.getByRole("link", { name: "Giỏ hàng, 0 sản phẩm" })).toBeInTheDocument();
     expect(screen.getByRole("main")).toHaveTextContent("Danh sách sản phẩm");
     expect(screen.getByRole("contentinfo")).toHaveClass("client-footer");
   });
 
-  it("shows authenticated client actions and the admin destination", () => {
+  it("shows authenticated client actions and the admin destination", async () => {
+    const user = userEvent.setup();
     renderWithRouter(
       <ClientHeader
         user={{
@@ -46,9 +49,27 @@ describe("application layout shells", () => {
       />,
     );
 
-    expect(screen.getByRole("link", { name: "Quản trị viên" })).toHaveAttribute("href", "/account");
-    expect(screen.getByRole("link", { name: "Quản trị" })).toHaveAttribute("href", "/admin");
-    expect(screen.getByRole("button", { name: "Đăng xuất" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /ACCOUNT/ }));
+    expect(screen.getByRole("link", { name: "Account overview" })).toHaveAttribute("href", "/account");
+    expect(screen.getByRole("link", { name: "Administration" })).toHaveAttribute("href", "/admin");
+    expect(screen.getByRole("button", { name: "Log out" })).toBeInTheDocument();
+  });
+
+  it("opens the category menu, closes it with Escape, and focuses search", async () => {
+    const user = userEvent.setup();
+    renderWithRouter(<ClientHeader user={null} />);
+
+    const category = screen.getByRole("button", { name: "CATEGORY" });
+    await user.click(category);
+    expect(category).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("heading", { name: "Eyeglasses" })).toBeInTheDocument();
+
+    await user.keyboard("{Escape}");
+    expect(category).toHaveAttribute("aria-expanded", "false");
+
+    await user.click(screen.getByRole("button", { name: "Tìm kiếm" }));
+    expect(screen.getByRole("dialog", { name: "Tìm kiếm sản phẩm" })).toBeInTheDocument();
+    expect(screen.getByRole("searchbox", { name: "SEARCH THE COLLECTION" })).toHaveFocus();
   });
 
   it("renders the dedicated admin header and footer", () => {

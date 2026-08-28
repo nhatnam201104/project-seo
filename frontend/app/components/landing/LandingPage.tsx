@@ -1,8 +1,6 @@
-import { useCallback, useState } from "react";
 import { useLenis } from "~/hooks/useLenis";
 import { useReducedMotion } from "~/hooks/useReducedMotion";
 import { SiteHeader } from "./SiteHeader";
-import { MenuOverlay } from "./MenuOverlay";
 import { HeroSection } from "./HeroSection";
 import { GallerySection } from "./GallerySection";
 import { StatementSection } from "./StatementSection";
@@ -18,17 +16,11 @@ import "./landing.css";
  */
 export function LandingPage() {
   const prefersReducedMotion = useReducedMotion();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
   useLenis(!prefersReducedMotion);
-
-  const toggleMenu = useCallback(() => setIsMenuOpen((open) => !open), []);
-  const closeMenu = useCallback(() => setIsMenuOpen(false), []);
 
   return (
     <div className="lp">
-      <SiteHeader isMenuOpen={isMenuOpen} onToggleMenu={toggleMenu} />
-      <MenuOverlay isOpen={isMenuOpen} onClose={closeMenu} />
+      <SiteHeader />
 
       <main>
         <HeroSection />

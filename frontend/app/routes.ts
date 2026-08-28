@@ -11,6 +11,7 @@ export default [
 
     // Auth — minh hoạ httpOnly session-cookie bridge
     route("login", "routes/login.tsx"),
+    route("register", "routes/register.tsx"),
 
     // Trang cần đăng nhập — minh hoạ requireUser()
     route("account", "routes/account.tsx"),
