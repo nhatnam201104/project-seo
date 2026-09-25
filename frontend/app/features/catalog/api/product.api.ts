@@ -10,7 +10,7 @@ import type {
 
 /**
  * API module cho Products (public read). Nhận `client: AxiosInstance` qua DI.
- * Ở loader SSR, truyền `publicServerApi` từ lib/http.server.
+ * Ở loader SSR, truyền `createPublicServerApi(request, context)` từ lib/http.server.
  *
  * Backend bọc mọi response trong envelope { error, data, pagination } → bóc tách
  * bằng unwrapData / unwrapPage trước khi trả cho tầng service.

@@ -1,6 +1,8 @@
 package com.projectsale.common.config;
 
 import com.projectsale.api.auth.security.JwtAuthenticationFilter;
+import com.projectsale.api.auth.security.RateLimitingFilter;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -26,6 +28,7 @@ public class SecurityConfig {
   SecurityFilterChain securityFilterChain(
       HttpSecurity http,
       JwtAuthenticationFilter jwtAuthenticationFilter,
+      RateLimitingFilter rateLimitingFilter,
       RestAuthenticationEntryPoint authenticationEntryPoint)
       throws Exception {
     return http.csrf(csrf -> csrf.disable())
@@ -37,9 +40,13 @@ public class SecurityConfig {
                 .requestMatchers(PublicEndpoints.all())
                 .permitAll()
                 .anyRequest()
-                .authenticated())
+                .authenticated()
+
+        )
         .exceptionHandling(handling -> handling.authenticationEntryPoint(authenticationEntryPoint))
         .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+        .addFilterBefore(rateLimitingFilter,
+            org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class)
         .build();
   }
 }

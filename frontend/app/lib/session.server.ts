@@ -14,6 +14,8 @@ import type { AuthUser } from "~/features/auth/api/auth.types";
 export type SessionData = {
   accessToken: string;
   refreshToken: string;
+  deviceId: string;
+  remember: boolean;
   /** Ảnh chụp user để render nhanh; vẫn xác minh lại qua /me khi cần. */
   user: AuthUser;
 };

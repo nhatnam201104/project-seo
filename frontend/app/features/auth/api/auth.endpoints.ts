@@ -1,11 +1,10 @@
-/** Đường dẫn Auth (đứng sau base /api/v1). Nguồn: api-list.html §Auth. */
+/** Contract: backend AuthController, relative to /api/v1. All use POST. */
 export const AUTH_ENDPOINTS = {
   register: "/auth/register",
   login: "/auth/login",
+  verify: "/auth/verify",
+  resendOtp: "/auth/resendOTP",
   refresh: "/auth/refresh",
   logout: "/auth/logout",
-  forgotPassword: "/auth/forgot-password",
-  resetPassword: "/auth/reset-password",
-  google: "/auth/google",
-  me: "/me",
+  me: "/auth/me",
 } as const;

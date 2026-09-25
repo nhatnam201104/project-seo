@@ -1,7 +1,6 @@
 package com.projectsale.api.auth.security;
 
 import java.time.Duration;
-import java.time.Period;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /** Cấu hình JWT (prefix {@code app.jwt}). */
@@ -11,5 +10,5 @@ public record JwtProperties(
     String issuer,
     String audience,
     Duration accessTtl,
-    Period refreshTtl,
+    Duration refreshTtl,
     Duration clockSkew) {}

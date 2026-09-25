@@ -31,11 +31,15 @@ services:
     image: redis:8.8.0-alpine
     restart: unless-stopped
     environment:
-      REDIS_PASSWORD: ${REDIS_PASSWORD:-projectsale-redis}
+      REDIS_USERNAME: ${REDIS_USERNAME:-nhatnam201104}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-12345}
     command:
       - sh
       - -c
-      - exec redis-server --appendonly yes --requirepass "$$REDIS_PASSWORD"
+      - >-
+        exec redis-server --appendonly yes
+        --user "$$REDIS_USERNAME" on ">$$REDIS_PASSWORD" allcommands allkeys
+        --user default off
     ports:
       - "127.0.0.1:${REDIS_PORT:-6379}:6379"
     volumes:
@@ -43,7 +47,7 @@ services:
     healthcheck:
       test:
         - CMD-SHELL
-        - REDISCLI_AUTH="$$REDIS_PASSWORD" redis-cli ping | grep -q PONG
+        - REDISCLI_AUTH="$$REDIS_PASSWORD" redis-cli --user "$$REDIS_USERNAME" ping | grep -q PONG
       start_period: 5s
       interval: 5s
       timeout: 3s

@@ -43,7 +43,11 @@ export function applyRefreshInterceptor(
       const config = error.config as RetriableConfig | undefined;
       const status = error.response?.status;
 
-      if (status !== 401 || !config || config._retry) {
+      if (status !== 401 || !config || config.signal?.aborted) {
+        return Promise.reject(error);
+      }
+      if (config._retry) {
+        ctx.onRefreshFailed();
         return Promise.reject(error);
       }
 
@@ -74,9 +78,12 @@ export function applyRefreshInterceptor(
         config.headers.set("Authorization", `Bearer ${tokens.accessToken}`);
 
         return instance(config);
-      } catch {
-        ctx.onRefreshFailed();
-        return Promise.reject(error);
+      } catch (refreshError) {
+        // An outage must not erase a still-valid refresh token.
+        const status = typeof refreshError === "object" && refreshError !== null && "status" in refreshError
+          ? refreshError.status : undefined;
+        if (status === 401 || status === 403) ctx.onRefreshFailed();
+        return Promise.reject(refreshError);
       }
     },
   );

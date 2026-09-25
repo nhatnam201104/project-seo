@@ -11,6 +11,8 @@ import java.util.stream.Stream;
  * Nhóm theo miền để đọc/bảo trì thuận tiện: auth công khai, đọc catalog, tài
  * liệu API. Khi cần mở/đóng một nhóm, chỉ sửa đúng mảng tương ứng.
  */
+
+
 public final class PublicEndpoints {
 
   private PublicEndpoints() {
@@ -18,7 +20,7 @@ public final class PublicEndpoints {
 
   /** Auth công khai (chưa cần token): đăng ký, đăng nhập, làm mới token. */
   public static final String[] AUTH = {
-      "/api/v1/auth/register", "/api/v1/auth/login", "/api/v1/auth/refresh"
+      "/api/v1/auth/register", "/api/v1/auth/login", "/api/v1/auth/refresh","/api/v1/auth/verify", "/api/v1/auth/resendOTP"
   };
 
   /** Đọc catalog công khai: sản phẩm, danh mục, thương hiệu. */

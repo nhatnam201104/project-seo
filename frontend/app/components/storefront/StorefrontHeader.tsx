@@ -88,6 +88,7 @@ export function StorefrontHeader({ user, overlay = false }: StorefrontHeaderProp
               <button
                 type="button"
                 className="sf-header__account"
+                aria-label={`${displayName?.toUpperCase() ?? "MEMBER"} / ACCOUNT`}
                 aria-expanded={accountOpen}
                 aria-controls="account-menu"
                 onClick={() => { setAccountOpen((value) => !value); setCategoryOpen(false); }}

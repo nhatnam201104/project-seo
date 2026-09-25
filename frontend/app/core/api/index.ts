@@ -19,7 +19,10 @@ export type {
   EnvelopeError,
 } from "./api-response";
 
-export type { RequestContext } from "./interceptors/request.interceptor";
+export type {
+  RequestContext,
+  ForwardedClient,
+} from "./interceptors/request.interceptor";
 export type {
   RefreshContext,
   RefreshedTokens,

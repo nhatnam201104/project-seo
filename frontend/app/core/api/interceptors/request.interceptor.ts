@@ -11,6 +11,19 @@ export type RequestContext = {
   cartToken?: string | null;
   /** Locale gửi kèm nếu backend hỗ trợ. */
   locale?: string;
+  /** Danh tính trình duyệt chuyển tiếp cho API; bỏ trống thì không gửi header nào. */
+  forwarded?: ForwardedClient;
+};
+
+/**
+ * Mọi request tới API đều đi từ server SSR, nên backend chỉ thấy IP của SSR. SSR
+ * chuyển tiếp IP/User-Agent thật của trình duyệt kèm bí mật dùng chung; backend
+ * chỉ tin các header này khi bí mật khớp.
+ */
+export type ForwardedClient = {
+  secret: string;
+  clientIp?: string;
+  userAgent?: string;
 };
 
 function randomId(): string {
@@ -36,6 +49,16 @@ export function applyRequestInterceptor(
 
     if (ctx.locale) {
       config.headers.set("Accept-Language", ctx.locale);
+    }
+
+    if (ctx.forwarded) {
+      config.headers.set("X-Internal-Proxy-Secret", ctx.forwarded.secret);
+      if (ctx.forwarded.clientIp) {
+        config.headers.set("X-Forwarded-For", ctx.forwarded.clientIp);
+      }
+      if (ctx.forwarded.userAgent) {
+        config.headers.set("X-Forwarded-User-Agent", ctx.forwarded.userAgent);
+      }
     }
 
     config.headers.set("X-Correlation-ID", randomId());

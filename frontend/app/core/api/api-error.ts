@@ -16,6 +16,7 @@ export type ApiError = {
   /** Chi tiết kỹ thuật tuỳ chọn từ backend (vd: lỗi từng field gộp lại). */
   detailMessage?: string;
   correlationId?: string;
+  retryAfter?: number;
   cause?: unknown;
 };
 
@@ -30,6 +31,8 @@ export function isApiError(value: unknown): value is ApiError {
 
 /** Chuyển bất kỳ lỗi nào (Axios / network / timeout / abort) về ApiError. */
 export function mapAxiosError(error: unknown): ApiError {
+  // Retried requests may already have passed through the response interceptor.
+  if (isApiError(error) && !axios.isAxiosError(error)) return error;
   if (axios.isCancel(error)) {
     return { status: 0, message: "Yêu cầu đã bị huỷ.", cause: error };
   }
@@ -54,16 +57,18 @@ export function mapAxiosError(error: unknown): ApiError {
     };
   }
 
-  const envelope = (error.response.data ?? {}) as Partial<ApiEnvelope<unknown>>;
+  const envelope = (error.response.data ?? {}) as Partial<ApiEnvelope<unknown>> & { message?: string; retryAfter?: number };
+  const retryHeader = Number(error.response.headers?.["retry-after"] ?? envelope.retryAfter);
   const correlationId = error.response.headers?.["x-correlation-id"] as
     | string
     | undefined;
 
   return {
     status: error.response.status,
-    message: envelope.error?.message ?? defaultMessageFor(error.response.status),
+    message: envelope.error?.message ?? envelope.message ?? defaultMessageFor(error.response.status),
     detailMessage: envelope.error?.detailMessage,
     correlationId,
+    retryAfter: Number.isFinite(retryHeader) && retryHeader > 0 ? retryHeader : undefined,
     cause: error,
   };
 }
