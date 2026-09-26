@@ -1,0 +1,206 @@
+name: Deploy Production
+
+# Build image backend + frontend → đẩy lên GitHub Container Registry → SSH vào VPS để pull và chạy.
+# Cấu hình cần có (Settings → Secrets and variables → Actions):
+#   Repository variable : DOMAIN (VD shop.example.com). Dùng lúc build frontend (VITE_SITE_URL).
+#   Environment "production":
+#     secrets  : VPS_HOST, VPS_USER, VPS_SSH_KEY, VPS_KNOWN_HOSTS
+#     variables: VPS_PORT (mặc định 22), DEPLOY_PATH (mặc định /opt/projectsale)
+# Trên VPS phải có sẵn $DEPLOY_PATH/deploy/.env.prod (secret không bao giờ đi qua GitHub).
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "backend/**"
+      - "frontend/**"
+      - "deploy/**"
+      - ".github/workflows/deploy.yml"
+
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Deploy lại một tag đã có (VD sha-1a2b3c4) để rollback. Để trống = build commit hiện tại."
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+# Không bao giờ chạy 2 lần deploy song song; lần sau xếp hàng chờ lần trước xong.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+env:
+  REGISTRY_HOST: ghcr.io
+
+jobs:
+  prepare:
+    name: Resolve image tag
+    runs-on: ubuntu-latest
+    outputs:
+      registry: ${{ steps.meta.outputs.registry }}
+      tag: ${{ steps.meta.outputs.tag }}
+      build: ${{ steps.meta.outputs.build }}
+    steps:
+      - id: meta
+        env:
+          INPUT_TAG: ${{ github.event.inputs.image_tag }}
+          OWNER: ${{ github.repository_owner }}
+        run: |
+          # Tên image trên GHCR bắt buộc chữ thường.
+          echo "registry=${REGISTRY_HOST}/${OWNER,,}/projectsale" >> "$GITHUB_OUTPUT"
+          if [[ -n "$INPUT_TAG" ]]; then
+            # Tag đi vào lệnh shell trên VPS → chỉ chấp nhận đúng cú pháp tag của Docker.
+            if [[ ! "$INPUT_TAG" =~ ^[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$ ]]; then
+              echo "::error::image_tag không hợp lệ: $INPUT_TAG"
+              exit 1
+            fi
+            echo "tag=$INPUT_TAG" >> "$GITHUB_OUTPUT"
+            echo "build=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=sha-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+            echo "build=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  build:
+    name: Build ${{ matrix.service }}
+    needs: prepare
+    if: needs.prepare.outputs.build == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: true
+      matrix:
+        service: [backend, frontend]
+    steps:
+      - name: Check required variables
+        env:
+          DOMAIN: ${{ vars.DOMAIN }}
+        run: |
+          if [[ -z "$DOMAIN" ]]; then
+            echo "::error::Chưa đặt repository variable DOMAIN"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY_HOST }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: ./${{ matrix.service }}
+          platforms: linux/amd64
+          push: true
+          # VITE_SITE_URL chỉ frontend dùng; backend bỏ qua build-arg này.
+          build-args: |
+            VITE_SITE_URL=https://${{ vars.DOMAIN }}
+          tags: |
+            ${{ needs.prepare.outputs.registry }}/${{ matrix.service }}:${{ needs.prepare.outputs.tag }}
+            ${{ needs.prepare.outputs.registry }}/${{ matrix.service }}:latest
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+          cache-from: type=gha,scope=${{ matrix.service }}
+          cache-to: type=gha,scope=${{ matrix.service }},mode=max
+
+  deploy:
+    name: Deploy to VPS
+    needs: [prepare, build]
+    # Chạy cả khi build bị bỏ qua (rollback bằng tag có sẵn), nhưng không chạy nếu build lỗi.
+    if: >-
+      always() &&
+      needs.prepare.result == 'success' &&
+      (needs.build.result == 'success' || needs.build.result == 'skipped')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: read
+    environment:
+      name: production
+      url: https://${{ vars.DOMAIN }}
+    env:
+      REGISTRY: ${{ needs.prepare.outputs.registry }}
+      TAG: ${{ needs.prepare.outputs.tag }}
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_PORT: ${{ vars.VPS_PORT || '22' }}
+      DEPLOY_PATH: ${{ vars.DEPLOY_PATH || '/opt/projectsale' }}
+      DOMAIN: ${{ vars.DOMAIN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY_HOST }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify images exist
+        run: |
+          for service in backend frontend; do
+            docker buildx imagetools inspect "$REGISTRY/$service:$TAG" > /dev/null \
+              || { echo "::error::Không tìm thấy $REGISTRY/$service:$TAG"; exit 1; }
+          done
+
+      - name: Configure SSH
+        env:
+          SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          # known_hosts cố định: chặn tấn công giả mạo server (không dùng ssh-keyscan lúc chạy).
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          cat > ~/.ssh/config <<EOF
+          Host vps
+            HostName $VPS_HOST
+            User $VPS_USER
+            Port $VPS_PORT
+            IdentityFile ~/.ssh/id_deploy
+            IdentitiesOnly yes
+            StrictHostKeyChecking yes
+            BatchMode yes
+            ServerAliveInterval 30
+          EOF
+
+      - name: Upload deploy files
+        # Chỉ gửi compose, Caddyfile, script, file mẫu env. Không động tới .env.prod trên VPS.
+        run: |
+          # shellcheck disable=SC2029  # cố ý mở rộng DEPLOY_PATH ở runner
+          tar -czf - deploy/docker-compose.prod.yml deploy/caddy deploy/scripts deploy/.env.prod.example \
+            | ssh vps "mkdir -p '$DEPLOY_PATH' && tar -xzf - -C '$DEPLOY_PATH'"
+
+      - name: Pull and restart on VPS
+        env:
+          # GITHUB_TOKEN chỉ sống trong job này; script logout ngay sau khi pull.
+          REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GHCR_USER: ${{ github.actor }}
+        run: |
+          # shellcheck disable=SC2029  # cố ý: giá trị lấy ở runner (tag đã được validate ở job prepare)
+          printf '%s\n' "$REGISTRY_TOKEN" | ssh vps \
+            "REGISTRY='$REGISTRY' TAG='$TAG' GHCR_USER='$GHCR_USER' bash '$DEPLOY_PATH/deploy/scripts/remote-deploy.sh'"
+
+      - name: Smoke test
+        run: |
+          curl --fail --silent --show-error --output /dev/null \
+            --retry 10 --retry-delay 6 --retry-all-errors \
+            "https://$DOMAIN/"
+          echo "https://$DOMAIN/ OK — đang chạy $TAG" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Clean up SSH key
+        if: always()
+        run: rm -f ~/.ssh/id_deploy

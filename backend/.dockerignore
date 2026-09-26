@@ -1,3 +1,11 @@
 target
 .idea
+.vscode
+.remember
 *.iml
+*.log
+docs
+specs
+.env
+.env.*
+!.env.example
