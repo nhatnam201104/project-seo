@@ -1,0 +1,6 @@
+# Caddy tự xin và gia hạn chứng chỉ HTTPS (Let's Encrypt) cho $DOMAIN,
+# tự chuyển hướng HTTP → HTTPS và gắn X-Forwarded-For cho frontend.
+{$DOMAIN} {
+	encode zstd gzip
+	reverse_proxy frontend:3000
+}
