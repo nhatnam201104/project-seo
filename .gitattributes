@@ -1,0 +1,2 @@
+# Shell script chạy trên Linux (VPS, CI): ép EOL LF kể cả khi checkout trên Windows.
+*.sh text eol=lf

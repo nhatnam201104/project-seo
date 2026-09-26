@@ -1,0 +1,58 @@
+services:
+  mysql:
+    image: mysql:8.4.10
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-projectsale}
+      MYSQL_USER: ${MYSQL_USER:-projectsale}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-projectsale}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-projectsale-root}
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_0900_ai_ci
+      - --default-time-zone=+00:00
+    ports:
+      - "127.0.0.1:${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          mysql --protocol=TCP --host=127.0.0.1
+          --user="$$MYSQL_USER" --password="$$MYSQL_PASSWORD"
+          "$$MYSQL_DATABASE" --execute="SELECT 1" >/dev/null 2>&1
+      start_period: 20s
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:8.8.0-alpine
+    restart: unless-stopped
+    environment:
+      REDIS_USERNAME: ${REDIS_USERNAME:-nhatnam201104}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-12345}
+    command:
+      - sh
+      - -c
+      - >-
+        exec redis-server --appendonly yes
+        --user "$$REDIS_USERNAME" on ">$$REDIS_PASSWORD" allcommands allkeys
+        --user default off
+    ports:
+      - "127.0.0.1:${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - REDISCLI_AUTH="$$REDIS_PASSWORD" redis-cli --user "$$REDIS_USERNAME" ping | grep -q PONG
+      start_period: 5s
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  mysql_data:
+  redis_data:

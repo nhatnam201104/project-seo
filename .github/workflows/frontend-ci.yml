@@ -47,6 +47,9 @@ jobs:
 
       - run: npm run lint
 
+      # `react-router build` does not type-check; without this a broken import can reach main.
+      - run: npm run typecheck
+
       - run: npm run test
 
       - run: npm run build

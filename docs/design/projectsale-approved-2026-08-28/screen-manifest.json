@@ -1,0 +1,41 @@
+{
+  "status": "approved-for-implementation",
+  "approvedAt": "2026-08-28",
+  "source": {
+    "tool": "Google Stitch",
+    "projectName": "PROJECTSALE Editorial UI Redesign",
+    "url": "https://stitch.withgoogle.com/projects/2857506753355085369"
+  },
+  "screens": [
+    {
+      "id": "homepage-header-guest",
+      "stitchName": "PROJECTSALE - Homepage Header Refined v2",
+      "export": "exports/homepage-header-guest.html"
+    },
+    {
+      "id": "homepage-header-authenticated",
+      "stitchName": "PROJECTSALE - Homepage Logged In Refined v2",
+      "export": "exports/homepage-header-authenticated.html"
+    },
+    {
+      "id": "category-mega-menu",
+      "stitchName": "PROJECTSALE - Category Mega Menu Refined v2",
+      "export": "exports/category-mega-menu.html"
+    },
+    {
+      "id": "login",
+      "stitchName": "PROJECTSALE - Login Refined v3 (Underline)",
+      "export": "exports/login.html"
+    },
+    {
+      "id": "register",
+      "stitchName": "PROJECTSALE - Register Refined v3 (Underline)",
+      "export": "exports/register.html"
+    },
+    {
+      "id": "account-overview",
+      "stitchName": "PROJECTSALE - Account Overview Refined v3 (Spaced)",
+      "export": "exports/account-overview.html"
+    }
+  ]
+}

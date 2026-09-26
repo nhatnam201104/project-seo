@@ -1,0 +1,34 @@
+@import "./components/storefront/storefront.css";
+
+:root {
+  --color-bg: #ffffff;
+  --color-surface: #f6f7f9;
+  --color-text: #14161a;
+  --color-muted: #5b6472;
+  --color-border: #e4e7ec;
+  --color-accent: #2b6cff;
+  --color-danger: #d33a3a;
+
+  --radius: 10px;
+  --space: 16px;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  line-height: 1.6;
+}
+
+a {
+  color: var(--color-accent);
+}

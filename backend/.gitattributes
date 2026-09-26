@@ -1,0 +1,3 @@
+# Maven Wrapper: ép EOL đúng để script chạy trên mọi nền tảng (đặc biệt CI Linux).
+/mvnw    text eol=lf
+/mvnw.cmd text eol=crlf
