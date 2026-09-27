@@ -1,18 +1,12 @@
 import { Form, Link } from "react-router";
 import { useEffect, useRef, useState } from "react";
 import type { AuthUser } from "~/features/auth/api/auth.types";
+import { STORE_CATEGORIES } from "./storefront-content";
 
 type StorefrontHeaderProps = {
   user: AuthUser | null;
   overlay?: boolean;
 };
-
-const categories = [
-  { title: "Eyeglasses", links: ["Acetate", "Titanium", "Metal"] },
-  { title: "Sunglasses", links: ["Classic", "Sport", "Polarized"] },
-  { title: "Lenses", links: ["Blue-light", "Prescription", "Photochromic"] },
-  { title: "Discover", links: ["New arrivals", "Best sellers", "Face-shape guide"] },
-];
 
 function Icon({ name }: { name: "search" | "cart" | "menu" | "close" | "user" }) {
   const paths = {
@@ -116,7 +110,7 @@ export function StorefrontHeader({ user, overlay = false }: StorefrontHeaderProp
       {categoryOpen ? (
         <div id="category-menu" className="sf-mega-menu">
           <div className="sf-mega-menu__grid">
-            {categories.map((group) => (
+            {STORE_CATEGORIES.map((group) => (
               <section key={group.title} aria-labelledby={`category-${group.title}`}>
                 <h2 id={`category-${group.title}`}>{group.title}</h2>
                 {group.links.map((label) => <Link key={label} to={`/products?category=${encodeURIComponent(label.toLowerCase())}`} onClick={() => setCategoryOpen(false)}>{label}</Link>)}

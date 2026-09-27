@@ -798,7 +798,7 @@ a.lp-tag:focus-visible .lp-tag-pill {
 }
 
 /* ============================================================
-   Final — zoom window + logo + CTA + footer
+   Final — zoom window + logo + CTA
    ============================================================ */
 
 .lp-final {
@@ -889,32 +889,6 @@ a.lp-tag:focus-visible .lp-tag-pill {
   background: var(--lp-paper);
   color: var(--lp-ink);
   gap: 1em;
-}
-
-/* Footer */
-.lp-footer {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.5rem;
-  justify-content: space-between;
-  align-items: center;
-  padding: 2rem var(--lp-gutter) 2.4rem;
-  font-size: var(--lp-text-meta);
-  color: color-mix(in srgb, var(--lp-paper) 70%, transparent);
-}
-
-.lp-footer nav {
-  display: flex;
-  gap: 1.6rem;
-}
-
-.lp-footer a {
-  transition: color var(--lp-dur-micro);
-}
-
-.lp-footer a:hover,
-.lp-footer a:focus-visible {
-  color: var(--lp-paper);
 }
 
 /* ============================================================

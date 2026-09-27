@@ -1,4 +1,5 @@
 @import "./components/storefront/storefront.css";
+@import "./components/storefront/storefront-footer.css";
 
 :root {
   --color-bg: #ffffff;

@@ -1,5 +1,6 @@
 import { useLenis } from "~/hooks/useLenis";
 import { useReducedMotion } from "~/hooks/useReducedMotion";
+import { StorefrontFooter } from "~/components/storefront/StorefrontFooter";
 import { SiteHeader } from "./SiteHeader";
 import { HeroSection } from "./HeroSection";
 import { GallerySection } from "./GallerySection";
@@ -30,6 +31,8 @@ export function LandingPage() {
         <ShowcaseSection />
         <FinalSection />
       </main>
+
+      <StorefrontFooter />
     </div>
   );
 }

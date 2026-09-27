@@ -109,7 +109,7 @@ export default function Register({
           label="Số điện thoại"
           type="tel"
           {...form.register("phone")}
-          placeholder="0901234567 hoặc +84901234567"
+          placeholder="0901234567"
           required
           autoComplete="tel"
           error={errors.phone?.message ?? actionData?.fieldErrors.phone}

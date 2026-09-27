@@ -1,13 +1,5 @@
-import { Link } from "react-router";
+import { StorefrontFooter } from "~/components/storefront/StorefrontFooter";
 
 export function ClientFooter() {
-  return (
-    <footer className="client-footer">
-      <span>© {new Date().getFullYear()} ProjectSale</span>
-      <nav aria-label="Điều hướng chân trang khách hàng">
-        <Link to="/">Trang chủ</Link>
-        <Link to="/products">Sản phẩm</Link>
-      </nav>
-    </footer>
-  );
+  return <StorefrontFooter />;
 }

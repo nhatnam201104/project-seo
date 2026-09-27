@@ -16,6 +16,9 @@ export default [
 
     // Trang cần đăng nhập — minh hoạ requireUser()
     route("account", "routes/account.tsx"),
+
+    // Trang khung chính sách (link từ footer); slug lạ → 404
+    route("policies/:slug", "routes/policies.$slug.tsx"),
   ]),
 
   // Resource route: chỉ action/redirect, không cần UI shell.
