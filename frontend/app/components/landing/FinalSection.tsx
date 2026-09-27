@@ -3,12 +3,12 @@ import { Link } from "react-router";
 import { gsap } from "gsap";
 import { EASE, MEDIA } from "~/lib/animation";
 import { useGsapContext } from "~/hooks/useGsapContext";
-import { BRAND, FINAL_CTA, IMAGES, NAV_LINKS, SOCIAL_LINKS } from "./content";
+import { BRAND, FINAL_CTA, IMAGES } from "./content";
 
 /**
  * Final scene: "zoom window" — khung ảnh nhỏ giữa nền tối scale mở rộng
  * ra fullscreen theo scroll (clip-path, không animate width/height),
- * sau đó logo + CTA hiện lên. Kết bằng footer.
+ * sau đó logo + CTA hiện lên. Footer chung (StorefrontFooter) nối ngay sau.
  */
 export function FinalSection() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -124,30 +124,6 @@ export function FinalSection() {
           </Link>
         </div>
       </div>
-
-      <footer className="lp-footer">
-        <span>
-          © {new Date().getFullYear()} {BRAND.name} — {BRAND.season}
-        </span>
-        <nav aria-label="Điều hướng footer">
-          {NAV_LINKS.map((link) =>
-            link.to.startsWith("#") ? (
-              <a key={link.label} href={link.to}>
-                {link.label}
-              </a>
-            ) : (
-              <Link key={link.label} to={link.to}>
-                {link.label}
-              </Link>
-            ),
-          )}
-          {SOCIAL_LINKS.map((link) => (
-            <a key={link.label} href={link.href} target="_blank" rel="noreferrer">
-              {link.label}
-            </a>
-          ))}
-        </nav>
-      </footer>
     </section>
   );
 }

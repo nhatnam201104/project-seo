@@ -32,7 +32,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Rate limit: theo IP chặn một client spam nhiều tài khoản; theo email bảo vệ một
+ * Rate limit: theo IP chặn một client spam nhiều tài khoản; theo email bảo vệ
+ * một
  * tài khoản khỏi kẻ tấn công xoay vòng IP. IP là IP thật của trình duyệt do
  * {@link ClientRequestResolver} xác định, không phải IP của server SSR.
  */
@@ -79,7 +80,8 @@ public class AuthController {
     }
 
     @RateLimit(limit = 10, duration = 15, keyType = KeyType.IP_ADDRESS)
-    // Khớp cooldown 300 giây ở frontend; chặn việc gửi lại liên tục để reset số lần đoán OTP.
+    // Khớp cooldown 300 giây ở frontend; chặn việc gửi lại liên tục để reset số lần
+    // đoán OTP.
     @RateLimit(limit = 1, duration = 5, keyType = KeyType.EMAIL)
     @PostMapping("/resendOTP")
     public ApiResponse<Void> resendOTP(@Valid @RequestBody ResendOTP request) {

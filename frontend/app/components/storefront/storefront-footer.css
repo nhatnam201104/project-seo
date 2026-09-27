@@ -1,0 +1,169 @@
+/* ============================================================
+   Storefront footer — nền ink, 4 cột: Giới thiệu / Chính sách /
+   Danh mục / Liên hệ. Dùng chung cho client layout và landing page.
+   Thang chữ: tiêu đề 1.5rem, nội dung 1.125rem (tỉ lệ 4:3).
+   ============================================================ */
+
+.sf-footer {
+  --sf-footer-dim: color-mix(in srgb, var(--sf-paper) 66%, transparent);
+  --sf-footer-rule: color-mix(in srgb, var(--sf-paper) 18%, transparent);
+  --sf-footer-text: 400 1.125rem/1.45 var(--sf-font-body);
+
+  padding: clamp(56px, 7vw, 96px) clamp(20px, 3vw, 48px) 28px;
+  background: var(--sf-ink);
+  color: var(--sf-paper);
+  font-family: var(--sf-font-body);
+}
+
+.sf-footer__grid {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 1fr 1.2fr;
+  grid-template-areas: "about policy category contact";
+  gap: clamp(32px, 3.5vw, 64px);
+}
+
+.sf-footer__col--about { grid-area: about; }
+.sf-footer__col--policy { grid-area: policy; }
+.sf-footer__col--category { grid-area: category; }
+.sf-footer__col--contact { grid-area: contact; }
+
+.sf-footer h2 {
+  margin: 0 0 22px;
+  font: 750 1.5rem/1.2 var(--sf-font-display);
+  letter-spacing: -0.02em;
+}
+
+.sf-footer ul {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Specificity > `.lp a` của landing.css (được load sau) */
+.sf-footer ul a {
+  display: inline-block;
+  color: var(--sf-footer-dim);
+  text-decoration: none;
+  font: var(--sf-footer-text);
+  transition: color 160ms, transform 160ms;
+}
+
+.sf-footer a:hover,
+.sf-footer a:focus-visible {
+  color: var(--sf-paper);
+  transform: translateX(4px);
+}
+
+.sf-footer a:focus-visible {
+  outline: 2px solid var(--sf-paper);
+  outline-offset: 4px;
+}
+
+.sf-footer__summary {
+  max-width: 34ch;
+  margin: 0 0 22px;
+  font: var(--sf-footer-text);
+}
+
+.sf-footer .sf-footer__col--about a {
+  color: var(--sf-paper);
+  font-weight: 600;
+}
+
+.sf-footer address {
+  display: grid;
+  gap: 18px;
+  font-style: normal;
+}
+
+.sf-footer address p {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+}
+
+.sf-footer address small {
+  color: var(--sf-footer-dim);
+  font: 500 0.72rem/1.2 var(--sf-font-mono);
+  letter-spacing: 0.1em;
+}
+
+.sf-footer address span {
+  max-width: 30ch;
+  font: var(--sf-footer-text);
+}
+
+.sf-footer address a {
+  display: inline-block;
+  color: var(--sf-paper);
+  text-decoration: none;
+  font: var(--sf-footer-text);
+  overflow-wrap: anywhere;
+  transition: transform 160ms;
+}
+
+.sf-footer__bottom {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px 24px;
+  margin-top: clamp(48px, 6vw, 80px);
+  padding-top: 20px;
+  border-top: 1px solid var(--sf-footer-rule);
+  color: var(--sf-footer-dim);
+  font: 500 0.75rem/1.4 var(--sf-font-mono);
+  letter-spacing: 0.08em;
+}
+
+@media (max-width: 1100px) {
+  .sf-footer__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+      "about contact"
+      "policy category";
+    row-gap: 48px;
+  }
+}
+
+@media (max-width: 680px) {
+  .sf-footer {
+    --sf-footer-text: 400 1rem/1.45 var(--sf-font-body);
+
+    padding: 52px 20px 24px;
+  }
+
+  .sf-footer h2 {
+    font-size: 1.3rem;
+  }
+
+  /* Tên chính sách dài hơn tên danh mục → cột trái rộng hơn để không xuống dòng */
+  .sf-footer__grid {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: 40px 24px;
+    grid-template-areas:
+      "about about"
+      "policy category"
+      "contact contact";
+  }
+
+  .sf-footer__bottom {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 400px) {
+  .sf-footer__grid {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "about" "policy" "category" "contact";
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sf-footer a {
+    transition-duration: 0.01ms;
+  }
+}

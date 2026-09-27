@@ -33,7 +33,7 @@ describe("application layout shells", () => {
     expect(screen.getByRole("link", { name: "LOGIN" })).toHaveAttribute("href", "/login");
     expect(screen.getByRole("link", { name: "Giỏ hàng, 0 sản phẩm" })).toBeInTheDocument();
     expect(screen.getByRole("main")).toHaveTextContent("Danh sách sản phẩm");
-    expect(screen.getByRole("contentinfo")).toHaveClass("client-footer");
+    expect(screen.getByRole("contentinfo")).toHaveClass("sf-footer");
   });
 
   it("shows authenticated client actions and the admin destination", async () => {

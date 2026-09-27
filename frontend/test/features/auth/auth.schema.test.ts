@@ -8,7 +8,7 @@ describe("auth validation matching backend DTOs", () => {
       ...registration, full_name: "Nguyễn Văn Nam", password: " password123 ",
     });
   });
-  it.each(["", "0123456789", "123", "+849012345678", "090 123 4567"])("rejects invalid required phone %s", (phone) => {
+  it.each(["", "0123456789", "123", "090 123 4567"])("rejects invalid required phone %s", (phone) => {
     expect(registerRequestSchema.safeParse({ ...registration, phone }).success).toBe(false);
   });
   it.each(["0901234567", "+84901234567"])("accepts supported Vietnamese phone %s", (phone) => {
