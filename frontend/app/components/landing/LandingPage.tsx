@@ -31,8 +31,9 @@ export function LandingPage() {
         <ShowcaseSection />
         <FinalSection />
       </main>
-
+      
       <StorefrontFooter />
     </div>
   );
 }
+// fixx
