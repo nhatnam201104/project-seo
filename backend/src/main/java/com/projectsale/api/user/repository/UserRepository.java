@@ -4,13 +4,16 @@ import java.util.*;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.projectsale.entity.User;
+import com.projectsale.enums.AuthProvider;
 
-    
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
 
     Optional<User> findByPublicId(UUID publicId);
 
     boolean existsByEmail(String email);
+
     boolean existsByPhone(String phone);
+
+    Optional<User> findByProviderAndProviderId(AuthProvider provider, String providerId);
 }

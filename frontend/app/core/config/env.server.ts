@@ -21,6 +21,15 @@ const schema = z.object({
     .default("false")
     .transform((v) => v === "true"),
   API_TIMEOUT_MS: z.coerce.number().int().positive().default(15_000),
+  // Điểm bắt đầu đăng nhập Google của backend (Spring oauth2Login). Production: cùng
+  // origin qua Caddy nên để mặc định; dev: http://localhost:8081/oauth2/authorization/google.
+  GOOGLE_AUTH_START_URL: z
+    .string()
+    .default("/oauth2/authorization/google")
+    .refine(
+      (v) => (v.startsWith("/") && !v.startsWith("//")) || /^https?:\/\//.test(v),
+      "GOOGLE_AUTH_START_URL phải là đường dẫn tuyệt đối (/...) hoặc URL http(s)",
+    ),
   // Bí mật dùng chung với backend (app.proxy.shared-secret). Chứng minh request đến
   // từ SSR để backend tin IP/User-Agent của trình duyệt được chuyển tiếp.
   INTERNAL_PROXY_SECRET: z
@@ -63,6 +72,7 @@ export const serverEnv = {
   cookieSecure: parsed.data.COOKIE_SECURE,
   apiTimeoutMs: parsed.data.API_TIMEOUT_MS,
   internalProxySecret: parsed.data.INTERNAL_PROXY_SECRET,
+  googleAuthStartUrl: parsed.data.GOOGLE_AUTH_START_URL,
 } as const;
 
 export type ServerEnv = typeof serverEnv;

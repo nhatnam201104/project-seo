@@ -22,7 +22,8 @@ public class AuthRequest {
 
                         @JsonProperty("full_name") @NotBlank(message = "Họ tên không được để trống") @Size(max = 120, message = "Họ tên tối đa 120 ký tự") String fullName,
 
-                        @NotBlank(message = "Số điện thoại không được để trống") @ValidPhone(message = "Số điện thoại không hợp lệ") String phone) implements EmailKeyed {
+                        @NotBlank(message = "Số điện thoại không được để trống") @ValidPhone(message = "Số điện thoại không hợp lệ") String phone)
+                        implements EmailKeyed {
         }
 
         public record LoginRequest(
@@ -57,12 +58,29 @@ public class AuthRequest {
                         DevicePlatform platform) implements EmailKeyed {
         }
 
+        /**
+         * SSR đổi mã một lần (từ callback Google) lấy token, kèm thiết bị của trình
+         * duyệt.
+         */
+        public record OAuth2ExchangeRequest(
+                        @NotBlank(message = "Thiếu mã đăng nhập") @Size(max = 64, message = "Mã đăng nhập không hợp lệ") String code,
+
+                        @NotBlank(message = "Thiếu mã liên kết") @Size(max = 64, message = "Mã liên kết không hợp lệ") String bind,
+
+                        @NotNull(message = "Thiếu device ID") UUID deviceId,
+
+                        @Size(max = 120, message = "Tên thiết bị tối đa 120 ký tự") String deviceName,
+
+                        DevicePlatform platform) {
+        }
+
         public record AccessRequest(
                         @JsonProperty("access_token") @NotBlank(message = "Thiếu access token") String accessToken) {
         }
 
         public record ResendOTP(
-                        @NotBlank(message = "Email không được để trống") @Email(message = "Email không hợp lệ") String email) implements EmailKeyed {
+                        @NotBlank(message = "Email không được để trống") @Email(message = "Email không hợp lệ") String email)
+                        implements EmailKeyed {
         }
 
 }

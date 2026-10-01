@@ -18,6 +18,7 @@ import {
 } from "~/features/auth/services/auth-form.server";
 import { beginPendingVerification } from "~/features/auth/services/pending-verification.server";
 import { getDevice } from "~/features/auth/services/device.server";
+import { oauthErrorMessage } from "~/features/auth/services/oauth-state.server";
 
 export function meta(_: Route.MetaArgs) {
   return [{ title: "Đăng nhập — ProjectSale" }];
@@ -30,10 +31,12 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   if (auth.isAuthenticated) throw redirect(redirectTo);
   const { headers } = await getDevice(request);
   headers.set("Cache-Control", "no-store");
-  const verification = new URL(request.url).searchParams.get("verification");
+  const searchParams = new URL(request.url).searchParams;
+  const verification = searchParams.get("verification");
   return data(
     {
       redirectTo,
+      oauthError: oauthErrorMessage(searchParams.get("oauth_error")),
       notice:
         verification === "expired"
           ? "Phiên xác thực đã hết hạn hoặc không còn tồn tại. Vui lòng đăng nhập để tiếp tục."
@@ -112,9 +115,9 @@ export default function Login({
             {loaderData.notice}
           </p>
         ) : null}
-        {actionData?.error ? (
+        {actionData?.error || loaderData.oauthError ? (
           <p className="auth-form__error" role="alert">
-            {actionData.error}
+            {actionData?.error ?? loaderData.oauthError}
           </p>
         ) : null}
         <AuthField
@@ -151,14 +154,13 @@ export default function Login({
               ? `THỬ LẠI SAU ${remaining}s`
               : "LOGIN"}
         </button>
-        <button
+        {/* Thẻ <a> thường (không phải <Link>): resource route redirect ra Google. */}
+        <a
           className="auth-button auth-button--secondary"
-          type="button"
-          disabled
-          aria-disabled="true"
+          href={`/auth/google${redirectQuery}`}
         >
           CONTINUE WITH GOOGLE
-        </button>
+        </a>
         <p className="auth-form__switch">
           NEW HERE? <Link to={`/register${redirectQuery}`}>REGISTER</Link>
         </p>

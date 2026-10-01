@@ -2,6 +2,7 @@ package com.projectsale.api.auth.service;
 
 import com.projectsale.api.auth.dto.AuthRequest.LoginRequest;
 import com.projectsale.api.auth.dto.AuthRequest.LogoutRequest;
+import com.projectsale.api.auth.dto.AuthRequest.OAuth2ExchangeRequest;
 import com.projectsale.api.auth.dto.AuthRequest.RefreshRequest;
 import com.projectsale.api.auth.dto.AuthRequest.RegisterRequest;
 import com.projectsale.api.auth.dto.AuthRequest.VerifyRequest;
@@ -22,6 +23,8 @@ import com.projectsale.enums.StatusEnum;
 
 import jakarta.annotation.PostConstruct;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
@@ -43,6 +46,7 @@ public class AuthService {
     private final JwtService jwtService;
     private final OtpService otpService;
     private final RefreshTokenService refreshTokenService;
+    private final OAuth2LoginCodeService oauth2LoginCodeService;
     private String dummyPasswordHash;
 
     /**
@@ -66,20 +70,43 @@ public class AuthService {
 
     public TokenResponse login(LoginRequest request, DeviceInfo deviceInfo) {
         User user = userRepo.findByEmail(request.email()).orElse(null);
+        // Tài khoản chỉ đăng nhập Google không có mật khẩu.
+        boolean hasPassword = user != null && user.getPasswordHash() != null;
         // Luôn kiểm mật khẩu để thời gian phản hồi không tiết lộ email có tồn tại hay
         // không.
-        String passwordHash = user == null ? dummyPasswordHash : user.getPasswordHash();
+        String passwordHash = hasPassword ? user.getPasswordHash() : dummyPasswordHash;
         boolean passwordMatches = passwordEncoder.matches(request.password(), passwordHash);
         // Không tồn tại, sai mật khẩu hay bị vô hiệu hoá đều trả cùng một lỗi.
-        if (user == null || !passwordMatches || user.getStatus() == StatusEnum.UNACTIVE) {
+        if (!hasPassword || !passwordMatches || user.getStatus() == StatusEnum.UNACTIVE) {
             throw new AppException(ErrorCode.INVALID_CREDENTIALS);
         }
         // Chỉ người đã chứng minh đúng mật khẩu mới biết tài khoản đang chờ xác thực.
         if (user.getStatus() == StatusEnum.PENDING) {
             throw new AppException(ErrorCode.ACCOUNT_NOT_VERIFY);
         }
+        return issueTokens(user, deviceInfo);
+    }
+
+    /**
+     * Đổi mã một lần do callback Google cấp lấy cặp token. Mã bị huỷ ngay khi đọc,
+     * kể cả khi {@code bind} không khớp, nên mã bị lộ không thể thử lại.
+     */
+    public TokenResponse exchangeOAuth2Code(OAuth2ExchangeRequest request, DeviceInfo deviceInfo) {
+        var pending = oauth2LoginCodeService.consume(request.code())
+                .filter(login -> MessageDigest.isEqual(
+                        login.bind().getBytes(StandardCharsets.UTF_8),
+                        request.bind().getBytes(StandardCharsets.UTF_8)))
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_OAUTH2_CODE));
+        // Tài khoản có thể bị khoá trong khoảng giữa callback và lúc đổi mã.
+        User user = userRepo.findByPublicId(pending.userId())
+                .filter(User::isActive)
+                .orElseThrow(() -> new AppException(ErrorCode.ACCOUNT_DISABLED));
+        return issueTokens(user, deviceInfo);
+    }
+
+    private TokenResponse issueTokens(User user, DeviceInfo deviceInfo) {
         var refreshToken = refreshTokenService.issue(user, deviceInfo);
-        var accessToken = jwtService.issueAccessToken(user, refreshToken.sessionId());
+        String accessToken = jwtService.issueAccessToken(user, refreshToken.sessionId());
         return new TokenResponse(
                 accessToken,
                 refreshToken.token(),
@@ -100,14 +127,7 @@ public class AuthService {
         }
         user.setStatus(StatusEnum.ACTIVE);
         userRepo.save(user);
-
-        var refreshToken = refreshTokenService.issue(user, deviceInfo);
-        String accessToken = jwtService.issueAccessToken(user, refreshToken.sessionId());
-
-        return new TokenResponse(
-                accessToken,
-                refreshToken.token(),
-                mapper.toResponse(user));
+        return issueTokens(user, deviceInfo);
     }
 
     public void resendOTP(String email) {

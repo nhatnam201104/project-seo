@@ -7,4 +7,5 @@ export const AUTH_ENDPOINTS = {
   refresh: "/auth/refresh",
   logout: "/auth/logout",
   me: "/auth/me",
+  oauth2Exchange: "/auth/oauth2/exchange",
 } as const;
