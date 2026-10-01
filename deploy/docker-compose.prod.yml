@@ -97,6 +97,12 @@ services:
       MAIL_USERNAME: ${MAIL_USERNAME:?MAIL_USERNAME is required}
       MAIL_PASSWORD: ${MAIL_PASSWORD:?MAIL_PASSWORD is required}
       MAIL_FROM: ${MAIL_FROM:?MAIL_FROM is required}
+      # Đăng nhập Google: redirect URI phải khớp Authorized redirect URI trong Google Cloud Console.
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:?GOOGLE_CLIENT_ID is required}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:?GOOGLE_CLIENT_SECRET is required}
+      GOOGLE_REDIRECT_URI: https://${DOMAIN:?DOMAIN is required}/login/oauth2/code/google
+      FRONTEND_BASE_URL: https://${DOMAIN:?DOMAIN is required}
+      SESSION_COOKIE_SECURE: "true"
     depends_on:
       mysql:
         condition: service_healthy

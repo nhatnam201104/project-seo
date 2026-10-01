@@ -8,6 +8,7 @@
 .auth-form__notice{margin:0;color:var(--sf-muted);font-size:.85rem;line-height:1.6;overflow-wrap:anywhere}
 .auth-form p.auth-field--error{margin:7px 0 0;color:var(--sf-danger);font-size:.72rem}
 .auth-button:disabled{cursor:not-allowed;opacity:.55}
+a.auth-button{display:flex;align-items:center;justify-content:center;text-decoration:none}
 .auth-form :focus-visible{outline:2px solid var(--sf-ink);outline-offset:4px}
 .auth-form input:focus-visible{outline:none}
 /* Header dính khi cuộn: sticky trong client layout, fixed khi đè lên hero landing */

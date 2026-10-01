@@ -70,6 +70,12 @@ export const pendingVerificationSchema = z.object({
   remember: z.boolean(),
 });
 export type PendingVerification = z.infer<typeof pendingVerificationSchema>;
+export const oauth2ExchangeRequestSchema = z
+  .object({
+    code: z.string().min(1).max(64),
+    bind: z.string().min(1).max(64),
+  })
+  .merge(deviceSchema);
 export const refreshRequestSchema = z.object({
   refresh_token: z.string().min(1),
 });

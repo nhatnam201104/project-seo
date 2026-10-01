@@ -91,7 +91,12 @@ không đưa token vào localStorage hoặc dữ liệu trả về trình duyệ
   lỗi nghiệp vụ và 429 có thông báo, trạng thái chờ và xử lý gửi lại.
 - Refresh bị từ chối: xóa phiên, chuyển đăng nhập. Backend tạm lỗi: giữ phiên
   để có thể thử lại. Đăng xuất vẫn xóa cookie nếu backend không phản hồi.
-- Chưa có API Google login/khôi phục mật khẩu trong backend hiện tại.
+- Đăng nhập Google: `/auth/google` đặt cookie `__ps_oauth` (`bind` + `redirectTo`)
+  rồi chuyển sang backend (`GOOGLE_AUTH_START_URL`). Sau khi Google xác thực,
+  backend redirect về `/auth/google/callback?code=…` (mã dùng một lần, 60 giây);
+  SSR đổi mã qua `POST /auth/oauth2/exchange` kèm `bind` + thiết bị rồi tạo
+  session như đăng nhập thường. Lỗi quay về `/login?oauth_error=…`.
+- Chưa có API khôi phục mật khẩu trong backend hiện tại.
   Các trang admin mock chưa nối API dữ liệu và vẫn giữ chế độ preview công khai.
 
 Kiểm tra: `npm run typecheck`, `npm run lint`, `npm test`, `npm run build`.

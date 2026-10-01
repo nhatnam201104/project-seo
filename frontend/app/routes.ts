@@ -23,6 +23,9 @@ export default [
 
   // Resource route: chỉ action/redirect, không cần UI shell.
   route("logout", "routes/logout.tsx"),
+  // Đăng nhập Google: bắt đầu vòng OAuth và nhận mã trao tay từ backend.
+  route("auth/google", "routes/auth.google.tsx"),
+  route("auth/google/callback", "routes/auth.google.callback.tsx"),
 
   layout("layouts/admin-layout.tsx", [
     // UI prototype công khai, chỉ dùng mock. Khôi phục guard trước khi nối API thật.
