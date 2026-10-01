@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 
 import com.projectsale.api.auth.dto.AuthRequest.LoginRequest;
 import com.projectsale.api.auth.dto.AuthRequest.LogoutRequest;
+import com.projectsale.api.auth.dto.AuthRequest.OAuth2ExchangeRequest;
 import com.projectsale.api.auth.dto.AuthRequest.RegisterRequest;
 import com.projectsale.api.auth.dto.AuthRequest.RefreshRequest;
 import com.projectsale.api.auth.dto.AuthRequest.VerifyRequest;
@@ -50,6 +51,7 @@ class AuthServiceProductionReadinessTest {
   private JwtService jwtService;
   private OtpService otpService;
   private RefreshTokenService refreshTokenService;
+  private OAuth2LoginCodeService oauth2LoginCodeService;
   private AuthService service;
 
   @BeforeEach
@@ -61,8 +63,9 @@ class AuthServiceProductionReadinessTest {
     jwtService = mock(JwtService.class);
     otpService = mock(OtpService.class);
     refreshTokenService = mock(RefreshTokenService.class);
+    oauth2LoginCodeService = mock(OAuth2LoginCodeService.class);
     service = new AuthService(userRepository, mapper, passwordEncoder, emailService,
-        jwtService, otpService, refreshTokenService);
+        jwtService, otpService, refreshTokenService, oauth2LoginCodeService);
     // The constructor pre-computes a dummy BCrypt hash; tests assert only on request-time calls.
     clearInvocations(passwordEncoder);
   }
@@ -346,6 +349,89 @@ class AuthServiceProductionReadinessTest {
     assertAppError(() -> service.refresh(new RefreshRequest("old-token"),
         new DeviceActivity("test-agent", "127.0.0.1")), ErrorCode.INVALID_REFRESH_TOKEN);
     verify(jwtService, never()).issueAccessToken(any(), any());
+  }
+
+  @Test
+  void loginOfGoogleOnlyAccountFailsLikeWrongPasswordAndStillPaysForAHashCheck() {
+    User user = activeUser();
+    when(user.getPasswordHash()).thenReturn(null);
+    when(userRepository.findByEmail("member@example.com")).thenReturn(Optional.of(user));
+    // Even an encoder that would accept the dummy hash must not let the login through.
+    when(passwordEncoder.matches(org.mockito.ArgumentMatchers.eq("secret123"), any()))
+        .thenReturn(true);
+
+    assertAppError(() -> service.login(loginRequest("secret123"), device()),
+        ErrorCode.INVALID_CREDENTIALS);
+
+    verify(passwordEncoder).matches(org.mockito.ArgumentMatchers.eq("secret123"), any());
+    verifyNoInteractions(refreshTokenService, jwtService);
+  }
+
+  @Test
+  void oauth2ExchangeIssuesTokensForTheBoundBrowser() {
+    User user = activeUser();
+    UUID sessionId = UUID.randomUUID();
+    stubPendingLogin(user);
+    when(refreshTokenService.issue(user, device())).thenReturn(new IssuedRefreshToken(
+        "refresh-token", sessionId, UUID.randomUUID(), device().deviceId(),
+        Instant.now().plusSeconds(3600)));
+    when(jwtService.issueAccessToken(user, sessionId)).thenReturn("access-token");
+    UserResponse mappedUser = userResponse(user);
+    when(mapper.toResponse(user)).thenReturn(mappedUser);
+
+    TokenResponse response = service.exchangeOAuth2Code(exchangeRequest(BIND), device());
+
+    assertThat(response.accessToken()).isEqualTo("access-token");
+    assertThat(response.refreshToken()).isEqualTo("refresh-token");
+    verify(refreshTokenService).issue(user, device());
+  }
+
+  @Test
+  void oauth2ExchangeRejectsUnknownOrAlreadyUsedCode() {
+    when(oauth2LoginCodeService.consume("login-code")).thenReturn(Optional.empty());
+
+    assertAppError(() -> service.exchangeOAuth2Code(exchangeRequest(BIND), device()),
+        ErrorCode.INVALID_OAUTH2_CODE);
+
+    verifyNoInteractions(refreshTokenService, jwtService);
+  }
+
+  @Test
+  void oauth2ExchangeRejectsCodeStartedInAnotherBrowser() {
+    User user = activeUser();
+    stubPendingLogin(user);
+
+    assertAppError(() -> service.exchangeOAuth2Code(exchangeRequest("x".repeat(43)), device()),
+        ErrorCode.INVALID_OAUTH2_CODE);
+
+    verifyNoInteractions(refreshTokenService, jwtService);
+  }
+
+  @Test
+  void oauth2ExchangeRejectsAccountDisabledAfterTheCodeWasIssued() {
+    User user = activeUser();
+    when(user.isActive()).thenReturn(false);
+    stubPendingLogin(user);
+
+    assertAppError(() -> service.exchangeOAuth2Code(exchangeRequest(BIND), device()),
+        ErrorCode.ACCOUNT_DISABLED);
+
+    verifyNoInteractions(refreshTokenService, jwtService);
+  }
+
+  private static final String BIND = "b".repeat(43);
+
+  /** Đọc publicId ra biến trước: gọi mock bên trong when(...) gây "unfinished stubbing". */
+  private void stubPendingLogin(User user) {
+    UUID userId = user.getPublicId();
+    OAuth2LoginCodeService.PendingLogin pending = new OAuth2LoginCodeService.PendingLogin(userId, BIND);
+    when(oauth2LoginCodeService.consume("login-code")).thenReturn(Optional.of(pending));
+    when(userRepository.findByPublicId(userId)).thenReturn(Optional.of(user));
+  }
+
+  private static OAuth2ExchangeRequest exchangeRequest(String bind) {
+    return new OAuth2ExchangeRequest("login-code", bind, device().deviceId(),
+        "QA PC", DevicePlatform.WINDOWS);
   }
 
   private static LoginRequest loginRequest(String password) {

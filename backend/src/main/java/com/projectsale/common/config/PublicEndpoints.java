@@ -18,9 +18,15 @@ public final class PublicEndpoints {
   private PublicEndpoints() {
   }
 
-  /** Auth công khai (chưa cần token): đăng ký, đăng nhập, làm mới token. */
+  /**
+   * Auth công khai (chưa cần token): đăng ký, đăng nhập, làm mới token, đổi mã
+   * đăng nhập Google. Hai endpoint OAuth của Spring ({@code /oauth2/authorization/*},
+   * {@code /login/oauth2/code/*}) do filter xử lý trước bước phân quyền nên không
+   * cần nằm ở đây.
+   */
   public static final String[] AUTH = {
-      "/api/v1/auth/register", "/api/v1/auth/login", "/api/v1/auth/refresh","/api/v1/auth/verify", "/api/v1/auth/resendOTP"
+      "/api/v1/auth/register", "/api/v1/auth/login", "/api/v1/auth/refresh","/api/v1/auth/verify", "/api/v1/auth/resendOTP",
+      "/api/v1/auth/oauth2/exchange"
   };
 
   /** Đọc catalog công khai: sản phẩm, danh mục, thương hiệu. */

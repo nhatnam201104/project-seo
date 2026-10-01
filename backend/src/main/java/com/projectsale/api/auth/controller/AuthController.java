@@ -2,6 +2,7 @@ package com.projectsale.api.auth.controller;
 
 import com.projectsale.api.auth.dto.AuthRequest.LoginRequest;
 import com.projectsale.api.auth.dto.AuthRequest.LogoutRequest;
+import com.projectsale.api.auth.dto.AuthRequest.OAuth2ExchangeRequest;
 import com.projectsale.api.auth.dto.AuthRequest.RefreshRequest;
 import com.projectsale.api.auth.dto.AuthRequest.RegisterRequest;
 import com.projectsale.api.auth.dto.AuthRequest.ResendOTP;
@@ -87,6 +88,18 @@ public class AuthController {
     public ApiResponse<Void> resendOTP(@Valid @RequestBody ResendOTP request) {
         authService.resendOTP(request.email());
         return ApiResponse.ok(null);
+    }
+
+    /** SSR đổi mã một lần từ callback Google lấy token (xem OAuth2LoginSuccessHandler). */
+    @RateLimit(limit = 20, duration = 15, keyType = KeyType.IP_ADDRESS)
+    @PostMapping("/oauth2/exchange")
+    public ApiResponse<TokenResponse> exchangeOAuth2Code(
+            @Valid @RequestBody OAuth2ExchangeRequest request,
+            HttpServletRequest httpRequest) {
+        var deviceInfo = DeviceInfoFactory.from(
+                request.deviceId(), request.deviceName(), request.platform(),
+                clientResolver.resolve(httpRequest));
+        return ApiResponse.ok(authService.exchangeOAuth2Code(request, deviceInfo));
     }
 
     @RateLimit(limit = 30, duration = 1, keyType = KeyType.IP_ADDRESS)

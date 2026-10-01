@@ -5,6 +5,7 @@ import {
   authUserSchema,
   loginRequestSchema,
   logoutRequestSchema,
+  oauth2ExchangeRequestSchema,
   refreshRequestSchema,
   registerRequestSchema,
   resendOtpRequestSchema,
@@ -15,6 +16,7 @@ import {
 import type {
   LoginRequest,
   LogoutRequest,
+  OAuth2ExchangeRequest,
   RefreshRequest,
   RegisterRequest,
   ResendOtpRequest,
@@ -123,6 +125,20 @@ export function logout(
     AUTH_ENDPOINTS.logout,
     logoutRequestSchema.parse(body),
     z.null(),
+    signal,
+  );
+}
+/** Đổi mã một lần (từ callback Google của backend) lấy token. */
+export function exchangeOAuth2Code(
+  client: AxiosInstance,
+  body: OAuth2ExchangeRequest,
+  signal?: AbortSignal,
+) {
+  return post(
+    client,
+    AUTH_ENDPOINTS.oauth2Exchange,
+    oauth2ExchangeRequestSchema.parse(body),
+    tokenResponseSchema,
     signal,
   );
 }

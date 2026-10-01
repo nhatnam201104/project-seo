@@ -21,6 +21,17 @@ spring:
       hibernate.type.preferred_uuid_jdbc_type: CHAR
   flyway:
     enabled: true
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope: openid, profile, email
+            # Production đứng sau Caddy nên {baseUrl} sẽ là http://backend:8081 → đặt tường minh
+            # (không dùng forward-headers-strategy, xem ClientRequestResolver).
+            redirect-uri: ${GOOGLE_REDIRECT_URI:{baseUrl}/login/oauth2/code/{registrationId}}
   mail:
     host: ${MAIL_HOST:smtp.gmail.com}
     port: ${MAIL_PORT:587}
@@ -46,10 +57,19 @@ spring:
       timeout: ${REDIS_TIMEOUT:2s}
       ssl:
         enabled: ${REDIS_SSL:false}
+
 server:
   error:
     include-message: never
   port: 8081
+  servlet:
+    # Session chỉ giữ state OAuth trong một vòng đăng nhập Google (bị huỷ ngay sau đó).
+    session:
+      timeout: 10m
+      cookie:
+        http-only: true
+        same-site: lax
+        secure: ${SESSION_COOKIE_SECURE:false}
 app:
   mail:
     from: ${MAIL_FROM:}
@@ -60,6 +80,9 @@ app:
     access-ttl: PT15M
     refresh-ttl: PT720H
     clock-skew: PT60S
+  oauth2:
+    # Origin công khai của frontend SSR: đích redirect sau callback Google.
+    frontend-base-url: ${FRONTEND_BASE_URL:http://localhost:5173}
   proxy:
     # Bí mật dùng chung với frontend SSR (>= 32 ký tự). Để trống: không tin IP/User-Agent
     # chuyển tiếp — mọi người dùng đi qua SSR sẽ dùng chung một khoá rate limit.

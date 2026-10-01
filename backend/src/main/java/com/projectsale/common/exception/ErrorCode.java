@@ -28,6 +28,7 @@ public enum ErrorCode {
   INVALID_DEVICE_ID (HttpStatus.FORBIDDEN, "Invalid device ID"),
   ACCOUNT_ALREADY_VERIFIED (HttpStatus.FORBIDDEN, "Account already verified"),
   ACCOUNT_DISABLED(HttpStatus.FORBIDDEN, "Account disabled"),
+  INVALID_OAUTH2_CODE(HttpStatus.UNAUTHORIZED, "Invalid or expired login code"),
   // Redis
   REDIS_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Error occurred while interacting with Redis"),
 

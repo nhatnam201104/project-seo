@@ -4,6 +4,7 @@ import type {
   deviceSchema,
   loginRequestSchema,
   logoutRequestSchema,
+  oauth2ExchangeRequestSchema,
   refreshRequestSchema,
   registerRequestSchema,
   resendOtpRequestSchema,
@@ -20,6 +21,7 @@ export type VerifyRequest = z.infer<typeof verifyRequestSchema>;
 export type ResendOtpRequest = z.infer<typeof resendOtpRequestSchema>;
 export type RefreshRequest = z.infer<typeof refreshRequestSchema>;
 export type LogoutRequest = z.infer<typeof logoutRequestSchema>;
+export type OAuth2ExchangeRequest = z.infer<typeof oauth2ExchangeRequestSchema>;
 export type AuthUser = z.infer<typeof authUserSchema>;
 export type LoginResponse = z.infer<typeof tokenResponseSchema>;
 export type VerifyResponse = LoginResponse;

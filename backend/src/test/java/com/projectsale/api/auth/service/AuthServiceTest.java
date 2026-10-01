@@ -66,7 +66,8 @@ class AuthServiceTest {
         mock(EmailService.class),
         jwtService,
         otpService,
-        refreshTokenService);
+        refreshTokenService,
+        mock(OAuth2LoginCodeService.class));
     DeviceInfo device = new DeviceInfo(
         deviceId, "Office PC", DevicePlatform.WINDOWS, "test-agent", "127.0.0.1");
 
@@ -114,7 +115,8 @@ class AuthServiceTest {
         mock(EmailService.class),
         jwtService,
         mock(OtpService.class),
-        refreshTokenService);
+        refreshTokenService,
+        mock(OAuth2LoginCodeService.class));
 
     TokenPair pair = service.refresh(
         new RefreshRequest("old-refresh"),
