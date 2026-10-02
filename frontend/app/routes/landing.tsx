@@ -28,13 +28,6 @@ export const links: Route.LinksFunction = () => [
     fetchPriority: "high",
     media: "(max-width: 767px)",
   },
-  {
-    rel: "preload",
-    as: "font",
-    href: "/landing/archivo-var.woff2",
-    type: "font/woff2",
-    crossOrigin: "anonymous",
-  },
 ];
 
 export default function Landing() {

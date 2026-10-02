@@ -26,9 +26,7 @@ crop theo từng vị trí giao diện, resize và nén WebP; không dùng ảnh
 
 ## Font
 
-- `archivo-var.woff2` — [Archivo](https://fonts.google.com/specimen/Archivo)
-  (variable: wght 100–900, wdth 62–125%, latin subset), Omnibus-Type.
-  Giấy phép: SIL Open Font License 1.1 — cho phép self-host.
+Toàn bộ web dùng Arial (font hệ thống), không cần nạp file font.
 
 ## Video tham chiếu
 
