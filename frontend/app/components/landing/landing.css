@@ -5,15 +5,6 @@
    JS desktop nâng cấp thành trải nghiệm pin + trượt ngang.
    ============================================================ */
 
-@font-face {
-  font-family: "Archivo";
-  font-style: normal;
-  font-weight: 100 900;
-  font-stretch: 62% 125%;
-  font-display: swap;
-  src: url("/landing/archivo-var.woff2") format("woff2");
-}
-
 .lp {
   /* --- Design tokens --- */
   --lp-paper: #ffffff;
@@ -30,7 +21,7 @@
   --lp-gutter: clamp(16px, 3vw, 28px);
   --lp-section-gap: clamp(4rem, 10vh, 8rem);
 
-  --lp-font: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --lp-font: Arial, "Helvetica Neue", Helvetica, sans-serif;
   --lp-text-tag: 11px;
   --lp-text-nav: 11.5px;
   --lp-text-meta: clamp(11px, 1vw, 13px);
@@ -235,7 +226,6 @@ a.lp-tab:focus-visible {
 .lp-menu-links a {
   font-size: clamp(2rem, 6vw, 4.5rem);
   font-weight: 800;
-  font-stretch: 112%;
   text-transform: uppercase;
   letter-spacing: -0.01em;
   line-height: 1.05;
@@ -352,7 +342,6 @@ a.lp-tab:focus-visible {
   margin: 0;
   font-size: var(--lp-text-title);
   font-weight: 900;
-  font-stretch: 118%;
   text-transform: uppercase;
   line-height: 0.94;
   letter-spacing: -0.015em;
@@ -592,7 +581,6 @@ a.lp-tag:focus-visible .lp-tag-pill {
   text-align: center;
   font-size: var(--lp-text-statement);
   font-weight: 900;
-  font-stretch: 116%;
   text-transform: uppercase;
   line-height: 0.92;
   letter-spacing: -0.01em;
@@ -736,7 +724,6 @@ a.lp-tag:focus-visible .lp-tag-pill {
 .lp-showcase-name {
   font-size: clamp(1.4rem, 3.4vw, 2.6rem);
   font-weight: 800;
-  font-stretch: 112%;
   text-transform: uppercase;
   letter-spacing: -0.01em;
   display: inline-flex;
@@ -851,7 +838,6 @@ a.lp-tag:focus-visible .lp-tag-pill {
   margin: 0;
   font-size: clamp(2.1rem, 8.2vw, 8rem);
   font-weight: 900;
-  font-stretch: 110%;
   letter-spacing: -0.02em;
   line-height: 0.9;
   text-transform: uppercase;

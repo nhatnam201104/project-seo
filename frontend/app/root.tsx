@@ -26,9 +26,6 @@ export const links: Route.LinksFunction = () => [
   // Khai báo favicon để trình duyệt dùng file này thay vì tự dò /favicon.ico
   // (request /favicon.ico không khớp route nào → SSR handler ném lỗi "No route matches").
   { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
-  { rel: "preconnect", href: "https://fonts.googleapis.com" },
-  { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-  { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@500;600;700;800;900&display=swap" },
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {

@@ -1,5 +1,6 @@
 @import "./components/storefront/storefront.css";
 @import "./components/storefront/storefront-footer.css";
+@import "./components/store/store-pages.css";
 
 :root {
   --color-bg: #ffffff;
@@ -12,8 +13,7 @@
 
   --radius: 10px;
   --space: 16px;
-  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    Helvetica, Arial, sans-serif;
+  --font-sans: Arial, "Helvetica Neue", Helvetica, sans-serif;
 }
 
 * {

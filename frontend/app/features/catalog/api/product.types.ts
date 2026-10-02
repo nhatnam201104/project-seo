@@ -53,6 +53,9 @@ export type ProductDetail = {
   warranty_months: number;
   meta_title: string | null;
   meta_description: string | null;
+  has_lens?: boolean;
+  gender?: string | null;
+  face_tags?: string[];
   images: ProductImage[];
   variants: ProductVariant[];
 };
@@ -76,3 +79,8 @@ export type GetProductsParams = PageParams & {
 export type SearchProductsParams = PageParams & {
   q: string;
 };
+
+/** Lựa chọn cho bộ lọc (GET /categories, GET /brands). */
+export type CategoryOption = { id: Id; name: string; slug: string };
+export type BrandOption = { id: Id; name: string; slug: string };
+
