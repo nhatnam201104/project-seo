@@ -95,7 +95,8 @@ export function StorefrontHeader({ user, overlay = false }: StorefrontHeaderProp
                   <Link to="/account">Account overview</Link>
                   <Link to="/account#orders">My orders</Link>
                   <Link to="/account#saved">Saved items</Link>
-                  <Link to="/account#address">Addresses</Link>
+                  <Link to="/account/addresses">Addresses</Link>
+                  <Link to="/account/profile">Edit profile</Link>
                   {user.role === "ADMIN" ? <Link to="/admin">Administration</Link> : null}
                   <Form method="post" action="/logout"><button type="submit">Log out</button></Form>
                 </div>

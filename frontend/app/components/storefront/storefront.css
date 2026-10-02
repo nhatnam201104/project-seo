@@ -1,9 +1,9 @@
 :root {
   --sf-paper: #f7f6f2; --sf-white: #fff; --sf-ink: #101010; --sf-muted: #6e6d68;
   --sf-rule: #c8c6be; --sf-danger: #b42318; --sf-header-height: 72px;
-  --sf-font-display: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
-  --sf-font-body: "Inter", "Helvetica Neue", Arial, sans-serif;
-  --sf-font-mono: "IBM Plex Mono", Consolas, monospace;
+  --sf-font-display: Arial, "Helvetica Neue", Helvetica, sans-serif;
+  --sf-font-body: Arial, "Helvetica Neue", Helvetica, sans-serif;
+  --sf-font-mono: Arial, "Helvetica Neue", Helvetica, sans-serif;
 }
 .auth-form__notice{margin:0;color:var(--sf-muted);font-size:.85rem;line-height:1.6;overflow-wrap:anywhere}
 .auth-form p.auth-field--error{margin:7px 0 0;color:var(--sf-danger);font-size:.72rem}

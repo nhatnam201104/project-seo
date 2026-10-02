@@ -8,6 +8,7 @@ export default [
   layout("layouts/client-layout.tsx", [
     // Danh sách sản phẩm (feature mẫu: read qua loader + Page<T>)
     route("products", "routes/products.tsx"),
+    route("product/:slug", "routes/product.$slug.tsx"),
 
     // Auth — minh hoạ httpOnly session-cookie bridge
     route("login", "routes/login.tsx"),
@@ -16,6 +17,10 @@ export default [
 
     // Trang cần đăng nhập — minh hoạ requireUser()
     route("account", "routes/account.tsx"),
+    route("account/profile", "routes/account.profile.tsx"),
+    route("account/addresses", "routes/account.addresses.tsx"),
+    route("account/addresses/new", "routes/account.addresses.new.tsx"),
+    route("account/addresses/:id", "routes/account.addresses.$id.tsx"),
 
     // Trang khung chính sách (link từ footer); slug lạ → 404
     route("policies/:slug", "routes/policies.$slug.tsx"),

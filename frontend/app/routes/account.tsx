@@ -29,17 +29,17 @@ export default function Account({ loaderData }: Route.ComponentProps) {
       <div className="account-page__layout">
         <nav className="account-nav" aria-label="Điều hướng tài khoản">
           <p>MY ACCOUNT / 01</p>
-          <Link to="/account">Overview</Link><a href="#orders">Orders</a><a href="#saved">Saved items</a><a href="#settings">Settings</a>
+          <Link to="/account">Overview</Link><a href="#orders">Orders</a><a href="#saved">Saved items</a><Link to="/account/addresses">Addresses</Link><Link to="/account/profile">Settings</Link>
           <Form method="post" action="/logout"><button type="submit">Logout</button></Form>
         </nav>
         <div className="account-main">
           <p className="account-main__kicker">ACCOUNT OVERVIEW / MEMBER</p>
           <h1 id="account-heading">WELCOME, {firstName.toUpperCase()}.</h1>
           <div className="account-grid">
-            <section className="account-card" id="settings"><h2>PROFILE DETAILS</h2><dl><dt>Full name</dt><dd>{me.full_name ?? "—"}</dd><dt>Email</dt><dd>{me.email}</dd><dt>Phone</dt><dd>{me.phone ?? "Not provided"}</dd></dl><div className="account-card__actions"><Link to="/account">Edit profile</Link><Link to="/account">Change password</Link></div></section>
+            <section className="account-card" id="settings"><h2>PROFILE DETAILS</h2><dl><dt>Full name</dt><dd>{me.full_name ?? "—"}</dd><dt>Email</dt><dd>{me.email}</dd><dt>Phone</dt><dd>{me.phone ?? "Not provided"}</dd></dl><div className="account-card__actions"><Link to="/account/profile">Edit profile</Link><Link to="/account/profile#password">Change password</Link></div></section>
             <section className="account-card" id="saved"><h2>SAVED ITEMS</h2><p className="account-stat">0<span>Frames waiting in your edit.</span></p><div className="account-card__actions"><Link to="/products">Explore collection</Link></div></section>
             <section className="account-card account-card--wide" id="orders"><h2>RECENT ORDERS</h2><div className="account-order"><code>NO ORDERS YET</code><strong>—</strong><span>Your recent purchases will appear here.</span></div><div className="account-card__actions"><Link to="/products">Shop eyewear</Link></div></section>
-            <section className="account-card account-card--wide" id="address"><h2>DEFAULT SHIPPING ADDRESS</h2><p className="account-stat">—<span>No shipping address saved yet.</span></p><div className="account-card__actions"><Link to="/account">Add address</Link></div></section>
+            <section className="account-card account-card--wide" id="address"><h2>DEFAULT SHIPPING ADDRESS</h2><p className="account-stat">—<span>No shipping address saved yet.</span></p><div className="account-card__actions"><Link to="/account/addresses/new">Add address</Link><Link to="/account/addresses">Manage addresses</Link></div></section>
           </div>
         </div>
       </div>
