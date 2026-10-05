@@ -35,18 +35,18 @@ describe("updateProfileSchema", () => {
   });
 });
 
-describe("changePasswordSchema (tối thiểu 6 ký tự)", () => {
-  const ok = { current_password: "old", new_password: "abc123", confirm_password: "abc123" };
-  it("chấp nhận đúng 6 ký tự có chữ thường và số", () => expect(changePasswordSchema.safeParse(ok).success).toBe(true));
-  it("từ chối 5 ký tự", () => {
-    const r = changePasswordSchema.safeParse({ ...ok, new_password: "abc12", confirm_password: "abc12" });
+describe("changePasswordSchema (tối thiểu 8 ký tự)", () => {
+  const ok = { current_password: "old", new_password: "abcdef12", confirm_password: "abcdef12" };
+  it("chấp nhận đúng 8 ký tự có chữ thường và số", () => expect(changePasswordSchema.safeParse(ok).success).toBe(true));
+  it("từ chối 7 ký tự", () => {
+    const r = changePasswordSchema.safeParse({ ...ok, new_password: "abcde12", confirm_password: "abcde12" });
     expect(r.success).toBe(false);
   });
   it("từ chối khi thiếu chữ số", () => {
-    expect(changePasswordSchema.safeParse({ ...ok, new_password: "abcdef", confirm_password: "abcdef" }).success).toBe(false);
+    expect(changePasswordSchema.safeParse({ ...ok, new_password: "abcdefgh", confirm_password: "abcdefgh" }).success).toBe(false);
   });
   it("báo lỗi xác nhận không khớp ở trường confirm_password", () => {
-    const r = changePasswordSchema.safeParse({ ...ok, confirm_password: "other1" });
+    const r = changePasswordSchema.safeParse({ ...ok, confirm_password: "other123" });
     expect(r.success).toBe(false);
     if (!r.success) expect(r.error.issues[0]?.path).toEqual(["confirm_password"]);
   });

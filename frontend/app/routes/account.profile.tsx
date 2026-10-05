@@ -84,6 +84,8 @@ export async function action({ request, context }: Route.ActionArgs) {
     return respond({ intent, error: "Yêu cầu không hợp lệ.", fieldErrors: {} }, 400);
   } catch (error) {
     const { status, message } = actionErrorMessage(error);
+    // 409: số điện thoại đã thuộc tài khoản khác → báo ngay tại ô nhập.
+    if (intent === "profile" && status === 409) return respond({ intent, fieldErrors: { phone: message } }, status);
     return respond({ intent, error: message, fieldErrors: {} }, status);
   }
 }

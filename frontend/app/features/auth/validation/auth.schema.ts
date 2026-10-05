@@ -36,7 +36,7 @@ export const registerRequestSchema = z.object({
   password: password.pipe(
     z
       .string()
-      .min(6, "Mật khẩu cần ít nhất 6 ký tự.")
+      .min(8, "Mật khẩu cần ít nhất 8 ký tự.")
       .max(72, "Mật khẩu tối đa 72 ký tự."),
   ),
 });
