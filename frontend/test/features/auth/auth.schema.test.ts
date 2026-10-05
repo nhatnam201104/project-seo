@@ -14,6 +14,10 @@ describe("auth validation matching backend DTOs", () => {
   it.each(["0901234567", "+84901234567"])("accepts supported Vietnamese phone %s", (phone) => {
     expect(registerRequestSchema.safeParse({ ...registration, phone }).success).toBe(true);
   });
+  it("requires passwords of 8 to 72 characters like the backend", () => {
+    expect(registerRequestSchema.safeParse({ ...registration, password: "a".repeat(7) }).success).toBe(false);
+    expect(registerRequestSchema.safeParse({ ...registration, password: "a".repeat(8) }).success).toBe(true);
+  });
   it("enforces backend field limits, terms and confirmation", () => {
     for (const invalid of [{ full_name: "x".repeat(121) }, { email: `${"a".repeat(180)}@example.com` }, { password: "a".repeat(73) }, { password: "        " }]) {
       expect(registerRequestSchema.safeParse({ ...registration, ...invalid }).success).toBe(false);
