@@ -35,6 +35,11 @@ public enum ErrorCode {
   // User
   USER_NOT_FOUND(HttpStatus.NOT_FOUND, "User not found"),
   INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "Invalid email or password"),
+  INVALID_CURRENT_PASSWORD(HttpStatus.BAD_REQUEST, "Mật khẩu hiện tại không đúng"),
+  PASSWORD_NOT_SET(HttpStatus.BAD_REQUEST, "Tài khoản đăng nhập bằng Google chưa có mật khẩu"),
+
+  // Address
+  ADDRESS_NOT_FOUND(HttpStatus.NOT_FOUND, "Không tìm thấy địa chỉ"),
 
   ;
 

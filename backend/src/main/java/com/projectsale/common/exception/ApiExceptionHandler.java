@@ -20,6 +20,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import com.projectsale.api.auth.security.RefreshTokenService;
 import com.projectsale.common.config.CorrelationIdFilter;
@@ -57,6 +58,12 @@ public class ApiExceptionHandler {
   @ExceptionHandler(HttpMessageNotReadableException.class)
   ResponseEntity<ApiResponse<Void>> handleUnreadableBody(HttpMessageNotReadableException exception) {
     return validationError(null);
+  }
+
+  /** Path/query param sai kiểu (vd: id không phải UUID) là lỗi của client, không phải 500. */
+  @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+  ResponseEntity<ApiResponse<Void>> handleArgumentTypeMismatch(MethodArgumentTypeMismatchException exception) {
+    return validationError(exception.getName() + ": giá trị không hợp lệ");
   }
 
   /**

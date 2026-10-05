@@ -7,7 +7,8 @@ import lombok.*;
 @Entity
 @Table(name = "addresses")
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Setter
+@NoArgsConstructor
 public class Address {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

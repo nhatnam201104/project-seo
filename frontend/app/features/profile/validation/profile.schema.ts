@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const PASSWORD_MIN = 6;
+export const PASSWORD_MIN = 8;
 export const PASSWORD_MAX = 72;
 export const AVATAR_MAX_BYTES = 2 * 1024 * 1024;
 export const AVATAR_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
