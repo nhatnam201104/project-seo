@@ -1,20 +1,15 @@
 package com.projectsale.api.user.mapper;
 
-import com.projectsale.api.user.dto.ProfileResponse;
+import com.projectsale.api.user.dto.UserResponse.Profile;
 import com.projectsale.entity.User;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingConstants;
+import org.mapstruct.ReportingPolicy;
 
-@Component
-public class ProfileMapper {
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, unmappedTargetPolicy = ReportingPolicy.ERROR)
+public interface ProfileMapper {
 
-  public ProfileResponse toResponse(User user) {
-    return new ProfileResponse(
-        user.getPublicId(),
-        user.getEmail(),
-        user.getFullName(),
-        user.getPhone(),
-        user.getDateOfBirth(),
-        user.getGender(),
-        user.getAvatarUrl());
-  }
+  @Mapping(target = "id", source = "publicId")
+  Profile toResponse(User user);
 }

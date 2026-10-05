@@ -1,7 +1,7 @@
 package com.projectsale.api.user.controller;
 
-import com.projectsale.api.user.dto.AddressRequest;
-import com.projectsale.api.user.dto.AddressResponse;
+import com.projectsale.api.user.dto.UserRequest;
+import com.projectsale.api.user.dto.UserResponse;
 import com.projectsale.api.user.service.AddressService;
 import com.projectsale.common.response.ApiResponse;
 import jakarta.validation.Valid;
@@ -28,25 +28,25 @@ public class AddressController {
   private final AddressService addressService;
 
   @GetMapping
-  public ApiResponse<List<AddressResponse>> list(@AuthenticationPrincipal UUID userId) {
+  public ApiResponse<List<UserResponse.Address>> list(@AuthenticationPrincipal UUID userId) {
     return ApiResponse.ok(addressService.list(userId));
   }
 
   @GetMapping("/{id}")
-  public ApiResponse<AddressResponse> get(@AuthenticationPrincipal UUID userId, @PathVariable UUID id) {
+  public ApiResponse<UserResponse.Address> get(@AuthenticationPrincipal UUID userId, @PathVariable UUID id) {
     return ApiResponse.ok(addressService.get(userId, id));
   }
 
   @PostMapping
-  public ResponseEntity<ApiResponse<AddressResponse>> create(
-      @AuthenticationPrincipal UUID userId, @Valid @RequestBody AddressRequest request) {
+  public ResponseEntity<ApiResponse<UserResponse.Address>> create(
+      @AuthenticationPrincipal UUID userId, @Valid @RequestBody UserRequest.SaveAddress request) {
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(ApiResponse.ok(addressService.create(userId, request)));
   }
 
   @PutMapping("/{id}")
-  public ApiResponse<AddressResponse> update(
-      @AuthenticationPrincipal UUID userId, @PathVariable UUID id, @Valid @RequestBody AddressRequest request) {
+  public ApiResponse<UserResponse.Address> update(
+      @AuthenticationPrincipal UUID userId, @PathVariable UUID id, @Valid @RequestBody UserRequest.SaveAddress request) {
     return ApiResponse.ok(addressService.update(userId, id, request));
   }
 

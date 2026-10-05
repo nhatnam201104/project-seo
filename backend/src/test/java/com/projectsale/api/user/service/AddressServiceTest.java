@@ -10,8 +10,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.projectsale.api.user.dto.AddressRequest;
+import com.projectsale.api.user.dto.UserRequest;
 import com.projectsale.api.user.mapper.AddressMapper;
+import com.projectsale.api.user.mapper.AddressMapperImpl;
 import com.projectsale.api.user.repository.AddressRepository;
 import com.projectsale.api.user.repository.UserRepository;
 import com.projectsale.common.exception.AppException;
@@ -34,13 +35,13 @@ class AddressServiceTest {
   void setUp() {
     addresses = mock(AddressRepository.class);
     users = mock(UserRepository.class);
-    service = new AddressService(addresses, users, new AddressMapper());
+    service = new AddressService(addresses, users, new AddressMapperImpl());
     when(addresses.save(any(Address.class))).thenAnswer(inv -> inv.getArgument(0));
     when(users.findByPublicIdForUpdate(userId)).thenReturn(Optional.of(new User()));
   }
 
-  private static AddressRequest request(boolean isDefault) {
-    return new AddressRequest("An", "0912345678", " 12 Nguyễn Huệ ", "Bến Nghé", "Quận 1", "Hồ Chí Minh", isDefault);
+  private static UserRequest.SaveAddress request(boolean isDefault) {
+    return new UserRequest.SaveAddress("An", "0912345678", " 12 Nguyễn Huệ ", "Bến Nghé", "Quận 1", "Hồ Chí Minh", isDefault);
   }
 
   private Address address(boolean isDefault) {

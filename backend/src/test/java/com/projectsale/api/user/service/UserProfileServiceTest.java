@@ -8,8 +8,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.projectsale.api.user.dto.ProfileRequest;
+import com.projectsale.api.user.dto.UserRequest;
 import com.projectsale.api.user.mapper.ProfileMapper;
+import com.projectsale.api.user.mapper.ProfileMapperImpl;
 import com.projectsale.api.user.repository.UserRepository;
 import com.projectsale.common.exception.AppException;
 import com.projectsale.common.exception.ErrorCode;
@@ -36,7 +37,7 @@ class UserProfileServiceTest {
   void setUp() {
     users = mock(UserRepository.class);
     encoder = new BCryptPasswordEncoder(4);
-    service = new UserProfileService(users, new ProfileMapper(), encoder);
+    service = new UserProfileService(users, new ProfileMapperImpl(), encoder);
     user = new User();
     user.setPublicId(userId);
     user.setEmail("a@b.vn");
@@ -49,7 +50,7 @@ class UserProfileServiceTest {
 
   @Test
   void updateTrimsNameAndStoresOptionalFields() {
-    var result = service.update(userId, new ProfileRequest.Update(
+    var result = service.update(userId, new UserRequest.UpdateProfile(
         "  Nguyễn An ", "0987654321", LocalDate.of(1995, 10, 24), Gender.FEMALE));
 
     assertThat(result.fullName()).isEqualTo("Nguyễn An");
@@ -61,7 +62,7 @@ class UserProfileServiceTest {
 
   @Test
   void updateClearsOptionalFieldsWhenNull() {
-    var result = service.update(userId, new ProfileRequest.Update("An", null, null, null));
+    var result = service.update(userId, new UserRequest.UpdateProfile("An", null, null, null));
 
     assertThat(result.phone()).isNull();
     assertThat(result.dateOfBirth()).isNull();
@@ -72,7 +73,7 @@ class UserProfileServiceTest {
   void updateRejectsPhoneUsedByAnotherAccount() {
     when(users.existsByPhone("0987654321")).thenReturn(true);
 
-    assertThatThrownBy(() -> service.update(userId, new ProfileRequest.Update("An", "0987654321", null, null)))
+    assertThatThrownBy(() -> service.update(userId, new UserRequest.UpdateProfile("An", "0987654321", null, null)))
         .isInstanceOfSatisfying(AppException.class,
             e -> assertThat(e.errorCode()).isEqualTo(ErrorCode.PHONE_ALREADY_EXIST));
     verify(users, never()).saveAndFlush(any());
@@ -83,21 +84,21 @@ class UserProfileServiceTest {
     when(users.existsByPhone("0987654321")).thenReturn(false);
     when(users.saveAndFlush(any(User.class))).thenThrow(new DataIntegrityViolationException("uk_users_phone"));
 
-    assertThatThrownBy(() -> service.update(userId, new ProfileRequest.Update("An", "0987654321", null, null)))
+    assertThatThrownBy(() -> service.update(userId, new UserRequest.UpdateProfile("An", "0987654321", null, null)))
         .isInstanceOfSatisfying(AppException.class,
             e -> assertThat(e.errorCode()).isEqualTo(ErrorCode.PHONE_ALREADY_EXIST));
   }
 
   @Test
   void updateKeepingOwnPhoneDoesNotCheckUniqueness() {
-    service.update(userId, new ProfileRequest.Update("An", "0912345678", null, null));
+    service.update(userId, new UserRequest.UpdateProfile("An", "0912345678", null, null));
 
     verify(users, never()).existsByPhone(any());
   }
 
   @Test
   void changePasswordStoresNewHash() {
-    service.changePassword(userId, new ProfileRequest.ChangePassword("password1", "newpassword2"));
+    service.changePassword(userId, new UserRequest.ChangePassword("password1", "newpassword2"));
 
     assertThat(encoder.matches("newpassword2", user.getPasswordHash())).isTrue();
     verify(users).save(user);
@@ -105,7 +106,7 @@ class UserProfileServiceTest {
 
   @Test
   void changePasswordRejectsWrongCurrentPassword() {
-    assertThatThrownBy(() -> service.changePassword(userId, new ProfileRequest.ChangePassword("nope", "newpassword2")))
+    assertThatThrownBy(() -> service.changePassword(userId, new UserRequest.ChangePassword("nope", "newpassword2")))
         .isInstanceOfSatisfying(AppException.class,
             e -> assertThat(e.errorCode()).isEqualTo(ErrorCode.INVALID_CURRENT_PASSWORD));
     verify(users, never()).save(any());
@@ -115,7 +116,7 @@ class UserProfileServiceTest {
   void changePasswordRejectsGoogleAccountWithoutPassword() {
     user.setPasswordHash(null);
 
-    assertThatThrownBy(() -> service.changePassword(userId, new ProfileRequest.ChangePassword("x", "newpassword2")))
+    assertThatThrownBy(() -> service.changePassword(userId, new UserRequest.ChangePassword("x", "newpassword2")))
         .isInstanceOfSatisfying(AppException.class,
             e -> assertThat(e.errorCode()).isEqualTo(ErrorCode.PASSWORD_NOT_SET));
   }

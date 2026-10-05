@@ -12,8 +12,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.projectsale.api.user.dto.AddressResponse;
-import com.projectsale.api.user.dto.ProfileResponse;
+import com.projectsale.api.user.dto.UserResponse;
 import com.projectsale.api.user.service.AddressService;
 import com.projectsale.api.user.service.UserProfileService;
 import com.projectsale.common.exception.ApiExceptionHandler;
@@ -65,7 +64,7 @@ class UserControllersContractTest {
 
   @Test
   void getProfileUsesSnakeCaseContract() throws Exception {
-    when(profileService.get(userId)).thenReturn(new ProfileResponse(
+    when(profileService.get(userId)).thenReturn(new UserResponse.Profile(
         userId, "a@b.vn", "An", "0912345678", LocalDate.of(1995, 10, 24), Gender.MALE, null));
 
     mvc.perform(get("/api/v1/users/me"))
@@ -92,7 +91,7 @@ class UserControllersContractTest {
 
   @Test
   void updateProfileAcceptsNullOptionalFields() throws Exception {
-    when(profileService.update(any(), any())).thenReturn(new ProfileResponse(
+    when(profileService.update(any(), any())).thenReturn(new UserResponse.Profile(
         userId, "a@b.vn", "An", null, null, null, null));
 
     mvc.perform(put("/api/v1/users/me")
@@ -120,7 +119,7 @@ class UserControllersContractTest {
   @Test
   void createAddressReturns201AndValidates() throws Exception {
     var id = UUID.randomUUID();
-    when(addressService.create(any(), any())).thenReturn(new AddressResponse(
+    when(addressService.create(any(), any())).thenReturn(new UserResponse.Address(
         id, "An", "0912345678", "12 Nguyễn Huệ", "Bến Nghé", "Quận 1", "Hồ Chí Minh", true));
 
     mvc.perform(post("/api/v1/users/me/addresses")
@@ -149,7 +148,7 @@ class UserControllersContractTest {
   void listUpdateDeleteAndDefaultDelegateWithCurrentUser() throws Exception {
     var id = UUID.randomUUID();
     when(addressService.list(userId)).thenReturn(List.of());
-    when(addressService.update(any(), any(), any())).thenReturn(new AddressResponse(
+    when(addressService.update(any(), any(), any())).thenReturn(new UserResponse.Address(
         id, "An", "0912345678", "l", "w", "d", "c", false));
 
     mvc.perform(get("/api/v1/users/me/addresses")).andExpect(status().isOk())

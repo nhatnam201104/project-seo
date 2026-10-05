@@ -1,7 +1,7 @@
 package com.projectsale.api.user.service;
 
-import com.projectsale.api.user.dto.AddressRequest;
-import com.projectsale.api.user.dto.AddressResponse;
+import com.projectsale.api.user.dto.UserRequest;
+import com.projectsale.api.user.dto.UserResponse;
 import com.projectsale.api.user.mapper.AddressMapper;
 import com.projectsale.api.user.repository.AddressRepository;
 import com.projectsale.api.user.repository.UserRepository;
@@ -28,19 +28,19 @@ public class AddressService {
   private final AddressMapper mapper;
 
   @Transactional(readOnly = true)
-  public List<AddressResponse> list(UUID userId) {
+  public List<UserResponse.Address> list(UUID userId) {
     return addressRepository.findByUserPublicIdOrderByIsDefaultDescIdAsc(userId).stream()
         .map(mapper::toResponse)
         .toList();
   }
 
   @Transactional(readOnly = true)
-  public AddressResponse get(UUID userId, UUID addressId) {
+  public UserResponse.Address get(UUID userId, UUID addressId) {
     return mapper.toResponse(owned(userId, addressId));
   }
 
   @Transactional
-  public AddressResponse create(UUID userId, AddressRequest request) {
+  public UserResponse.Address create(UUID userId, UserRequest.SaveAddress request) {
     var user = lockUser(userId);
     var address = new Address();
     address.setUser(user);
@@ -55,7 +55,7 @@ public class AddressService {
   }
 
   @Transactional
-  public AddressResponse update(UUID userId, UUID addressId, AddressRequest request) {
+  public UserResponse.Address update(UUID userId, UUID addressId, UserRequest.SaveAddress request) {
     lockUser(userId);
     var address = owned(userId, addressId);
     mapper.apply(request, address);

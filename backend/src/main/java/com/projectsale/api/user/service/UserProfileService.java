@@ -1,7 +1,7 @@
 package com.projectsale.api.user.service;
 
-import com.projectsale.api.user.dto.ProfileRequest;
-import com.projectsale.api.user.dto.ProfileResponse;
+import com.projectsale.api.user.dto.UserRequest;
+import com.projectsale.api.user.dto.UserResponse;
 import com.projectsale.api.user.mapper.ProfileMapper;
 import com.projectsale.api.user.repository.UserRepository;
 import com.projectsale.common.exception.AppException;
@@ -24,12 +24,12 @@ public class UserProfileService {
   private final PasswordEncoder passwordEncoder;
 
   @Transactional(readOnly = true)
-  public ProfileResponse get(UUID userId) {
+  public UserResponse.Profile get(UUID userId) {
     return mapper.toResponse(find(userId));
   }
 
   @Transactional
-  public ProfileResponse update(UUID userId, ProfileRequest.Update request) {
+  public UserResponse.Profile update(UUID userId, UserRequest.UpdateProfile request) {
     User user = find(userId);
     String phone = request.phone() == null || request.phone().isBlank() ? null : request.phone().trim();
     if (phone != null && !phone.equals(user.getPhone()) && userRepository.existsByPhone(phone)) {
@@ -50,7 +50,7 @@ public class UserProfileService {
 
   // TODO: thu hồi các phiên khác sau khi đổi mật khẩu (cần biết session hiện tại để không đăng xuất chính mình).
   @Transactional
-  public void changePassword(UUID userId, ProfileRequest.ChangePassword request) {
+  public void changePassword(UUID userId, UserRequest.ChangePassword request) {
     User user = find(userId);
     if (user.getPasswordHash() == null) {
       throw new AppException(ErrorCode.PASSWORD_NOT_SET);
