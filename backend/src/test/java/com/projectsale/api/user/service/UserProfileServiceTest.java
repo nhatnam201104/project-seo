@@ -61,12 +61,12 @@ class UserProfileServiceTest {
   }
 
   @Test
-  void updateClearsOptionalFieldsWhenNull() {
+  void updateClearsOptionalFieldsAndFallsBackToDefaultGender() {
     var result = service.update(userId, new UserRequest.UpdateProfile("An", null, null, null));
 
     assertThat(result.phone()).isNull();
     assertThat(result.dateOfBirth()).isNull();
-    assertThat(result.gender()).isNull();
+    assertThat(result.gender()).isEqualTo(Gender.OTHER);
   }
 
   @Test

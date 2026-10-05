@@ -7,6 +7,7 @@ import com.projectsale.api.user.repository.UserRepository;
 import com.projectsale.common.exception.AppException;
 import com.projectsale.common.exception.ErrorCode;
 import com.projectsale.entity.User;
+import com.projectsale.enums.Gender;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +39,8 @@ public class UserProfileService {
     user.setFullName(request.fullName().trim());
     user.setPhone(phone);
     user.setDateOfBirth(request.dateOfBirth());
-    user.setGender(request.gender());
+    // Không chọn giới tính → quay về mặc định OTHER (cột NOT NULL).
+    user.setGender(request.gender() == null ? Gender.OTHER : request.gender());
     user.setUpdatedAt(Instant.now());
     try {
       return mapper.toResponse(userRepository.saveAndFlush(user));

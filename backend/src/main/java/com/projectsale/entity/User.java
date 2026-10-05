@@ -44,7 +44,7 @@ public class User {
   private LocalDate dateOfBirth;
 
   @Enumerated(EnumType.STRING)
-  @Column(length = 16)
+  @Column(nullable = false, length = 16)
   private Gender gender;
 
   @Column(name = "avatar_url")
@@ -84,6 +84,9 @@ public class User {
     }
     if (provider == null) {
       provider = AuthProvider.LOCAL;
+    }
+    if (gender == null) {
+      gender = Gender.OTHER;
     }
   }
 
