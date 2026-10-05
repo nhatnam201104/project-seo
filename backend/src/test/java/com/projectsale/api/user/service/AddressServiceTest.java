@@ -3,8 +3,10 @@ package com.projectsale.api.user.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -34,6 +36,7 @@ class AddressServiceTest {
     users = mock(UserRepository.class);
     service = new AddressService(addresses, users, new AddressMapper());
     when(addresses.save(any(Address.class))).thenAnswer(inv -> inv.getArgument(0));
+    when(users.findByPublicIdForUpdate(userId)).thenReturn(Optional.of(new User()));
   }
 
   private static AddressRequest request(boolean isDefault) {
@@ -54,7 +57,6 @@ class AddressServiceTest {
 
   @Test
   void firstAddressBecomesDefaultEvenWhenNotRequested() {
-    when(users.findByPublicId(userId)).thenReturn(Optional.of(new User()));
     when(addresses.countByUserPublicId(userId)).thenReturn(0L);
 
     var created = service.create(userId, request(false));
@@ -66,7 +68,6 @@ class AddressServiceTest {
 
   @Test
   void laterAddressKeepsExistingDefaultUnlessRequested() {
-    when(users.findByPublicId(userId)).thenReturn(Optional.of(new User()));
     when(addresses.countByUserPublicId(userId)).thenReturn(2L);
 
     var created = service.create(userId, request(false));
@@ -77,13 +78,38 @@ class AddressServiceTest {
 
   @Test
   void requestedDefaultClearsPreviousDefault() {
-    when(users.findByPublicId(userId)).thenReturn(Optional.of(new User()));
     when(addresses.countByUserPublicId(userId)).thenReturn(2L);
 
     var created = service.create(userId, request(true));
 
     assertThat(created.isDefault()).isTrue();
     verify(addresses).clearDefault(userId);
+  }
+
+  @Test
+  void writesLockUserRowBeforeTouchingAddresses() {
+    var existing = address(false);
+    when(addresses.findByPublicIdAndUserPublicId(existing.getPublicId(), userId)).thenReturn(Optional.of(existing));
+    when(addresses.countByUserPublicId(userId)).thenReturn(1L);
+
+    service.create(userId, request(false));
+    service.update(userId, existing.getPublicId(), request(false));
+    service.makeDefault(userId, existing.getPublicId());
+    service.delete(userId, existing.getPublicId());
+
+    var order = inOrder(users, addresses);
+    order.verify(users).findByPublicIdForUpdate(userId);
+    order.verify(addresses).countByUserPublicId(userId);
+    verify(users, times(4)).findByPublicIdForUpdate(userId);
+  }
+
+  @Test
+  void writeForUnknownUserIsUserNotFound() {
+    when(users.findByPublicIdForUpdate(userId)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> service.create(userId, request(false)))
+        .isInstanceOfSatisfying(AppException.class,
+            e -> assertThat(e.errorCode()).isEqualTo(ErrorCode.USER_NOT_FOUND));
   }
 
   @Test

@@ -10,6 +10,7 @@ import com.projectsale.entity.User;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,7 +40,12 @@ public class UserProfileService {
     user.setDateOfBirth(request.dateOfBirth());
     user.setGender(request.gender());
     user.setUpdatedAt(Instant.now());
-    return mapper.toResponse(userRepository.saveAndFlush(user));
+    try {
+      return mapper.toResponse(userRepository.saveAndFlush(user));
+    } catch (DataIntegrityViolationException e) {
+      // Race: số điện thoại vừa bị tài khoản khác chiếm giữa existsByPhone và flush (uk_users_phone).
+      throw new AppException(ErrorCode.PHONE_ALREADY_EXIST);
+    }
   }
 
   // TODO: thu hồi các phiên khác sau khi đổi mật khẩu (cần biết session hiện tại để không đăng xuất chính mình).

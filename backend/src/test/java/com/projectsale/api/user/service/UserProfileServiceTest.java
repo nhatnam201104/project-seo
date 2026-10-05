@@ -20,6 +20,7 @@ import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -75,6 +76,16 @@ class UserProfileServiceTest {
         .isInstanceOfSatisfying(AppException.class,
             e -> assertThat(e.errorCode()).isEqualTo(ErrorCode.PHONE_ALREADY_EXIST));
     verify(users, never()).saveAndFlush(any());
+  }
+
+  @Test
+  void updateMapsConcurrentDuplicatePhoneToPhoneAlreadyExist() {
+    when(users.existsByPhone("0987654321")).thenReturn(false);
+    when(users.saveAndFlush(any(User.class))).thenThrow(new DataIntegrityViolationException("uk_users_phone"));
+
+    assertThatThrownBy(() -> service.update(userId, new ProfileRequest.Update("An", "0987654321", null, null)))
+        .isInstanceOfSatisfying(AppException.class,
+            e -> assertThat(e.errorCode()).isEqualTo(ErrorCode.PHONE_ALREADY_EXIST));
   }
 
   @Test
