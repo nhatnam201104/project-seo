@@ -3,9 +3,11 @@ package com.projectsale.entity;
 import jakarta.persistence.*;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.UUID;
 
 import com.projectsale.enums.AuthProvider;
+import com.projectsale.enums.Gender;
 import com.projectsale.enums.RolesEnum;
 import com.projectsale.enums.StatusEnum;
 
@@ -37,6 +39,16 @@ public class User {
 
   @Column(length = 20, unique = true)
   private String phone;
+
+  @Column(name = "date_of_birth")
+  private LocalDate dateOfBirth;
+
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false, length = 16)
+  private Gender gender;
+
+  @Column(name = "avatar_url")
+  private String avatarUrl;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false, length = 16)
@@ -72,6 +84,9 @@ public class User {
     }
     if (provider == null) {
       provider = AuthProvider.LOCAL;
+    }
+    if (gender == null) {
+      gender = Gender.OTHER;
     }
   }
 

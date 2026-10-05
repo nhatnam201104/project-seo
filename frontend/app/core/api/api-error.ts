@@ -17,6 +17,11 @@ export type ApiError = {
   detailMessage?: string;
   correlationId?: string;
   retryAfter?: number;
+  /**
+   * `true` khi response không mang thông điệp từ envelope lỗi của backend
+   * (vd: 404/405 trần do endpoint chưa tồn tại) và `message` chỉ là chuỗi mặc định phía client.
+   */
+  bare?: boolean;
   cause?: unknown;
 };
 
@@ -63,9 +68,13 @@ export function mapAxiosError(error: unknown): ApiError {
     | string
     | undefined;
 
+  const serverMessage = envelope.error?.message ?? envelope.message;
+  const hasServerMessage = typeof serverMessage === "string" && serverMessage.trim() !== "";
+
   return {
     status: error.response.status,
-    message: envelope.error?.message ?? envelope.message ?? defaultMessageFor(error.response.status),
+    message: hasServerMessage ? serverMessage : defaultMessageFor(error.response.status),
+    bare: hasServerMessage ? undefined : true,
     detailMessage: envelope.error?.detailMessage,
     correlationId,
     retryAfter: Number.isFinite(retryHeader) && retryHeader > 0 ? retryHeader : undefined,

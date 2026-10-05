@@ -1,43 +1,51 @@
 package com.projectsale.api.user.dto;
 
-import com.projectsale.enums.RolesEnum;
-import com.projectsale.enums.StatusEnum;
-
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.projectsale.common.validate.phone.ValidPhone;
+import com.projectsale.enums.Gender;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.Size;
+import java.time.LocalDate;
 
-@Getter
-@Setter
-@Builder
+/** Body request của người dùng đã đăng nhập (hồ sơ, mật khẩu, địa chỉ). */
 public class UserRequest {
 
-    @Min(value = 2, message = "Fullname must be at least 2 characters long")
-    @NotBlank(message = "Fullname is required")
-    @Max(value = 200, message = "Fullname must be at most 200 characters long")
-    @Pattern(regexp = "^[\\p{L}]+(?:[\\s]+[\\p{L}]+)*$", message = "Full name must contain only letters and spaces")
-    private String fullname;
+  private UserRequest() {
+  }
 
-    @NotBlank(message = "Password is required")
-    @Min(value = 6, message = "Password must be at least 6 characters long")
-    @Pattern(regexp = "^(?=.*[a-z])(?=.*\\d).+$", message = "Password must contain at least one lowercase letter, and one digit")
-    @Max(value = 200, message = "Password must be at most 200 characters long")
-    private String password;
+  /** PUT /users/me — phone, date_of_birth, gender có thể null (xóa giá trị). */
+  public record UpdateProfile(
+      @JsonProperty("full_name") @NotBlank(message = "Họ tên không được để trống") @Size(max = 120, message = "Họ tên tối đa 120 ký tự") String fullName,
 
+      @ValidPhone(nullable = true, message = "Số điện thoại không hợp lệ") String phone,
 
-    @NotBlank(message = "Email is required")
-    @Email (message = "Invalid email format")
-    private String email;
+      @JsonProperty("date_of_birth") @PastOrPresent(message = "Ngày sinh không hợp lệ") LocalDate dateOfBirth,
 
-    
-    private String phone;
-    private RolesEnum role;
-    private StatusEnum status;
+      Gender gender) {
+  }
 
-    // Getters and setters
+  /** POST /users/me/password — độ dài mật khẩu mới khớp {@code RegisterRequest}. */
+  public record ChangePassword(
+      @JsonProperty("current_password") @NotBlank(message = "Mật khẩu hiện tại không được để trống") String currentPassword,
+
+      @JsonProperty("new_password") @NotBlank(message = "Mật khẩu mới không được để trống") @Size(min = 8, max = 72, message = "Mật khẩu phải có từ 8 đến 72 ký tự") String newPassword) {
+  }
+
+  /** POST/PUT /users/me/addresses. */
+  public record SaveAddress(
+      @JsonProperty("receiver_name") @NotBlank(message = "Tên người nhận không được để trống") @Size(max = 120, message = "Tên người nhận tối đa 120 ký tự") String receiverName,
+
+      @JsonProperty("receiver_phone") @NotBlank(message = "Số điện thoại không được để trống") @ValidPhone(message = "Số điện thoại không hợp lệ") String receiverPhone,
+
+      @NotBlank(message = "Số nhà, tên đường không được để trống") @Size(max = 255, message = "Địa chỉ tối đa 255 ký tự") String line,
+
+      @NotBlank(message = "Phường / xã không được để trống") @Size(max = 120, message = "Phường / xã tối đa 120 ký tự") String ward,
+
+      @NotBlank(message = "Quận / huyện không được để trống") @Size(max = 120, message = "Quận / huyện tối đa 120 ký tự") String district,
+
+      @NotBlank(message = "Tỉnh / thành phố không được để trống") @Size(max = 120, message = "Tỉnh / thành phố tối đa 120 ký tự") String city,
+
+      @JsonProperty("is_default") boolean isDefault) {
+  }
 }

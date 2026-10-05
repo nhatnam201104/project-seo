@@ -10,11 +10,21 @@ public class PhoneValidator
 
     private static final Pattern PHONE_PATTERN = Pattern.compile("^(0|\\+84)(3|5|7|8|9)\\d{8}$");
 
+    private boolean nullable;
+
+    @Override
+    public void initialize(ValidPhone annotation) {
+        this.nullable = annotation.nullable();
+    }
+
     @Override
     public boolean isValid(
             String phone,
             ConstraintValidatorContext context) {
-        if (phone == null || phone.isBlank()) {
+        if (phone == null) {
+            return nullable;
+        }
+        if (phone.isBlank()) {
             return false;
         }
 

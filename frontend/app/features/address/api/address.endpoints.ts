@@ -1,6 +1,6 @@
 /**
- * Contract đề xuất cho backend (sau base /api/v1) — CHƯA có controller tương ứng
- * (entity Address đã có). Mọi endpoint yêu cầu Bearer token.
+ * Endpoint backend (sau base /api/v1), controller `AddressController`.
+ * Mọi endpoint yêu cầu Bearer token.
  */
 export const ADDRESS_ENDPOINTS = {
   collection: "/users/me/addresses", // GET danh sách, POST tạo

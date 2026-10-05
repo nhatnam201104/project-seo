@@ -15,6 +15,9 @@ import java.lang.annotation.Target;
 public @interface ValidPhone {
    String message() default "Phone number is invalid";
 
+   /** true: {@code null} hợp lệ (trường tuỳ chọn); chuỗi rỗng/sai định dạng vẫn bị từ chối. */
+   boolean nullable() default false;
+
    Class<?>[] groups() default {};
 
    Class<? extends Payload>[] payload() default {};

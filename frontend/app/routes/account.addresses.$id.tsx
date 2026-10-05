@@ -18,7 +18,7 @@ export async function loader({ request, context, params }: Route.LoaderArgs) {
     const setCookie = await auth.commit();
     return data({ address }, setCookie ? { headers: { "Set-Cookie": setCookie } } : undefined);
   } catch (error) {
-    if (isApiError(error) && (error.status === 404 || error.status === 403)) {
+    if (isApiError(error) && (error.status === 404 || error.status === 403 || error.status === 400)) {
       throw new Response("Không tìm thấy địa chỉ", { status: 404 });
     }
     throw error;
