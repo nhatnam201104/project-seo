@@ -1,25 +1,24 @@
 import { describe, expect, it } from "vitest";
 import {
   changePasswordSchema,
-  formatVnDate,
-  parseVnDate,
+  parseIsoDate,
   updateProfileSchema,
   validateAvatar,
 } from "~/features/profile/validation/profile.schema";
 
-describe("parseVnDate", () => {
-  it("chuyển DD/MM/YYYY sang ISO", () => expect(parseVnDate("24/10/1995")).toBe("1995-10-24"));
-  it("chuỗi rỗng là null", () => expect(parseVnDate("  ")).toBeNull());
-  it("từ chối ngày không tồn tại hoặc ở tương lai", () => {
-    expect(parseVnDate("31/02/2000")).toBeUndefined();
-    expect(parseVnDate("01/01/2999")).toBeUndefined();
-    expect(parseVnDate("1995-10-24")).toBeUndefined();
+describe("parseIsoDate", () => {
+  it("nhận YYYY-MM-DD hợp lệ", () => expect(parseIsoDate("1995-10-24")).toBe("1995-10-24"));
+  it("chuỗi rỗng là null", () => expect(parseIsoDate("  ")).toBeNull());
+  it("từ chối ngày không tồn tại, tương lai hoặc sai định dạng", () => {
+    expect(parseIsoDate("2000-02-31")).toBeUndefined();
+    expect(parseIsoDate("2999-01-01")).toBeUndefined();
+    expect(parseIsoDate("24/10/1995")).toBeUndefined();
+    expect(parseIsoDate("1899-12-31")).toBeUndefined();
   });
-  it("formatVnDate là nghịch đảo", () => expect(formatVnDate("1995-10-24")).toBe("24/10/1995"));
 });
 
 describe("updateProfileSchema", () => {
-  const base = { full_name: " Nam Nguyen ", phone: "0901234567", date_of_birth: "24/10/1995", gender: "MALE" };
+  const base = { full_name: " Nam Nguyen ", phone: "0901234567", date_of_birth: "1995-10-24", gender: "MALE" };
   it("chuẩn hóa dữ liệu hợp lệ", () => {
     const r = updateProfileSchema.parse(base);
     expect(r).toEqual({ full_name: "Nam Nguyen", phone: "0901234567", date_of_birth: "1995-10-24", gender: "MALE" });

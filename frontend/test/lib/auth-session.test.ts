@@ -60,7 +60,7 @@ describe("SSR auth bridge against an HTTP backend", () => {
     expect(session.get("refreshToken")).toBe("fresh-refresh");
     expect(session.get("deviceId")).toBe(user.id);
     expect(cookie).not.toContain("Max-Age");
-    expect(calls.map((call) => call.path)).toEqual(["/api/v1/auth/me", "/api/v1/auth/refresh", "/api/v1/auth/me"]);
+    expect(calls.map((call) => call.path)).toEqual(["/api/v1/auth/me", "/api/v1/auth/refresh", "/api/v1/auth/me", "/api/v1/users/me/addresses"]);
   });
   it("logs out using the rotated refresh token and original device", async () => {
     const result = await logout.action({ request: await sessionRequest("/logout"), params: {}, context: {} } as never);
