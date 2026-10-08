@@ -36,5 +36,5 @@ export async function submitAddress(
     return finish({ error: message, fieldErrors: {} }, status);
   }
   const setCookie = await auth.commit();
-  return redirect("/account/addresses", setCookie ? { headers: { "Set-Cookie": setCookie } } : undefined);
+  return redirect(`/account/addresses?notice=${id ? "updated" : "created"}`, setCookie ? { headers: { "Set-Cookie": setCookie } } : undefined);
 }

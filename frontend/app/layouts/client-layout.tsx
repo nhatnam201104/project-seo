@@ -3,6 +3,7 @@ import type { loader as rootLoader } from "~/root";
 import { MainLayout } from "~/components/layout/MainLayout";
 import { ClientHeader } from "~/components/layout/client/ClientHeader";
 import { ClientFooter } from "~/components/layout/client/ClientFooter";
+import { Toaster } from "~/components/store/Toaster";
 import "~/components/layout/layout.css";
 
 export default function ClientLayout() {
@@ -15,6 +16,7 @@ export default function ClientLayout() {
       footer={<ClientFooter />}
     >
       <Outlet />
+      <Toaster />
     </MainLayout>
   );
 }

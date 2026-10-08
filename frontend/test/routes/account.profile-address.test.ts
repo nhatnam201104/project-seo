@@ -13,6 +13,7 @@ const api = vi.hoisted(() => ({
   makeDefaultAddress: vi.fn(),
   updateAddress: vi.fn(),
   createAddress: vi.fn(),
+  listAddresses: vi.fn(),
 }));
 vi.mock("~/lib/auth.server", () => ({
   requireUser: vi.fn(async () => ({ client: {}, user: { id: "u1" }, commit: async () => null })),
@@ -22,6 +23,7 @@ vi.mock("~/features/address/api/address.api", () => api);
 
 import { action as profileAction } from "~/routes/account.profile";
 import { action as addressesAction } from "~/routes/account.addresses";
+import { loader as accountLoader } from "~/routes/account";
 import { submitAddress } from "~/features/address/services/address-action.server";
 
 function post(fields: Record<string, string>) {
@@ -73,5 +75,45 @@ describe("address actions against a real backend (endpoint exists)", () => {
     const req = post({ receiver_name: "An", receiver_phone: "0912345678", line: "l", city: "c", district: "d", ward: "w" });
     const res = (await submitAddress(req, { client: {}, commit: async () => null } as never, "a1")) as never as { data: { error: string } };
     expect(res.data.error).toBe("Không tìm thấy địa chỉ");
+  });
+});
+
+describe("success notices", () => {
+  const redirectTo = (res: unknown) => (res as Response).headers.get("Location");
+  it("profile accepts the ISO date from input[type=date]", async () => {
+    api.updateProfile.mockResolvedValue({});
+    await run(profileAction, { intent: "profile", full_name: "An", phone: "", date_of_birth: "1995-10-24", gender: "" });
+    expect(api.updateProfile).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ date_of_birth: "1995-10-24" }), expect.anything());
+  });
+  it("redirects with notice codes after create/update/delete/default", async () => {
+    const fields = { receiver_name: "An", receiver_phone: "0912345678", line: "l", city: "c", district: "d", ward: "w" };
+    api.createAddress.mockResolvedValue({});
+    api.updateAddress.mockResolvedValue({});
+    api.deleteAddress.mockResolvedValue(undefined);
+    api.makeDefaultAddress.mockResolvedValue(undefined);
+    const auth = { client: {}, commit: async () => null } as never;
+    expect(redirectTo(await submitAddress(post(fields), auth))).toBe("/account/addresses?notice=created");
+    expect(redirectTo(await submitAddress(post(fields), auth, "a1"))).toBe("/account/addresses?notice=updated");
+    expect(redirectTo(await run(addressesAction, { intent: "delete", id: "a1" }))).toBe("/account/addresses?notice=deleted");
+    expect(redirectTo(await run(addressesAction, { intent: "default", id: "a1" }))).toBe("/account/addresses?notice=default");
+  });
+});
+
+describe("account overview loader", () => {
+  const load = async () => {
+    const res = (await (accountLoader as unknown as (a: unknown) => Promise<{ data: { defaultAddress: { id: string } | null; addressCount: number } }>)({
+      request: new Request("http://localhost/account"), params: {}, context: {},
+    }));
+    return res.data;
+  };
+  it("returns the default address and count", async () => {
+    api.listAddresses.mockResolvedValue([{ id: "a", is_default: false }, { id: "b", is_default: true }]);
+    expect(await load()).toMatchObject({ defaultAddress: { id: "b" }, addressCount: 2 });
+  });
+  it("falls back to the first address, or null when none", async () => {
+    api.listAddresses.mockResolvedValue([{ id: "a", is_default: false }]);
+    expect((await load()).defaultAddress?.id).toBe("a");
+    api.listAddresses.mockResolvedValue([]);
+    expect(await load()).toMatchObject({ defaultAddress: null, addressCount: 0 });
   });
 });

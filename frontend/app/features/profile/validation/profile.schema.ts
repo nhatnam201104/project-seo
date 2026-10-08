@@ -10,26 +10,27 @@ const phone = z
   .trim()
   .regex(/^(0|\+84)(3|5|7|8|9)\d{8}$/, "Số điện thoại Việt Nam không hợp lệ.");
 
-/** "24/10/1995" → "1995-10-24"; chuỗi rỗng → null; sai định dạng/ngày không tồn tại → undefined. */
-export function parseVnDate(value: string): string | null | undefined {
+export const MIN_BIRTH_YEAR = 1900;
+
+/** "1995-10-24" (giá trị input date) → giữ nguyên; rỗng → null; sai định dạng/ngày không tồn tại/tương lai → undefined. */
+export function parseIsoDate(value: string): string | null | undefined {
   const text = value.trim();
   if (!text) return null;
-  const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(text);
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(text);
   if (!m) return undefined;
-  const [, dd, mm, yyyy] = m;
+  const [, yyyy, mm, dd] = m;
   const d = new Date(Date.UTC(Number(yyyy), Number(mm) - 1, Number(dd)));
   const valid =
     d.getUTCFullYear() === Number(yyyy) &&
     d.getUTCMonth() === Number(mm) - 1 &&
     d.getUTCDate() === Number(dd);
-  if (!valid || d.getTime() > Date.now()) return undefined;
-  return `${yyyy}-${mm}-${dd}`;
+  if (!valid || Number(yyyy) < MIN_BIRTH_YEAR || d.getTime() > Date.now()) return undefined;
+  return text;
 }
 
-/** "1995-10-24" → "24/10/1995" (hiển thị). */
-export function formatVnDate(iso: string | null | undefined): string {
-  const m = iso ? /^(\d{4})-(\d{2})-(\d{2})/.exec(iso) : null;
-  return m ? `${m[3]}/${m[2]}/${m[1]}` : "";
+/** Ngày hôm nay dạng YYYY-MM-DD (cho thuộc tính max của input date). */
+export function todayIso(): string {
+  return new Date().toISOString().slice(0, 10);
 }
 
 export const updateProfileSchema = z.object({
@@ -42,9 +43,9 @@ export const updateProfileSchema = z.object({
   date_of_birth: z
     .string()
     .transform((v, ctx) => {
-      const iso = parseVnDate(v);
+      const iso = parseIsoDate(v);
       if (iso === undefined) {
-        ctx.addIssue({ code: "custom", message: "Ngày sinh không hợp lệ (DD/MM/YYYY)." });
+        ctx.addIssue({ code: "custom", message: "Ngày sinh không hợp lệ." });
         return z.NEVER;
       }
       return iso;

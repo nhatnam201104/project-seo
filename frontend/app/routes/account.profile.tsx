@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { data, Form, useNavigation } from "react-router";
 import type { Route } from "./+types/account.profile";
 import { requireUser } from "~/lib/auth.server";
@@ -8,11 +9,13 @@ import * as profileApi from "~/features/profile/api/profile.api";
 import type { Gender, Profile } from "~/features/profile/api/profile.types";
 import {
   changePasswordSchema,
-  formatVnDate,
+  MIN_BIRTH_YEAR,
+  todayIso,
   updateProfileSchema,
   validateAvatar,
   PASSWORD_MIN,
 } from "~/features/profile/validation/profile.schema";
+import { useNotificationStore } from "~/stores";
 import { validationErrors } from "~/features/auth/validation/auth.schema";
 
 export function meta(_: Route.MetaArgs) {
@@ -96,6 +99,12 @@ const GENDERS: { value: Gender; label: string }[] = [
   { value: "OTHER", label: "Khác" },
 ];
 
+const SUCCESS_MESSAGES: Record<Intent, string> = {
+  profile: "Đã lưu hồ sơ",
+  password: "Đã đổi mật khẩu",
+  avatar: "Đã cập nhật ảnh đại diện",
+};
+
 function initials(name: string | null, email: string) {
   const source = name?.trim() || email;
   return source.split(/\s+/).slice(-2).map((p) => p[0]?.toUpperCase()).join("") || "?";
@@ -111,6 +120,11 @@ export default function EditProfile({ loaderData, actionData }: Route.ComponentP
   const profileBanner = bannerFor("profile");
   const passwordBanner = bannerFor("password");
   const avatarBanner = bannerFor("avatar");
+  const pushToast = useNotificationStore((s) => s.push);
+
+  useEffect(() => {
+    if (result?.ok) pushToast("success", SUCCESS_MESSAGES[result.intent]);
+  }, [result, pushToast]);
 
   return (
     <AccountShell active="settings">
@@ -127,7 +141,6 @@ export default function EditProfile({ loaderData, actionData }: Route.ComponentP
             <input type="file" name="avatar" accept="image/jpeg,image/png,image/webp" aria-label="Chọn ảnh đại diện" aria-invalid={Boolean(errorsFor("avatar").avatar)} />
             <p>JPG, PNG hoặc WEBP. Tối đa 2MB.</p>
             {errorsFor("avatar").avatar ? <p className="sp-field__msg--error" role="alert">{errorsFor("avatar").avatar}</p> : null}
-            {avatarBanner?.ok ? <p role="status">Đã cập nhật ảnh.</p> : null}
             {avatarBanner?.error ? <p className="sp-field__msg--error" role="alert">{avatarBanner.error}</p> : null}
           </div>
           <button className="sp-link" type="submit" disabled={busyIntent === "avatar"}>{busyIntent === "avatar" ? "Đang tải…" : "Đổi ảnh"}</button>
@@ -135,13 +148,12 @@ export default function EditProfile({ loaderData, actionData }: Route.ComponentP
 
         <Form method="post" className="sp-section" style={{ border: 0, margin: 0, padding: 0 }} aria-busy={busyIntent === "profile"}>
           <input type="hidden" name="intent" value="profile" />
-          {profileBanner?.ok ? <p className="sp-alert" role="status">Đã lưu hồ sơ</p> : null}
           {profileBanner?.error ? <p className="sp-alert sp-alert--error" role="alert">{profileBanner.error}</p> : null}
           <div className="sp-form-grid">
             <UnderlineField label="Họ và tên" name="full_name" required defaultValue={profile.full_name ?? ""} autoComplete="name" hint="Tên hiển thị trên đơn hàng" error={errorsFor("profile").full_name} />
             <UnderlineField label="Email" name="email" type="email" defaultValue={profile.email} disabled hint="Email không thể thay đổi" />
             <UnderlineField label="Số điện thoại" name="phone" type="tel" defaultValue={profile.phone ?? ""} autoComplete="tel" hint="Dùng để xác nhận giao hàng" error={errorsFor("profile").phone} />
-            <UnderlineField label="Ngày sinh" name="date_of_birth" defaultValue={formatVnDate(profile.date_of_birth)} placeholder="DD/MM/YYYY" inputMode="numeric" hint="Định dạng DD/MM/YYYY" error={errorsFor("profile").date_of_birth} />
+            <UnderlineField label="Ngày sinh" name="date_of_birth" type="date" defaultValue={profile.date_of_birth ?? ""} min={`${MIN_BIRTH_YEAR}-01-01`} max={todayIso()} autoComplete="bday" error={errorsFor("profile").date_of_birth} />
           </div>
           <fieldset className="sp-field" style={{ border: 0, padding: 0, margin: 0 }}>
             <legend style={{ color: "var(--sf-muted)", fontSize: ".8rem", fontWeight: 700, padding: 0, marginBottom: 8 }}>Giới tính</legend>
@@ -159,7 +171,6 @@ export default function EditProfile({ loaderData, actionData }: Route.ComponentP
         <header><h2 id="password-heading">Đổi mật khẩu</h2><span>Bảo mật</span></header>
         <Form method="post" key={passwordBanner?.ok ? "done" : "form"} className="sp-form-grid" style={{ gridTemplateColumns: "1fr" }} aria-busy={busyIntent === "password"}>
           <input type="hidden" name="intent" value="password" />
-          {passwordBanner?.ok ? <p className="sp-alert" role="status">Đã đổi mật khẩu</p> : null}
           {passwordBanner?.error ? <p className="sp-alert sp-alert--error" role="alert">{passwordBanner.error}</p> : null}
           <UnderlineField className="sp-narrow" label="Mật khẩu hiện tại" name="current_password" type="password" required autoComplete="current-password" error={errorsFor("password").current_password} />
           <UnderlineField className="sp-narrow" label="Mật khẩu mới" name="new_password" type="password" required autoComplete="new-password" placeholder="Nhập mật khẩu mới" hint={`Tối thiểu ${PASSWORD_MIN} ký tự, gồm chữ thường và chữ số`} error={errorsFor("password").new_password} />

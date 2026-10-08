@@ -1,6 +1,10 @@
-import { data, Form, Link } from "react-router";
+import { data, Link } from "react-router";
 import type { Route } from "./+types/account";
 import { requireUser } from "~/lib/auth.server";
+import { isEndpointMissing } from "~/lib/action-error.server";
+import { AccountShell, PageHeading } from "~/components/store/AccountShell";
+import * as addressApi from "~/features/address/api/address.api";
+import type { Address } from "~/features/address/api/address.types";
 
 export function meta(_: Route.MetaArgs) {
   return [{ title: "Tài khoản — ProjectSale" }];
@@ -9,40 +13,86 @@ export function meta(_: Route.MetaArgs) {
 export async function loader({ request, context }: Route.LoaderArgs) {
   // requireUser → ném redirect /login nếu chưa đăng nhập.
   const auth = await requireUser(request, context);
-
-  // Gọi API có auth qua bridge; nếu access token hết hạn, refresh tự chạy.
   const me = auth.user;
+
+  let addresses: Address[] = [];
+  try {
+    addresses = await addressApi.listAddresses(auth.client, request.signal);
+  } catch (error) {
+    // Backend chưa có endpoint địa chỉ: Overview vẫn hiển thị, chỉ thiếu mục địa chỉ.
+    if (!isEndpointMissing(error)) throw error;
+  }
+  const defaultAddress = addresses.find((a) => a.is_default) ?? addresses[0] ?? null;
 
   // Nếu vừa refresh, ghi token mới vào session cookie (Set-Cookie).
   const setCookie = await auth.commit();
   return data(
-    { me },
+    { me, defaultAddress, addressCount: addresses.length },
     setCookie ? { headers: { "Set-Cookie": setCookie } } : undefined,
   );
 }
 
 export default function Account({ loaderData }: Route.ComponentProps) {
-  const { me } = loaderData;
-  const firstName = me.full_name?.trim().split(/\s+/).at(-1) ?? me.email.split("@")[0] ?? "MEMBER";
+  const { me, defaultAddress, addressCount } = loaderData;
+  const firstName = me.full_name?.trim().split(/\s+/).at(-1) ?? me.email.split("@")[0] ?? "bạn";
+
   return (
-    <section className="account-page" aria-labelledby="account-heading">
-      <div className="account-page__layout">
-        <nav className="account-nav" aria-label="Điều hướng tài khoản">
-          <p>MY ACCOUNT / 01</p>
-          <Link to="/account">Overview</Link><a href="#orders">Orders</a><a href="#saved">Saved items</a><Link to="/account/addresses">Addresses</Link><Link to="/account/profile">Settings</Link>
-          <Form method="post" action="/logout"><button type="submit">Logout</button></Form>
-        </nav>
-        <div className="account-main">
-          <p className="account-main__kicker">ACCOUNT OVERVIEW / MEMBER</p>
-          <h1 id="account-heading">WELCOME, {firstName.toUpperCase()}.</h1>
-          <div className="account-grid">
-            <section className="account-card" id="settings"><h2>PROFILE DETAILS</h2><dl><dt>Full name</dt><dd>{me.full_name ?? "—"}</dd><dt>Email</dt><dd>{me.email}</dd><dt>Phone</dt><dd>{me.phone ?? "Not provided"}</dd></dl><div className="account-card__actions"><Link to="/account/profile">Edit profile</Link><Link to="/account/profile#password">Change password</Link></div></section>
-            <section className="account-card" id="saved"><h2>SAVED ITEMS</h2><p className="account-stat">0<span>Frames waiting in your edit.</span></p><div className="account-card__actions"><Link to="/products">Explore collection</Link></div></section>
-            <section className="account-card account-card--wide" id="orders"><h2>RECENT ORDERS</h2><div className="account-order"><code>NO ORDERS YET</code><strong>—</strong><span>Your recent purchases will appear here.</span></div><div className="account-card__actions"><Link to="/products">Shop eyewear</Link></div></section>
-            <section className="account-card account-card--wide" id="address"><h2>DEFAULT SHIPPING ADDRESS</h2><p className="account-stat">—<span>No shipping address saved yet.</span></p><div className="account-card__actions"><Link to="/account/addresses/new">Add address</Link><Link to="/account/addresses">Manage addresses</Link></div></section>
-          </div>
+    <AccountShell active="overview">
+      <PageHeading title={`Xin chào, ${firstName}.`} lead="Quản lý đơn hàng, địa chỉ và thông tin tài khoản." />
+
+      <div className="sp-overview">
+        <div className="sp-stats" id="saved">
+          <Link to="/account#orders"><b>0</b><span>Đơn hàng</span><em>Xem đơn hàng →</em></Link>
+          <Link to="/products"><b>0</b><span>Đã lưu</span><em>Xem sản phẩm →</em></Link>
+          <Link to="/account/addresses"><b>{addressCount}</b><span>Địa chỉ</span><em>Quản lý địa chỉ →</em></Link>
         </div>
+
+        <div className="sp-panels">
+          <section className="sp-panel" aria-labelledby="profile-panel">
+            <h2 id="profile-panel">Thông tin cá nhân</h2>
+            <div className="sp-panel__body">
+              <p className="sp-panel__name">{me.full_name ?? "Chưa cập nhật tên"}</p>
+              <p>{me.email}</p>
+              <p>{me.phone ?? "Chưa cung cấp số điện thoại"}</p>
+            </div>
+            <div className="sp-panel__actions">
+              <Link className="sp-btn sp-btn--sm" to="/account/profile">Sửa hồ sơ</Link>
+              <Link className="sp-btn sp-btn--sm sp-btn--ghost" to="/account/profile#password">Đổi mật khẩu</Link>
+            </div>
+          </section>
+
+          <section className="sp-panel" aria-labelledby="address-panel">
+            <h2 id="address-panel">Địa chỉ mặc định</h2>
+            {defaultAddress ? (
+              <address className="sp-panel__body">
+                <p className="sp-panel__name">{defaultAddress.receiver_name}</p>
+                <p>{defaultAddress.receiver_phone}</p>
+                <p className="sp-panel__lines">
+                  {[defaultAddress.line, defaultAddress.ward, defaultAddress.district, defaultAddress.city]
+                    .filter(Boolean)
+                    .map((part) => <span key={part}>{part}</span>)}
+                </p>
+              </address>
+            ) : (
+              <p>Bạn chưa lưu địa chỉ giao hàng nào.</p>
+            )}
+            <div className="sp-panel__actions">
+              <Link className="sp-more" to="/account/addresses">Quản lý địa chỉ →</Link>
+              {defaultAddress ? null : <Link className="sp-btn sp-btn--sm" to="/account/addresses/new">Thêm địa chỉ</Link>}
+            </div>
+          </section>
+        </div>
+
+        <section className="sp-panel sp-orders" id="orders" aria-labelledby="orders-panel">
+          <h2 id="orders-panel">Đơn hàng gần đây</h2>
+          <div className="sp-orders__empty">
+            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 7h12l1 13H5L6 7Z" /><path d="M9 10V6a3 3 0 0 1 6 0v4" /></svg>
+            <p className="sp-panel__name">Chưa có đơn hàng nào</p>
+            <p>Đơn hàng bạn mua sẽ xuất hiện tại đây.</p>
+            <Link className="sp-btn sp-btn--sm" to="/products">Bắt đầu mua sắm</Link>
+          </div>
+        </section>
       </div>
-    </section>
+    </AccountShell>
   );
 }

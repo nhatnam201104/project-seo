@@ -1,10 +1,13 @@
-import { data, Form, Link, redirect, useNavigation } from "react-router";
+import { useEffect } from "react";
+import { data, Form, Link, redirect, useNavigation, useSearchParams } from "react-router";
 import type { Route } from "./+types/account.addresses";
 import { requireUser } from "~/lib/auth.server";
 import { actionErrorMessage, isEndpointMissing } from "~/lib/action-error.server";
 import { AccountShell, PageHeading } from "~/components/store/AccountShell";
 import * as addressApi from "~/features/address/api/address.api";
 import type { Address } from "~/features/address/api/address.types";
+import { ADDRESS_NOTICES, fullAddress, isAddressNotice } from "~/features/address/lib/format";
+import { useNotificationStore } from "~/stores";
 
 export function meta(_: Route.MetaArgs) {
   return [{ title: "Địa chỉ giao hàng — ProjectSale" }];
@@ -40,17 +43,27 @@ export async function action({ request, context }: Route.ActionArgs) {
     return data({ error: message }, { status, headers: setCookie ? { "Set-Cookie": setCookie } : undefined });
   }
   const setCookie = await auth.commit();
-  return redirect("/account/addresses", setCookie ? { headers: { "Set-Cookie": setCookie } } : undefined);
-}
-
-function fullAddress(a: Address) {
-  return [a.line, a.ward, a.district, a.city].filter(Boolean).join(", ");
+  return redirect(`/account/addresses?notice=${intent === "delete" ? "deleted" : "default"}`, setCookie ? { headers: { "Set-Cookie": setCookie } } : undefined);
 }
 
 export default function Addresses({ loaderData, actionData }: Route.ComponentProps) {
   const { addresses, unavailable } = loaderData;
   const navigation = useNavigation();
   const pendingId = navigation.state === "submitting" ? String(navigation.formData?.get("id")) : null;
+  const [searchParams, setSearchParams] = useSearchParams();
+  const pushToast = useNotificationStore((s) => s.push);
+  const notice = searchParams.get("notice");
+
+  useEffect(() => {
+    if (notice === null) return;
+    if (isAddressNotice(notice)) pushToast("success", ADDRESS_NOTICES[notice]);
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.delete("notice");
+      return next;
+    }, { replace: true });
+  }, [notice, pushToast, setSearchParams]);
+
   const sorted = [...addresses].sort((a, b) => Number(b.is_default) - Number(a.is_default));
 
   return (
